@@ -159,19 +159,23 @@ table {
 
 @media (max-width: 1200px) {
     :root {
-        --container-width: 960px;
         --section-padding: 80px;
+    }
+    
+    .container {
+        padding: 0 40px;
+        max-width: 1200px;
     }
 }
 
 @media (max-width: 1024px) {
     :root {
-        --container-width: 100%;
         --section-padding: 70px;
     }
     
     .container {
-        padding: 0 24px;
+        padding: 0 32px;
+        max-width: 1200px;
     }
 }
 
