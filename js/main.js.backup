@@ -99,12 +99,6 @@ class MainApp {
         hamburger?.addEventListener('click', () => {
             hamburger.classList.toggle('active');
             navMenu.classList.toggle('active');
-            
-            if (navMenu.classList.contains('active')) {
-                document.body.classList.add('nav-open');
-            } else {
-                document.body.classList.remove('nav-open');
-            }
         });
 
         window.addEventListener('scroll', () => {
@@ -136,7 +130,6 @@ class MainApp {
                 if (targetSection) {
                     navMenu.classList.remove('active');
                     hamburger.classList.remove('active');
-                    document.body.classList.remove("nav-open");
 
                     window.scrollTo({
                         top: targetSection.offsetTop - 80,
