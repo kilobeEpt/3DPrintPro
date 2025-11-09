@@ -499,6 +499,11 @@ img {
         padding: 6px 16px;
     }
     
+    .top-info-content {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
     .hero-buttons .btn,
     .btn-block {
         padding: 12px 20px;
@@ -528,5 +533,198 @@ img {
     
     .total-price .price {
         font-size: 24px;
+    }
+}
+
+/* ========================================
+   RESPONSIVE STYLES FOR OMSK SECTIONS
+   ======================================== */
+
+@media (max-width: 968px) {
+    .top-info-strip {
+        display: none;
+    }
+    
+    .header {
+        padding-top: 0;
+    }
+    
+    .breadcrumb {
+        padding: 10px 0;
+    }
+    
+    .breadcrumb ol {
+        font-size: 13px;
+    }
+    
+    .timeline-item {
+        grid-template-columns: 70px 1fr;
+        gap: 15px;
+        padding: 15px 0;
+    }
+    
+    .timeline-year {
+        font-size: 20px;
+    }
+    
+    .why-us-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .cases-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-subtitle {
+        font-size: clamp(16px, 4vw, 20px);
+    }
+    
+    .omsk-timeline {
+        padding: 20px;
+    }
+    
+    .omsk-cta {
+        padding: 20px;
+    }
+    
+    .districts-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .district-card {
+        padding: 24px;
+    }
+    
+    .delivery-info {
+        padding: 24px;
+    }
+    
+    .why-us-card {
+        padding: 24px;
+    }
+    
+    .why-us-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .why-us-icon i {
+        font-size: 28px;
+    }
+    
+    .case-image {
+        height: 220px;
+    }
+    
+    .case-content {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .breadcrumb {
+        display: none;
+    }
+    
+    .hero-subtitle {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+    
+    .timeline-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .timeline-year {
+        font-size: 18px;
+    }
+    
+    .omsk-about-text p,
+    .omsk-services-intro p,
+    .omsk-services-footer p,
+    .omsk-districts-content > p {
+        font-size: 15px;
+    }
+    
+    .omsk-cta {
+        padding: 16px;
+    }
+    
+    .omsk-cta p {
+        font-size: 15px;
+    }
+    
+    .district-card {
+        padding: 20px;
+    }
+    
+    .district-card i {
+        font-size: 32px;
+    }
+    
+    .district-card h3 {
+        font-size: 18px;
+    }
+    
+    .delivery-info {
+        padding: 20px;
+    }
+    
+    .delivery-info h3 {
+        font-size: 20px;
+    }
+    
+    .why-us-card {
+        padding: 20px;
+    }
+    
+    .why-us-card h3 {
+        font-size: 18px;
+    }
+    
+    .case-card {
+        border-radius: var(--radius);
+    }
+    
+    .case-image {
+        height: 200px;
+    }
+    
+    .case-content {
+        padding: 20px;
+    }
+    
+    .case-content h3 {
+        font-size: 20px;
+    }
+    
+    .contact-info {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .contact-map {
+        grid-column: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .cases-grid {
+        gap: 24px;
+    }
+    
+    .case-image {
+        height: 180px;
+    }
+    
+    .case-content {
+        padding: 16px;
     }
 }
