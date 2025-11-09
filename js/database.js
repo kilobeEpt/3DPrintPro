@@ -354,12 +354,12 @@ class Database {
 getDefaultSettings() {
     return {
         siteName: '3D Print Pro',
-        siteDescription: 'Профессиональная 3D печать любой сложности',
+        siteDescription: 'Профессиональная 3D печать в Омске',
         contactEmail: 'info@3dprintpro.ru',
         contactPhone: '+7 (999) 123-45-67',
-        address: 'г. Москва, ул. Примерная, д. 123',
+        address: 'г. Омск, ул. Ленина, д. 15',
         workingHours: 'Пн-Пт: 9:00 - 18:00\nСб-Вс: Выходной',
-        timezone: 'Europe/Moscow',
+        timezone: 'Asia/Omsk',
         socialLinks: {
             vk: '',
             telegram: 'https://t.me/PrintPro_Omsk',
