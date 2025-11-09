@@ -54,8 +54,18 @@ class Calculator {
         const weightInput = document.getElementById('weight');
         if (weightInput) {
             weightInput.addEventListener('input', (e) => {
-                this.data.weight = parseFloat(e.target.value) || 0;
-                this.validateWeight();
+                const value = e.target.value.trim();
+                if (value === '') {
+                    this.data.weight = '';
+                } else {
+                    const numValue = parseFloat(value);
+                    this.data.weight = Number.isFinite(numValue) ? numValue : '';
+                    this.validateWeight(false);
+                }
+            });
+            
+            weightInput.addEventListener('blur', (e) => {
+                this.validateWeight(true);
             });
         }
         
@@ -63,8 +73,18 @@ class Calculator {
         const quantityInput = document.getElementById('quantity');
         if (quantityInput) {
             quantityInput.addEventListener('input', (e) => {
-                this.data.quantity = parseInt(e.target.value) || 1;
-                this.validateQuantity();
+                const value = e.target.value.trim();
+                if (value === '') {
+                    this.data.quantity = '';
+                } else {
+                    const numValue = parseInt(value);
+                    this.data.quantity = Number.isFinite(numValue) ? numValue : '';
+                    this.validateQuantity(false);
+                }
+            });
+            
+            quantityInput.addEventListener('blur', (e) => {
+                this.validateQuantity(true);
             });
         }
         
@@ -98,31 +118,51 @@ class Calculator {
         });
     }
 
-    validateWeight() {
+    validateWeight(applyMinClamp = true) {
         const input = document.getElementById('weight');
         const value = this.data.weight;
         
-        if (value < 1) {
-            input.value = 1;
-            this.data.weight = 1;
-        } else if (value > 10000) {
+        // Allow empty during input
+        if (value === '' || !Number.isFinite(value)) {
+            if (applyMinClamp) {
+                input.value = 1;
+                this.data.weight = 1;
+            }
+            return;
+        }
+        
+        // Clamp to max always
+        if (value > 10000) {
             input.value = 10000;
             this.data.weight = 10000;
             app.showNotification('Максимальный вес - 10000г. Для больших заказов свяжитесь с нами.', 'warning');
+        } else if (value < 1 && applyMinClamp) {
+            input.value = 1;
+            this.data.weight = 1;
         }
     }
 
-    validateQuantity() {
+    validateQuantity(applyMinClamp = true) {
         const input = document.getElementById('quantity');
         const value = this.data.quantity;
         
-        if (value < 1) {
-            input.value = 1;
-            this.data.quantity = 1;
-        } else if (value > 1000) {
+        // Allow empty during input
+        if (value === '' || !Number.isFinite(value)) {
+            if (applyMinClamp) {
+                input.value = 1;
+                this.data.quantity = 1;
+            }
+            return;
+        }
+        
+        // Clamp to max always
+        if (value > 1000) {
             input.value = 1000;
             this.data.quantity = 1000;
             app.showNotification('Для заказов более 1000 шт свяжитесь с нами напрямую.', 'warning');
+        } else if (value < 1 && applyMinClamp) {
+            input.value = 1;
+            this.data.quantity = 1;
         }
     }
 
@@ -186,9 +226,14 @@ class Calculator {
     calculate() {
         const { weight, quantity, infill, quality } = this.data;
         
-        // Validate inputs
-        if (weight <= 0 || quantity <= 0) {
-            app.showNotification('Пожалуйста, введите корректные значения', 'error');
+        // Validate inputs - check for empty or invalid values
+        if (!Number.isFinite(weight) || weight <= 0 || weight === '') {
+            app.showNotification('Пожалуйста, введите корректный вес модели', 'error');
+            return null;
+        }
+        
+        if (!Number.isFinite(quantity) || quantity <= 0 || quantity === '') {
+            app.showNotification('Пожалуйста, введите корректное количество', 'error');
             return null;
         }
         
