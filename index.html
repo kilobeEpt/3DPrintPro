@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Профессиональная 3D печать любой сложности. Быстро, качественно, доступно.">
+    <meta name="keywords" content="3D печать, FDM, SLA, прототипирование, 3D моделирование">
+    <title>3D Print Pro - Профессиональная 3D печать</title>
+    
+    <!-- Быстрое скрытие прелоадера -->
+    <style>
+        .preloader {
+            animation: fadeOutPreloader 0.5s ease 0.2s forwards;
+        }
+        @keyframes fadeOutPreloader {
+            to {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+            }
+        }
+    </style>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖨️</text></svg>">
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="loader">
+            <div class="cube">
+                <div class="face front"></div>
+                <div class="face back"></div>
+                <div class="face right"></div>
+                <div class="face left"></div>
+                <div class="face top"></div>
+                <div class="face bottom"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="navbar container">
+            <a href="#home" class="logo" style="text-decoration: none; color: inherit;">
+                <i class="fas fa-cube"></i>
+                <span id="siteName">3D Print<strong>Pro</strong></span>
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" class="nav-link active">Главная</a></li>
+                <li><a href="#services" class="nav-link">Услуги</a></li>
+                <li><a href="#calculator" class="nav-link">Калькулятор</a></li>
+                <li><a href="#portfolio" class="nav-link">Портфолио</a></li>
+                <li><a href="#about" class="nav-link">О нас</a></li>
+                <li><a href="#contact" class="nav-link">Контакты</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="Переключить тему">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="hamburger" id="hamburger" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-bg">
+            <div class="particle" style="--i:1"></div>
+            <div class="particle" style="--i:2"></div>
+            <div class="particle" style="--i:3"></div>
+            <div class="particle" style="--i:4"></div>
+            <div class="particle" style="--i:5"></div>
+        </div>
+        <div class="container hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    <span class="title-line">Превращаем ваши</span>
+                    <span class="title-line gradient-text" id="heroTitle">идеи в реальность</span>
+                </h1>
+                <p class="hero-description" id="heroDescription">
+                    Профессиональная 3D печать любой сложности. Быстро, качественно, доступно.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#calculator" class="btn btn-primary">
+                        <span>Рассчитать стоимость</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#portfolio" class="btn btn-outline">
+                        <span>Наши работы</span>
+                    </a>
+                </div>
+                <div class="hero-features" id="heroFeatures">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Печать от 1 часа</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>15+ материалов</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Гарантия качества</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="floating-card">
+                    <div class="card-3d">
+                        <i class="fas fa-print"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <i class="fas fa-project-diagram"></i>
+                    <div class="stat-number" data-target="1500">0</div>
+                    <p>Проектов выполнено</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-number" data-target="850">0</div>
+                    <p>Довольных клиентов</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <div class="stat-number" data-target="12">0</div>
+                    <p>Лет опыта</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-award"></i>
+                    <div class="stat-number" data-target="25">0</div>
+                    <p>Наград получено</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Наши услуги</span>
+                <h2 class="section-title">Что мы предлагаем</h2>
+                <p class="section-description">
+                    Полный спектр услуг 3D печати для бизнеса и частных лиц
+                </p>
+            </div>
+            <div class="services-grid" id="servicesGrid">
+                <!-- Services will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <section class="calculator-section" id="calculator">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Калькулятор</span>
+                <h2 class="section-title">Рассчитайте стоимость</h2>
+                <p class="section-description">
+                    Моментальный расчет стоимости вашего заказа
+                </p>
+            </div>
+            <div class="calculator-wrapper">
+                <div class="calculator-form">
+                    <div class="form-group">
+                        <label for="printTechnology">
+                            <i class="fas fa-print"></i>
+                            Технология печати
+                        </label>
+                        <select id="printTechnology" class="form-control">
+                            <option value="fdm">FDM (послойное наплавление)</option>
+                            <option value="sla">SLA (фотополимерная)</option>
+                            <option value="sls">SLS (лазерное спекание)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="material">
+                            <i class="fas fa-layer-group"></i>
+                            Материал
+                        </label>
+                        <select id="material" class="form-control">
+                            <!-- Options will be loaded dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="weight">
+                                <i class="fas fa-weight"></i>
+                                Вес модели (г)
+                            </label>
+                            <input type="number" id="weight" class="form-control" value="100" min="1" max="10000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantity">
+                                <i class="fas fa-copy"></i>
+                                Количество (шт)
+                            </label>
+                            <input type="number" id="quantity" class="form-control" value="1" min="1" max="1000">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="infill">
+                            <i class="fas fa-percentage"></i>
+                            Заполнение: <span id="infillValue">20</span>%
+                        </label>
+                        <input type="range" id="infill" class="range-slider" min="0" max="100" value="20">
+                        <div class="range-labels">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quality">
+                            <i class="fas fa-sliders-h"></i>
+                            Качество печати
+                        </label>
+                        <select id="quality" class="form-control">
+                            <option value="draft">Черновое (быстро)</option>
+                            <option value="normal" selected>Нормальное</option>
+                            <option value="high">Высокое</option>
+                            <option value="ultra">Ультра (медленно)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-plus-circle"></i>
+                            Дополнительные услуги
+                        </label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="modeling">
+                                <span>3D моделирование (<span class="service-price" data-service="modeling">500</span>₽/час)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="postProcessing">
+                                <span>Постобработка (<span class="service-price" data-service="postProcessing">300</span>₽)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="painting">
+                                <span>Покраска (<span class="service-price" data-service="painting">500</span>₽)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="express">
+                                <span>Срочное изготовление (<span class="service-price" data-service="express">1000</span>₽)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-block" onclick="calculatePrice()">
+                        <i class="fas fa-calculator"></i>
+                        Рассчитать стоимость
+                    </button>
+                </div>
+
+                <div class="calculator-result">
+                    <div class="result-card">
+                        <h3>Расчет стоимости</h3>
+                        <div class="price-breakdown" id="priceBreakdown">
+                            <div class="price-item">
+                                <span>Материалы:</span>
+                                <span id="materialCost">0₽</span>
+                            </div>
+                            <div class="price-item">
+                                <span>Работа:</span>
+                                <span id="laborCost">0₽</span>
+                            </div>
+                            <div class="price-item">
+                                <span>Доп. услуги:</span>
+                                <span id="additionalCost">0₽</span>
+                            </div>
+                            <div class="price-item discount" id="discountItem" style="display: none;">
+                                <span>Скидка:</span>
+                                <span id="discountAmount">-0₽</span>
+                            </div>
+                        </div>
+                        <div class="total-price">
+                            <span>Итого:</span>
+                            <span class="price" id="totalPrice">0₽</span>
+                        </div>
+                        <div class="estimate-time">
+                            <i class="fas fa-clock"></i>
+                            <span>Срок изготовления: <strong id="estimateTime">-</strong></span>
+                        </div>
+                        <button class="btn btn-success btn-block" onclick="scrollToContactForm()">
+                            <i class="fas fa-paper-plane"></i>
+                            Отправить заявку
+                        </button>
+                        <a href="https://t.me/PrintPro_Omsk" target="_blank" class="btn btn-outline btn-block" style="margin-top: 10px; text-decoration: none;">
+                            <i class="fab fa-telegram"></i>
+                            Написать в Telegram
+                        </a>
+                        <div class="result-info">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Расчет является предварительным. Точная стоимость определяется после анализа модели.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio" id="portfolio">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Портфолио</span>
+                <h2 class="section-title">Наши работы</h2>
+                <p class="section-description">
+                    Примеры реализованных проектов различной сложности
+                </p>
+            </div>
+
+            <div class="portfolio-filters" id="portfolioFilters">
+                <button class="filter-btn active" data-filter="all">Все работы</button>
+                <button class="filter-btn" data-filter="prototype">Прототипы</button>
+                <button class="filter-btn" data-filter="functional">Функциональные</button>
+                <button class="filter-btn" data-filter="art">Художественные</button>
+                <button class="filter-btn" data-filter="industrial">Промышленные</button>
+            </div>
+
+            <div class="portfolio-grid" id="portfolioGrid">
+                <!-- Portfolio items will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Отзывы</span>
+                <h2 class="section-title">Что говорят клиенты</h2>
+            </div>
+            <div class="testimonials-slider" id="testimonialsSlider">
+                <!-- Testimonials will be loaded here -->
+            </div>
+            <div class="slider-controls">
+                <button class="slider-btn" id="prevTestimonial" aria-label="Предыдущий отзыв">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="slider-btn" id="nextTestimonial" aria-label="Следующий отзыв">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800" alt="3D принтер" loading="lazy">
+                    <div class="about-badge">
+                        <i class="fas fa-trophy"></i>
+                        <span>12+ лет опыта</span>
+                    </div>
+                </div>
+                <div class="about-text">
+                    <span class="section-label">О компании</span>
+                    <h2 class="section-title">Лидеры в области 3D печати</h2>
+                    <p id="aboutDescription">
+                        Мы - команда профессионалов с более чем 12-летним опытом в области аддитивных технологий. 
+                        Наша миссия - делать 3D печать доступной и качественной для каждого.
+                    </p>
+                    <div class="about-features" id="aboutFeatures">
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Современное оборудование</h4>
+                                <p>Работаем на принтерах последнего поколения</p>
+                            </div>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Опытная команда</h4>
+                                <p>15 специалистов с профильным образованием</p>
+                            </div>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4>Гарантия качества</h4>
+                                <p>Все изделия проходят контроль качества</p>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#contact" class="btn btn-primary">Связаться с нами</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">FAQ</span>
+                <h2 class="section-title">Часто задаваемые вопросы</h2>
+            </div>
+            <div class="faq-list" id="faqList">
+                <!-- FAQ items will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Контакты</span>
+                <h2 class="section-title">Свяжитесь с нами</h2>
+                <p class="section-description">
+                    Ответим на все вопросы и поможем с вашим проектом
+                </p>
+            </div>
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>Адрес</h3>
+                        <p id="contactAddress">г. Москва, ул. Примерная, д. 123</p>
+                    </div>
+                    <div class="contact-card">
+                        <i class="fas fa-phone"></i>
+                        <h3>Телефон</h3>
+                        <p id="contactPhone">+7 (999) 123-45-67</p>
+                    </div>
+                    <div class="contact-card">
+                        <i class="fas fa-envelope"></i>
+                        <h3>Email</h3>
+                        <p id="contactEmail">info@3dprintpro.ru</p>
+                    </div>
+                    <div class="contact-card">
+                        <i class="fab fa-telegram"></i>
+                        <h3>Telegram</h3>
+                        <p><a href="https://t.me/PrintPro_Omsk" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">@PrintPro_Omsk</a></p>
+                    </div>
+                    <div class="contact-card">
+                        <i class="fas fa-clock"></i>
+                        <h3>Режим работы</h3>
+                        <p id="contactHours">Пн-Пт: 9:00 - 18:00<br>Сб-Вс: Выходной</p>
+                    </div>
+                    <div class="social-links" id="socialLinks">
+                        <!-- Social links will be loaded here -->
+                    </div>
+                </div>
+                
+                <form class="contact-form" id="contactForm">
+                    <h3 id="formTitle" style="margin-bottom: 20px; color: var(--text);">
+                        <i class="fas fa-envelope"></i>
+                        Свяжитесь с нами
+                    </h3>
+                    
+                    <!-- Блок расчёта (скрыт по умолчанию) -->
+                    <div id="calculationInfo" style="display: none; padding: 20px; background: var(--bg-tertiary); border-radius: 12px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 15px; color: var(--primary);">
+                            <i class="fas fa-calculator"></i>
+                            Ваш расчёт
+                        </h4>
+                        <div style="display: grid; gap: 10px; font-size: 14px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Услуга:</span>
+                                <strong id="calcService">-</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Материал:</span>
+                                <strong id="calcMaterial">-</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Вес:</span>
+                                <strong id="calcWeight">-</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Количество:</span>
+                                <strong id="calcQuantity">-</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 2px solid var(--border); margin-top: 5px;">
+                                <span style="font-size: 16px;">Итого:</span>
+                                <strong id="calcTotal" style="font-size: 18px; color: var(--primary);">0₽</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Динамические поля формы -->
+                    <div id="dynamicFormFields">
+                        <!-- Поля загружаются автоматически из CONFIG -->
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="privacy" required>
+                            <span>Согласен на обработку персональных данных</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-paper-plane"></i>
+                        Отправить сообщение
+                    </button>
+                    <a href="https://t.me/PrintPro_Omsk" target="_blank" class="btn btn-outline btn-block" style="margin-top: 15px; text-decoration: none;">
+                        <i class="fab fa-telegram"></i>
+                        Написать в Telegram
+                    </a>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <div class="logo">
+                        <i class="fas fa-cube"></i>
+                        <span>3D Print<strong>Pro</strong></span>
+                    </div>
+                    <p>Профессиональная 3D печать любой сложности с 2011 года</p>
+                    <a href="https://t.me/PrintPro_Omsk" target="_blank" class="btn btn-outline btn-sm" style="margin-top: 15px; text-decoration: none;">
+                        <i class="fab fa-telegram"></i>
+                        Наш Telegram
+                    </a>
+                </div>
+                <div class="footer-col">
+                    <h4>Услуги</h4>
+                    <ul id="footerServices">
+                        <li><a href="#services">FDM печать</a></li>
+                        <li><a href="#services">SLA печать</a></li>
+                        <li><a href="#services">3D моделирование</a></li>
+                        <li><a href="#services">Постобработка</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Компания</h4>
+                    <ul>
+                        <li><a href="#about">О нас</a></li>
+                        <li><a href="#portfolio">Портфолио</a></li>
+                        <li><a href="#contact">Контакты</a></li>
+                        <li><a href="admin.html">Вход</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Подписка</h4>
+                    <p>Получайте новости и спецпредложения</p>
+                    <form class="subscribe-form" id="subscribeForm">
+                        <input type="email" name="email" placeholder="Ваш email" required>
+                        <button type="submit"><i class="fas fa-arrow-right"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 3D Print Pro. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal Windows -->
+    <div class="modal" id="serviceModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('serviceModal')">&times;</button>
+            <div id="serviceModalContent"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="portfolioModal">
+        <div class="modal-content modal-large">
+            <button class="modal-close" onclick="closeModal('portfolioModal')">&times;</button>
+            <div id="portfolioModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="js/validators.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/calculator.js"></script>
+    <script src="js/telegram.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
