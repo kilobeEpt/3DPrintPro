@@ -1,0 +1,512 @@
+/* ========================================
+   LAYOUT REENGINEERING - SITEWIDE MAX-WIDTH FIX
+   ========================================
+   
+   This stylesheet provides comprehensive layout fixes to prevent
+   elements from stretching across full screen width.
+   
+   Key fixes:
+   - Enforce consistent max-width constraints across all sections
+   - Prevent horizontal overflow on all viewport sizes
+   - Add proper content constraints for ultra-wide screens
+   - Ensure all grids have max-width limits
+   - Fix padding/margin overflow issues
+   
+   Load order: style.css → mobile-polish.css → layout-fix.css
+   ======================================== */
+
+/* ========================================
+   ROOT LEVEL OVERFLOW PREVENTION
+   ======================================== */
+
+/* Prevent ANY horizontal overflow at root level */
+html {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* ========================================
+   UNIVERSAL BOX-SIZING
+   ======================================== */
+
+/* Ensure consistent box-sizing for layout predictability */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* ========================================
+   SECTION OVERFLOW PREVENTION
+   ======================================== */
+
+/* Prevent overflow in all major structural elements */
+section,
+header,
+footer,
+main,
+article,
+aside {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+}
+
+/* ========================================
+   CONTAINER SYSTEM REFINEMENT
+   ======================================== */
+
+/* Ensure container class is consistently applied */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* Prevent container children from overflowing */
+.container > * {
+    max-width: 100%;
+}
+
+/* ========================================
+   SECTION-SPECIFIC MAX-WIDTH CONSTRAINTS
+   ======================================== */
+
+/* Ensure all major content sections respect max-width */
+.hero-content,
+.stats-grid,
+.services-grid,
+.calculator-wrapper,
+.portfolio-grid,
+.about-content,
+.contact-wrapper,
+.footer-content {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* Narrower content for better readability */
+.content-wrapper {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* Testimonials centered constraint */
+.testimonials-slider {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* Why us grid constraint */
+.why-us-grid {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* Blog grid constraint */
+.blog-grid {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* Districts and cases grid constraint */
+.districts-grid,
+.cases-grid {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* ========================================
+   GRID SYSTEM OVERFLOW PREVENTION
+   ======================================== */
+
+/* Ensure grid containers don't overflow */
+.stats-grid,
+.services-grid,
+.portfolio-grid,
+.why-us-grid,
+.blog-grid,
+.districts-grid,
+.cases-grid {
+    width: 100%;
+}
+
+/* Ensure grid items respect their container */
+.stat-card,
+.service-card,
+.portfolio-item,
+.why-us-card,
+.blog-card,
+.district-card,
+.case-study-card {
+    max-width: 100%;
+}
+
+/* ========================================
+   FORM ELEMENTS CONSTRAINT
+   ======================================== */
+
+/* Prevent forms from overflowing */
+.calculator-form,
+.contact-form,
+.calculator-result,
+.result-card {
+    max-width: 100%;
+    width: 100%;
+}
+
+/* Ensure all form controls respect container width */
+.form-control,
+.form-group,
+input,
+textarea,
+select {
+    max-width: 100%;
+    width: 100%;
+}
+
+/* ========================================
+   IMAGE & MEDIA CONSTRAINTS
+   ======================================== */
+
+/* Prevent images and media from causing overflow */
+img,
+video,
+iframe,
+embed,
+object,
+svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Specific image containers */
+.hero-image,
+.about-image,
+.portfolio-image,
+.case-image,
+.blog-image,
+.testimonial-avatar {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* ========================================
+   HEADER & NAVIGATION CONSTRAINT
+   ======================================== */
+
+.header {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.navbar {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+/* ========================================
+   PAGE HERO & BREADCRUMBS CONSTRAINT
+   ======================================== */
+
+.page-hero,
+.breadcrumbs {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.page-hero .container,
+.breadcrumbs .container {
+    max-width: 1200px;
+}
+
+/* ========================================
+   RESPONSIVE BREAKPOINTS
+   ======================================== */
+
+/* Desktop: 1200px - 1440px */
+@media (min-width: 1200px) and (max-width: 1440px) {
+    .container {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+}
+
+/* Large Desktop: 1440px - 1920px */
+@media (min-width: 1440px) and (max-width: 1920px) {
+    .container {
+        max-width: 1400px;
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+    
+    .hero-content,
+    .stats-grid,
+    .services-grid,
+    .portfolio-grid,
+    .why-us-grid,
+    .blog-grid,
+    .about-content,
+    .contact-wrapper,
+    .footer-content {
+        max-width: 1400px;
+    }
+}
+
+/* Ultra-wide: 1920px+ */
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1600px;
+        padding-left: 80px;
+        padding-right: 80px;
+    }
+    
+    /* Prevent content from stretching too wide */
+    .hero-content,
+    .stats-grid,
+    .services-grid,
+    .portfolio-grid,
+    .why-us-grid,
+    .blog-grid {
+        max-width: 1600px;
+    }
+    
+    .calculator-wrapper,
+    .about-content,
+    .contact-wrapper {
+        max-width: 1400px;
+    }
+    
+    .footer-content {
+        max-width: 1600px;
+    }
+    
+    .content-wrapper,
+    .testimonials-slider {
+        max-width: 1000px;
+    }
+}
+
+/* Tablet: 768px - 1024px */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .container {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+}
+
+/* Mobile Large: 600px - 768px */
+@media (min-width: 600px) and (max-width: 767px) {
+    .container {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+/* Mobile Medium: 480px - 600px */
+@media (min-width: 480px) and (max-width: 599px) {
+    .container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+/* Mobile Small: 414px - 480px */
+@media (min-width: 414px) and (max-width: 479px) {
+    .container {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+}
+
+/* Mobile Extra Small: 360px - 414px */
+@media (min-width: 360px) and (max-width: 413px) {
+    .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+
+/* Mobile Minimum: < 360px */
+@media (max-width: 359px) {
+    .container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    
+    /* Ensure even smallest screens don't overflow */
+    .hero-title,
+    .section-title {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+}
+
+/* ========================================
+   PREVENT SPECIFIC OVERFLOW ISSUES
+   ======================================== */
+
+/* Prevent long text from causing overflow */
+h1, h2, h3, h4, h5, h6,
+p, span, a, li {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Prevent pre-formatted text from overflowing */
+pre, code {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* ========================================
+   SPECIAL ELEMENTS THAT SHOULD IGNORE CONSTRAINTS
+   ======================================== */
+
+/* Background elements can be full-width */
+.hero-bg,
+.particle,
+.page-hero::before,
+.page-hero::after {
+    position: absolute;
+}
+
+/* ========================================
+   CALCULATOR SECTION SPECIFIC FIX
+   ======================================== */
+
+/* Ensure calculator doesn't overflow on narrow screens */
+@media (max-width: 768px) {
+    .calculator-wrapper {
+        gap: 30px;
+    }
+    
+    .calculator-form,
+    .calculator-result {
+        width: 100%;
+        padding: 20px;
+    }
+}
+
+/* ========================================
+   FOOTER CONSTRAINT FIX
+   ======================================== */
+
+.footer {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.footer .container {
+    max-width: 1200px;
+}
+
+/* ========================================
+   FAQ SECTION FIX
+   ======================================== */
+
+.faq-item,
+.faq-question,
+.faq-answer {
+    max-width: 100%;
+}
+
+/* ========================================
+   CONTACT SECTION FIX
+   ======================================== */
+
+.contact-info,
+.contact-card {
+    max-width: 100%;
+}
+
+/* ========================================
+   PORTFOLIO FILTERS FIX
+   ======================================== */
+
+.portfolio-filters {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure filter buttons don't cause overflow */
+@media (max-width: 600px) {
+    .portfolio-filters {
+        justify-content: flex-start;
+        padding: 0;
+    }
+}
+
+/* ========================================
+   TABLE RESPONSIVENESS
+   ======================================== */
+
+/* Ensure tables don't cause horizontal overflow */
+table {
+    max-width: 100%;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
+/* ========================================
+   MODAL FIX
+   ======================================== */
+
+.modal-content {
+    max-width: calc(100vw - 40px);
+    width: 100%;
+}
+
+/* ========================================
+   ABSOLUTE POSITIONING SAFETY
+   ======================================== */
+
+/* Ensure absolutely positioned elements don't cause overflow */
+.portfolio-category,
+.featured-badge,
+.about-badge {
+    max-width: 90%;
+}
+
+/* ========================================
+   FINAL SAFETY NET
+   ======================================== */
+
+/* Last resort overflow prevention */
+html,
+body {
+    overflow-x: hidden;
+}
+
+/* Ensure viewport constraints are respected */
+body > * {
+    max-width: 100vw;
+}
