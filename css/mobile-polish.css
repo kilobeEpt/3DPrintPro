@@ -1591,6 +1591,110 @@ table {
     }
 }
 
+/* ========================================
+   PAGE HERO & BREADCRUMBS - MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .page-hero {
+        padding: 80px 0 40px;
+    }
+
+    .page-hero h1 {
+        font-size: clamp(1.75rem, 6vw, 2.5rem);
+    }
+
+    .page-hero p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-hero {
+        padding: 60px 0 30px;
+    }
+
+    .breadcrumbs {
+        padding: 12px 0;
+    }
+
+    .breadcrumbs ul {
+        font-size: 0.85rem;
+        gap: 5px;
+    }
+}
+
+/* ========================================
+   CONTENT SECTIONS - MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .content-section {
+        padding: 50px 0;
+    }
+
+    .content-wrapper h2 {
+        font-size: 1.75rem;
+    }
+
+    .content-wrapper h3 {
+        font-size: 1.3rem;
+    }
+
+    .timeline::before {
+        left: 15px;
+    }
+
+    .timeline-item {
+        padding-left: 50px;
+    }
+
+    .timeline-item::before {
+        left: 7px;
+    }
+
+    .district-card {
+        padding: 20px;
+    }
+
+    .case-study-content {
+        padding: 20px;
+    }
+
+    .case-study-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .blog-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-section {
+        padding: 40px 0;
+    }
+
+    .content-wrapper h2 {
+        font-size: 1.5rem;
+    }
+
+    .district-card {
+        padding: 15px;
+    }
+
+    .case-study-image {
+        height: 200px;
+    }
+
+    .blog-content {
+        padding: 20px;
+    }
+}
+
 /* Print styles - hide mobile navigation */
 @media print {
     .hamburger,
@@ -1604,5 +1708,109 @@ table {
 
     .admin-main {
         margin-left: 0 !important;
+    }
+}
+
+/* ========================================
+   PAGE HERO & BREADCRUMBS - MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .page-hero {
+        padding: 80px 0 40px;
+    }
+
+    .page-hero h1 {
+        font-size: clamp(1.75rem, 6vw, 2.5rem);
+    }
+
+    .page-hero p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-hero {
+        padding: 60px 0 30px;
+    }
+
+    .breadcrumbs {
+        padding: 12px 0;
+    }
+
+    .breadcrumbs ul {
+        font-size: 0.85rem;
+        gap: 5px;
+    }
+}
+
+/* ========================================
+   CONTENT SECTIONS - MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .content-section {
+        padding: 50px 0;
+    }
+
+    .content-wrapper h2 {
+        font-size: 1.75rem;
+    }
+
+    .content-wrapper h3 {
+        font-size: 1.3rem;
+    }
+
+    .timeline::before {
+        left: 15px;
+    }
+
+    .timeline-item {
+        padding-left: 50px;
+    }
+
+    .timeline-item::before {
+        left: 7px;
+    }
+
+    .district-card {
+        padding: 20px;
+    }
+
+    .case-study-content {
+        padding: 20px;
+    }
+
+    .case-study-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .blog-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-section {
+        padding: 40px 0;
+    }
+
+    .content-wrapper h2 {
+        font-size: 1.5rem;
+    }
+
+    .district-card {
+        padding: 15px;
+    }
+
+    .case-study-image {
+        height: 200px;
+    }
+
+    .blog-content {
+        padding: 20px;
     }
 }

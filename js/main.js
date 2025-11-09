@@ -279,9 +279,14 @@ class MainApp {
     }
 
     loadServices() {
-        const services = db.getData('services').filter(s => s.active);
+        let services = db.getData('services').filter(s => s.active);
         const grid = document.getElementById('servicesGrid');
         if (!grid) return;
+
+        const isHomepage = document.body.getAttribute('data-page') === 'home';
+        if (isHomepage && services.length > 4) {
+            services = services.slice(0, 4);
+        }
 
         grid.innerHTML = services.map(service => `
             <div class="service-card ${service.featured ? 'featured' : ''}">
@@ -359,9 +364,14 @@ class MainApp {
         const grid = document.getElementById('portfolioGrid');
         if (!grid) return;
 
-        const filtered = this.currentFilter === 'all'
+        let filtered = this.currentFilter === 'all'
             ? items
             : items.filter(item => item.category === this.currentFilter);
+
+        const isHomepage = document.body.getAttribute('data-page') === 'home';
+        if (isHomepage && filtered.length > 6) {
+            filtered = filtered.slice(0, 6);
+        }
 
         if (filtered.length === 0) {
             grid.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary); grid-column: 1/-1;">Работ не найдено</p>';
@@ -437,8 +447,16 @@ class MainApp {
     }
 
     loadTestimonials() {
-        const testimonials = db.getData('testimonials').filter(t => t.approved);
+        let testimonials = db.getData('testimonials').filter(t => t.approved);
         const slider = document.getElementById('testimonialsSlider');
+        if (!slider) return;
+
+        const isHomepage = document.body.getAttribute('data-page') === 'home';
+        if (isHomepage && testimonials.length > 3) {
+            testimonials = testimonials.slice(0, 3);
+        }
+
+        if (!slider) return;
         if (!slider) return;
 
         if (testimonials.length === 0) {
@@ -489,8 +507,16 @@ class MainApp {
     }
 
     loadFAQ() {
-        const faqs = db.getData('faq').filter(f => f.active);
+        let faqs = db.getData('faq').filter(f => f.active);
         const list = document.getElementById('faqList');
+        if (!list) return;
+
+        const isHomepage = document.body.getAttribute('data-page') === 'home';
+        if (isHomepage && faqs.length > 5) {
+            faqs = faqs.slice(0, 5);
+        }
+
+        if (!list) return;
         if (!list) return;
 
         list.innerHTML = faqs.map((faq, index) => `
