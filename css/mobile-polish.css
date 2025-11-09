@@ -1,22 +1,62 @@
 /* ========================================
-   MOBILE POLISH - ENHANCED RESPONSIVE DESIGN
+   MOBILE POLISH - COMPREHENSIVE RESPONSIVE DESIGN
    ========================================
    
-   This stylesheet provides comprehensive mobile optimizations
-   for both the public landing page and admin dashboard.
+   Complete mobile redesign with systematic responsive improvements
+   addressing stretched blocks, proper padding, and mobile UX.
    
-   Key Features:
-   - Responsive breakpoints: 360px, 414px, 480px, 600px, 768px, 968px, 1024px, 1200px
-   - Touch-friendly tap targets (≥44px)
-   - Prevents horizontal scrolling
-   - Optimized typography (min 16px to prevent iOS zoom)
-   - Performance optimizations (reduced animations, disabled particles)
-   - Accessible navigation with body scroll prevention
-   - Admin sidebar becomes off-canvas drawer on mobile
-   - Full-width forms and buttons on mobile
-   - Responsive tables with horizontal scroll containers
-   - CLS prevention with aspect ratio preservation
-   - Font display swap for better loading
+   RESPONSIVE PADDING SYSTEM:
+   - Desktop (1024px+):     padding: 0 40px
+   - Tablet (768-1024px):   padding: 0 32px
+   - Mobile (360-768px):    padding: 0 20px
+   - Small Mobile (<480px): padding: 0 16px
+   - Tiny Mobile (<360px):  padding: 0 12px
+   
+   CONTAINER SYSTEM:
+   - All sections use .container class with max-width: 1200px
+   - Container centered with margin: 0 auto
+   - Content constrained, never stretches full-width
+   - Responsive padding adjusts per breakpoint
+   
+   MOBILE OPTIMIZATIONS:
+   - Touch-friendly tap targets (≥44px for all interactive elements)
+   - No horizontal scrolling (overflow-x: hidden enforced)
+   - Typography min 16px to prevent iOS zoom
+   - Full-width buttons and forms on mobile
+   - Single-column layouts on small screens
+   - Compressed spacing for small screens
+   - Optimized images (max 250px height on mobile)
+   
+   MOBILE NAVIGATION:
+   - Hamburger menu: 44x44px touch target
+   - Full-screen overlay menu
+   - Body scroll lock when menu open
+   - Touch-friendly 52px menu items
+   
+   MOBILE FORMS & CALCULATOR:
+   - All inputs full-width on mobile
+   - Input height ≥48px for easy tapping
+   - Labels above inputs (not beside)
+   - Range sliders optimized for touch
+   - Result cards stack vertically
+   
+   BREAKPOINTS:
+   - 1920px+: Ultra-wide (max-width: 1600px)
+   - 1200px: Desktop
+   - 1024px: Tablet large
+   - 968px:  Tablet/Mobile transition
+   - 768px:  Mobile
+   - 600px:  Small mobile
+   - 480px:  Very small mobile
+   - 414px:  iPhone adjustments
+   - 400px:  Tiny screens
+   - 360px:  Minimum supported width
+   
+   PERFORMANCE:
+   - Disabled particle animations on mobile
+   - Reduced animation durations (0.3s max)
+   - No hover transforms on touch devices
+   - Lazy loading optimization
    
    ======================================== */
 
@@ -87,9 +127,62 @@ section,
 .portfolio,
 .testimonials,
 .contact,
-.footer {
+.footer,
+.header,
+.navbar,
+.calculator-section,
+.stats,
+.faq,
+.about,
+.page-hero,
+.breadcrumbs {
     overflow-x: hidden;
     max-width: 100%;
+}
+
+/* Prevent all child elements from exceeding container width */
+* {
+    max-width: 100%;
+}
+
+/* Allow specific elements to be full width */
+html,
+body,
+section,
+.hero-bg,
+.particle,
+.modal,
+.modal-overlay,
+.preloader {
+    max-width: none;
+}
+
+/* Ensure images don't cause overflow */
+img,
+video,
+iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Prevent code blocks and pre from causing overflow */
+pre,
+code {
+    max-width: 100%;
+    overflow-x: auto;
+    word-wrap: break-word;
+}
+
+/* Ensure grids and flex containers don't overflow */
+.services-grid,
+.portfolio-grid,
+.stats-grid,
+.footer-content,
+.why-us-grid,
+.districts-grid,
+.cases-grid {
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 /* Prevent long text from breaking layout */
@@ -157,6 +250,18 @@ table {
     }
 }
 
+/* ========================================
+   RESPONSIVE BREAKPOINTS - SYSTEMATIC APPROACH
+   ======================================== */
+
+/* Ultra-wide screens - maintain max-width */
+@media (min-width: 1920px) {
+    .container {
+        max-width: 1600px;
+    }
+}
+
+/* Desktop - Default styles from style.css apply (padding: 0 40px) */
 @media (max-width: 1200px) {
     :root {
         --section-padding: 80px;
@@ -167,6 +272,7 @@ table {
     }
 }
 
+/* Tablet - Large */
 @media (max-width: 1024px) {
     :root {
         --section-padding: 70px;
@@ -175,8 +281,19 @@ table {
     .container {
         padding: 0 32px;
     }
+    
+    /* Optimize grid layouts for tablet */
+    .services-grid,
+    .portfolio-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
+/* Tablet & Mobile Navigation */
 @media (max-width: 968px) {
     :root {
         --section-padding: 60px;
@@ -186,6 +303,13 @@ table {
     /* Top info strip hidden on mobile for cleaner navigation */
     .top-info-strip {
         display: none !important;
+    }
+
+    /* ========================================
+       MOBILE HEADER & NAVIGATION
+       ======================================== */
+    .navbar {
+        padding: 16px 32px;
     }
 
     .nav-menu {
@@ -219,6 +343,7 @@ table {
         border-bottom: none;
     }
     
+    /* Mobile menu items - finger-friendly tap targets */
     .nav-link {
         display: flex;
         align-items: center;
@@ -239,6 +364,7 @@ table {
         display: none;
     }
     
+    /* Hamburger menu - proper sizing for touch */
     .hamburger {
         display: flex;
         z-index: calc(var(--z-modal) + 10);
@@ -253,6 +379,7 @@ table {
         background: var(--bg-tertiary);
     }
     
+    /* Theme toggle - proper sizing for touch */
     .theme-toggle {
         min-width: 44px;
         min-height: 44px;
@@ -318,20 +445,23 @@ table {
     }
 }
 
+/* ========================================
+   MOBILE LAYOUT - 768px and below
+   ======================================== */
 @media (max-width: 768px) {
     :root {
         --section-padding: 50px;
         --card-padding: 20px;
     }
     
+    /* Container - Mobile padding */
     .container {
         padding: 0 20px;
     }
     
-    .section-header {
-        margin-bottom: 40px;
-    }
-    
+    /* ========================================
+       MOBILE HERO
+       ======================================== */
     .hero {
         padding-top: 100px;
         min-height: auto;
@@ -339,8 +469,64 @@ table {
     
     .hero-content {
         padding: 20px 0 40px;
+        gap: 30px;
     }
     
+    .hero-title {
+        font-size: clamp(32px, 8vw, 48px);
+        line-height: 1.1;
+        margin-bottom: 16px;
+    }
+    
+    .hero-description {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+    
+    .hero-buttons {
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+    
+    .hero-features {
+        gap: 12px;
+    }
+    
+    /* ========================================
+       MOBILE SECTIONS
+       ======================================== */
+    .section-header {
+        margin-bottom: 40px;
+    }
+    
+    .section-title {
+        font-size: clamp(28px, 6vw, 36px);
+        line-height: 1.2;
+    }
+    
+    .section-description {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+    
+    /* ========================================
+       MOBILE CARDS & GRIDS
+       ======================================== */
+    .services-grid,
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .service-card,
+    .portfolio-item {
+        box-shadow: var(--shadow-sm);
+    }
+    
+    /* ========================================
+       MOBILE IMAGES
+       ======================================== */
     .about-image img {
         height: 350px;
     }
@@ -355,6 +541,9 @@ table {
         background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
     }
     
+    /* ========================================
+       MOBILE TESTIMONIALS
+       ======================================== */
     .testimonials-slider {
         min-height: 400px;
     }
@@ -362,32 +551,64 @@ table {
     .slider-btn {
         width: 44px;
         height: 44px;
+        font-size: 18px;
+    }
+    
+    /* ========================================
+       MOBILE BUTTONS & INTERACTIVE ELEMENTS
+       ======================================== */
+    .btn {
+        padding: 14px 24px;
+        font-size: 16px;
+        min-height: 48px;
+    }
+    
+    .btn-sm {
+        padding: 10px 18px;
+        font-size: 14px;
+        min-height: 44px;
+    }
+    
+    /* Ensure all interactive elements are touch-friendly */
+    a,
+    button,
+    .filter-btn,
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-height: 44px;
     }
 }
 
+/* ========================================
+   SMALL MOBILE - 600px and below
+   ======================================== */
 @media (max-width: 600px) {
     :root {
         --section-padding: 40px;
         --card-padding: 16px;
     }
     
+    /* Container - Small mobile padding */
     .container {
-        padding: 0 16px;
+        padding: 0 20px;
     }
     
     .navbar {
         padding: 16px 20px;
     }
 
-    /* Typography optimized for mobile readability */
+    /* ========================================
+       MOBILE TYPOGRAPHY
+       ======================================== */
     body {
         font-size: 16px; /* Minimum 16px to prevent zoom on iOS */
         line-height: 1.6;
     }
 
     .section-title {
-        font-size: clamp(28px, 6vw, 36px);
+        font-size: clamp(24px, 6vw, 32px);
         line-height: 1.2;
+        margin-bottom: 12px;
     }
     
     .section-description {
@@ -396,7 +617,7 @@ table {
     }
     
     .hero-title {
-        font-size: clamp(32px, 8vw, 48px);
+        font-size: clamp(28px, 8vw, 42px);
         line-height: 1.1;
         margin-bottom: 16px;
     }
@@ -404,9 +625,20 @@ table {
     .hero-description {
         font-size: 16px;
         line-height: 1.6;
+        margin-bottom: 24px;
+    }
+    
+    h3 {
+        font-size: 20px;
+    }
+    
+    h4 {
+        font-size: 18px;
     }
 
-    /* Ensure all inputs are properly sized for mobile */
+    /* ========================================
+       MOBILE FORMS
+       ======================================== */
     input,
     textarea,
     select,
@@ -414,21 +646,11 @@ table {
         font-size: 16px !important; /* Prevent zoom on iOS */
         padding: 14px 16px;
         min-height: 48px;
+        border-radius: var(--radius-sm);
     }
 
     textarea {
         min-height: 120px;
-    }
-    
-    .services-grid,
-    .portfolio-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .service-card,
-    .portfolio-item {
-        box-shadow: var(--shadow-sm);
     }
     
     .form-row {
@@ -448,42 +670,20 @@ table {
         flex-shrink: 0;
         margin-top: 2px;
     }
-    
-    .hero-buttons {
-        flex-direction: column;
-        width: 100%;
-        gap: 12px;
-    }
-    
-    .hero-buttons .btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .hero-features {
-        flex-direction: column;
-        gap: 12px;
-        align-items: center;
-    }
 
-    /* Ensure all interactive elements are finger-friendly */
-    a,
-    button,
-    .btn,
-    .filter-btn,
-    input[type="checkbox"],
-    input[type="radio"] {
-        min-height: 44px;
-        min-width: 44px;
+    /* ========================================
+       MOBILE CARDS & GRIDS
+       ======================================== */
+    .services-grid,
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
-
-    /* Links with icon spacing */
-    a[href^="tel:"],
-    a[href^="mailto:"] {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 0;
+    
+    .service-card,
+    .portfolio-item {
+        box-shadow: var(--shadow-sm);
+        padding: var(--card-padding);
     }
     
     .stats-grid {
@@ -498,11 +698,149 @@ table {
     .stat-card i {
         font-size: 40px;
     }
+
+    /* ========================================
+       MOBILE BUTTONS
+       ======================================== */
+    .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .btn {
+        padding: 14px 20px;
+        font-size: 16px;
+    }
+    
+    .btn-block {
+        width: 100%;
+    }
+
+    /* ========================================
+       MOBILE HERO
+       ======================================== */
+    .hero-features {
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+    }
+    
+    .feature-item {
+        font-size: 14px;
+    }
+
+    /* ========================================
+       MOBILE LINKS & INTERACTIVE ELEMENTS
+       ======================================== */
+    /* Ensure all interactive elements are finger-friendly */
+    a,
+    button,
+    .btn,
+    .filter-btn {
+        min-height: 44px;
+    }
+    
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-width: 24px;
+        min-height: 24px;
+    }
+
+    /* Links with icon spacing */
+    a[href^="tel:"],
+    a[href^="mailto:"] {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        min-height: 44px;
+    }
+    
+    /* ========================================
+       MOBILE SPACING
+       ======================================== */
+    .section-header {
+        margin-bottom: 30px;
+    }
+    
+    .hero-content {
+        padding: 20px 0 30px;
+    }
     
     .stat-number {
         font-size: 36px;
     }
 
+    /* ========================================
+       MOBILE CALCULATOR
+       ======================================== */
+    .calculator-wrapper {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .calculator-form,
+    .calculator-result {
+        padding: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 16px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+        font-weight: 500;
+    }
+    
+    .form-control,
+    .range-slider {
+        width: 100%;
+    }
+    
+    .range-slider {
+        height: 44px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: transparent;
+    }
+    
+    .range-slider::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+    }
+    
+    .range-slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+    }
+    
+    .result-card {
+        position: static;
+        margin-top: 0;
+    }
+    
+    .price-breakdown {
+        font-size: 15px;
+    }
+    
+    .total-price {
+        font-size: 28px;
+    }
+
+    /* ========================================
+       MOBILE FOOTER
+       ======================================== */
     .footer-content {
         grid-template-columns: 1fr;
         gap: 24px;
@@ -545,6 +883,13 @@ table {
         padding-top: 24px;
     }
 
+    /* ========================================
+       MOBILE MODALS & POPUPS
+       ======================================== */
+    .modal {
+        padding: 16px;
+    }
+    
     .modal-content {
         padding: 24px;
         margin: 20px;
@@ -552,11 +897,17 @@ table {
         max-height: calc(100vh - 40px);
         max-height: calc(100dvh - 40px);
         overflow-y: auto;
+        border-radius: var(--radius);
     }
     
     .modal-content h2 {
         font-size: 24px;
         margin-bottom: 20px;
+        padding-right: 40px;
+    }
+    
+    .modal-content h3 {
+        font-size: 20px;
     }
     
     .modal-close {
@@ -570,15 +921,25 @@ table {
         display: flex;
         align-items: center;
         justify-content: center;
+        background: var(--bg-tertiary);
+        border-radius: 50%;
+        z-index: 10;
     }
-
-    /* Modal optimization for mobile */
-    .modal {
-        padding: 16px;
+    
+    .modal-close:hover {
+        background: var(--bg-secondary);
     }
 
     .modal-overlay {
         backdrop-filter: blur(4px);
+    }
+    
+    /* Full-screen modals on small mobile */
+    .modal-large .modal-content {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+        max-height: calc(100vh - 20px);
+        max-height: calc(100dvh - 20px);
     }
 
     .testimonial-card {
@@ -683,11 +1044,16 @@ table {
     }
 }
 
+/* ========================================
+   VERY SMALL MOBILE - 480px and below
+   ======================================== */
 @media (max-width: 480px) {
     :root {
         --section-padding: 32px;
+        --card-padding: 12px;
     }
     
+    /* Container - Very small mobile padding */
     .container {
         padding: 0 16px;
     }
@@ -696,6 +1062,25 @@ table {
         padding: 14px 16px;
     }
     
+    /* ========================================
+       COMPRESSED SPACING FOR SMALL SCREENS
+       ======================================== */
+    .section-header {
+        margin-bottom: 24px;
+    }
+    
+    .section-title {
+        font-size: clamp(22px, 6vw, 28px);
+        margin-bottom: 10px;
+    }
+    
+    .section-description {
+        font-size: 15px;
+    }
+    
+    /* ========================================
+       MOBILE HERO - COMPACT
+       ======================================== */
     .hero {
         padding-top: 80px;
     }
