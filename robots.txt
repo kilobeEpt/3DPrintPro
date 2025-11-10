@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Disallow admin panel
+Disallow: /admin.html
+Disallow: /admin
+
+# Allow all pages
+Allow: /index.html
+Allow: /services.html
+Allow: /portfolio.html
+Allow: /about.html
+Allow: /contact.html
+Allow: /blog.html
+Allow: /districts.html
+Allow: /why-us.html
+
+# Allow CSS and JS
+Allow: /css/
+Allow: /js/
+Allow: /assets/
+
+# Sitemap
+Sitemap: https://3dprintpro.ru/sitemap.xml
