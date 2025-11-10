@@ -1,157 +1,422 @@
 // ========================================
-// DATABASE MANAGEMENT (LocalStorage)
+// DATABASE MANAGEMENT (API-backed with LocalStorage fallback)
 // ========================================
 
 class Database {
     constructor() {
         this.storageKey = '3dprintpro_data';
-        this.init();
+        this.api = typeof apiClient !== 'undefined' ? apiClient : null;
+        this.useAPI = this.api !== null;
+        console.log(this.useAPI ? '✅ Database using API' : '⚠️ Database using localStorage fallback');
     }
     
-    init() {
-        if (!localStorage.getItem(this.storageKey)) {
-            this.resetToDefault();
+    // ========================================
+    // Settings Methods (API-first)
+    // ========================================
+    
+    async getOrCreateSettings() {
+        if (this.useAPI) {
+            try {
+                const settings = await this.api.getAllSettings();
+                // Cache to localStorage as backup
+                this.cacheToLocalStorage('settings', [settings]);
+                return settings;
+            } catch (error) {
+                console.error('❌ Failed to fetch settings from API, using localStorage fallback', error);
+                return this.getFromLocalStorage('settings');
+            }
+        } else {
+            return this.getFromLocalStorage('settings');
         }
     }
     
-    resetToDefault() {
-        const defaultData = {
-            orders: [],
-            portfolio: [],
-            services: this.getDefaultServices(),
-            testimonials: this.getDefaultTestimonials(),
-            faq: this.getDefaultFAQ(),
-            settings: [this.getDefaultSettings()], // ИСПРАВЛЕНО: массив с одним объектом
-            content: [this.getDefaultContent()],   // ИСПРАВЛЕНО: массив с одним объектом
-            stats: this.getDefaultStats()
-        };
-        
-        this.saveAll(defaultData);
-    }
-    
-    // CRUD Operations
-    getData(table) {
-        const data = JSON.parse(localStorage.getItem(this.storageKey));
-        return data ? data[table] || [] : [];
-    }
-    
-    getAllData() {
-        return JSON.parse(localStorage.getItem(this.storageKey)) || {};
-    }
-    
-    saveData(table, data) {
-        const allData = this.getAllData();
-        allData[table] = data;
-        this.saveAll(allData);
-    }
-    
-    saveAll(data) {
-        localStorage.setItem(this.storageKey, JSON.stringify(data));
-    }
-    
-    addItem(table, item) {
-        const data = this.getData(table);
-        item.id = this.generateId();
-        item.createdAt = new Date().toISOString();
-        item.updatedAt = new Date().toISOString();
-        data.push(item);
-        this.saveData(table, data);
-        return item;
-    }
-    
-    updateItem(table, id, updates) {
-        const data = this.getData(table);
-        const index = data.findIndex(item => item.id === id);
-        
-        if (index !== -1) {
-            data[index] = {
-                ...data[index],
-                ...updates,
-                updatedAt: new Date().toISOString()
-            };
-            this.saveData(table, data);
-            return data[index];
+    async updateSettings(updates) {
+        if (this.useAPI) {
+            try {
+                await this.api.saveSettings(updates);
+                // Update cache
+                this.cacheToLocalStorage('settings', [updates]);
+                console.log('✅ Settings updated in database');
+                return updates;
+            } catch (error) {
+                console.error('❌ Failed to update settings via API', error);
+                throw error;
+            }
+        } else {
+            return this.updateLocalStorage('settings', updates);
         }
-        return null;
     }
     
-    deleteItem(table, id) {
-        const data = this.getData(table);
-        const filtered = data.filter(item => item.id !== id);
-        this.saveData(table, filtered);
-        return filtered.length < data.length;
-    }
+    // ========================================
+    // Services Methods (API-first)
+    // ========================================
     
-    getItem(table, id) {
-        const data = this.getData(table);
-        return data.find(item => item.id === id);
-    }
-    
-    generateId() {
-        return Date.now() + Math.random().toString(36).substr(2, 9);
-    }
-    
-    // НОВОЕ: Безопасное получение/создание settings
-    getOrCreateSettings() {
-        let settings = this.getData('settings');
-        
-        if (!settings || settings.length === 0) {
-            const defaultSettings = this.getDefaultSettings();
-            defaultSettings.id = this.generateId();
-            defaultSettings.createdAt = new Date().toISOString();
-            defaultSettings.updatedAt = new Date().toISOString();
-            this.saveData('settings', [defaultSettings]);
-            return defaultSettings;
+    async getServices(filters = {}) {
+        if (this.useAPI) {
+            try {
+                const result = await this.api.getServices({ active: true, ...filters });
+                // Cache to localStorage
+                this.cacheToLocalStorage('services', result.services);
+                return result.services;
+            } catch (error) {
+                console.error('❌ Failed to fetch services from API, using localStorage fallback', error);
+                return this.getFromLocalStorage('services') || this.getDefaultServices();
+            }
+        } else {
+            return this.getFromLocalStorage('services') || this.getDefaultServices();
         }
-        
-        return settings[0];
     }
     
-    // НОВОЕ: Обновление settings
-    updateSettings(updates) {
-        let settings = this.getOrCreateSettings();
-        
-        const updated = {
-            ...settings,
-            ...updates,
-            updatedAt: new Date().toISOString()
-        };
-        
-        this.saveData('settings', [updated]);
-        return updated;
-    }
-    
-    // НОВОЕ: Безопасное получение/создание content
-    getOrCreateContent() {
-        let content = this.getData('content');
-        
-        if (!content || content.length === 0) {
-            const defaultContent = this.getDefaultContent();
-            defaultContent.id = this.generateId();
-            defaultContent.createdAt = new Date().toISOString();
-            defaultContent.updatedAt = new Date().toISOString();
-            this.saveData('content', [defaultContent]);
-            return defaultContent;
+    async addService(service) {
+        if (this.useAPI) {
+            try {
+                const result = await this.api.createService(service);
+                console.log('✅ Service created:', result);
+                return { ...service, id: result.id };
+            } catch (error) {
+                console.error('❌ Failed to create service via API', error);
+                throw error;
+            }
+        } else {
+            return this.addToLocalStorage('services', service);
         }
-        
-        return content[0];
     }
     
-    // НОВОЕ: Обновление content
-    updateContent(updates) {
-        let content = this.getOrCreateContent();
-        
-        const updated = {
-            ...content,
-            ...updates,
-            updatedAt: new Date().toISOString()
-        };
-        
-        this.saveData('content', [updated]);
-        return updated;
+    async updateService(id, updates) {
+        if (this.useAPI) {
+            try {
+                await this.api.updateService(id, updates);
+                console.log('✅ Service updated');
+                return { id, ...updates };
+            } catch (error) {
+                console.error('❌ Failed to update service via API', error);
+                throw error;
+            }
+        } else {
+            return this.updateInLocalStorage('services', id, updates);
+        }
     }
     
-    // Default data generators
+    async deleteService(id) {
+        if (this.useAPI) {
+            try {
+                await this.api.deleteService(id);
+                console.log('✅ Service deleted');
+                return true;
+            } catch (error) {
+                console.error('❌ Failed to delete service via API', error);
+                throw error;
+            }
+        } else {
+            return this.deleteFromLocalStorage('services', id);
+        }
+    }
+    
+    // ========================================
+    // Portfolio Methods (API-first)
+    // ========================================
+    
+    async getPortfolio(filters = {}) {
+        if (this.useAPI) {
+            try {
+                const result = await this.api.getPortfolio({ active: true, ...filters });
+                this.cacheToLocalStorage('portfolio', result.items);
+                return result.items;
+            } catch (error) {
+                console.error('❌ Failed to fetch portfolio from API, using localStorage fallback', error);
+                return this.getFromLocalStorage('portfolio') || [];
+            }
+        } else {
+            return this.getFromLocalStorage('portfolio') || [];
+        }
+    }
+    
+    async addPortfolioItem(item) {
+        if (this.useAPI) {
+            try {
+                const result = await this.api.createPortfolioItem(item);
+                console.log('✅ Portfolio item created:', result);
+                return { ...item, id: result.id };
+            } catch (error) {
+                console.error('❌ Failed to create portfolio item via API', error);
+                throw error;
+            }
+        } else {
+            return this.addToLocalStorage('portfolio', item);
+        }
+    }
+    
+    async updatePortfolioItem(id, updates) {
+        if (this.useAPI) {
+            try {
+                await this.api.updatePortfolioItem(id, updates);
+                console.log('✅ Portfolio item updated');
+                return { id, ...updates };
+            } catch (error) {
+                console.error('❌ Failed to update portfolio item via API', error);
+                throw error;
+            }
+        } else {
+            return this.updateInLocalStorage('portfolio', id, updates);
+        }
+    }
+    
+    async deletePortfolioItem(id) {
+        if (this.useAPI) {
+            try {
+                await this.api.deletePortfolioItem(id);
+                console.log('✅ Portfolio item deleted');
+                return true;
+            } catch (error) {
+                console.error('❌ Failed to delete portfolio item via API', error);
+                throw error;
+            }
+        } else {
+            return this.deleteFromLocalStorage('portfolio', id);
+        }
+    }
+    
+    // ========================================
+    // Testimonials Methods (API-first)
+    // ========================================
+    
+    async getTestimonials(filters = {}) {
+        if (this.useAPI) {
+            try {
+                const result = await this.api.getTestimonials({ active: true, approved: true, ...filters });
+                this.cacheToLocalStorage('testimonials', result.testimonials);
+                return result.testimonials;
+            } catch (error) {
+                console.error('❌ Failed to fetch testimonials from API, using localStorage fallback', error);
+                return this.getFromLocalStorage('testimonials') || this.getDefaultTestimonials();
+            }
+        } else {
+            return this.getFromLocalStorage('testimonials') || this.getDefaultTestimonials();
+        }
+    }
+    
+    async addTestimonial(testimonial) {
+        if (this.useAPI) {
+            try {
+                const result = await this.api.createTestimonial(testimonial);
+                console.log('✅ Testimonial created:', result);
+                return { ...testimonial, id: result.id };
+            } catch (error) {
+                console.error('❌ Failed to create testimonial via API', error);
+                throw error;
+            }
+        } else {
+            return this.addToLocalStorage('testimonials', testimonial);
+        }
+    }
+    
+    async updateTestimonial(id, updates) {
+        if (this.useAPI) {
+            try {
+                await this.api.updateTestimonial(id, updates);
+                console.log('✅ Testimonial updated');
+                return { id, ...updates };
+            } catch (error) {
+                console.error('❌ Failed to update testimonial via API', error);
+                throw error;
+            }
+        } else {
+            return this.updateInLocalStorage('testimonials', id, updates);
+        }
+    }
+    
+    async deleteTestimonial(id) {
+        if (this.useAPI) {
+            try {
+                await this.api.deleteTestimonial(id);
+                console.log('✅ Testimonial deleted');
+                return true;
+            } catch (error) {
+                console.error('❌ Failed to delete testimonial via API', error);
+                throw error;
+            }
+        } else {
+            return this.deleteFromLocalStorage('testimonials', id);
+        }
+    }
+    
+    // ========================================
+    // FAQ Methods (API-first)
+    // ========================================
+    
+    async getFAQ(filters = {}) {
+        if (this.useAPI) {
+            try {
+                const result = await this.api.getFAQ({ active: true, ...filters });
+                this.cacheToLocalStorage('faq', result.items);
+                return result.items;
+            } catch (error) {
+                console.error('❌ Failed to fetch FAQ from API, using localStorage fallback', error);
+                return this.getFromLocalStorage('faq') || this.getDefaultFAQ();
+            }
+        } else {
+            return this.getFromLocalStorage('faq') || this.getDefaultFAQ();
+        }
+    }
+    
+    async addFAQItem(item) {
+        if (this.useAPI) {
+            try {
+                const result = await this.api.createFAQItem(item);
+                console.log('✅ FAQ item created:', result);
+                return { ...item, id: result.id };
+            } catch (error) {
+                console.error('❌ Failed to create FAQ item via API', error);
+                throw error;
+            }
+        } else {
+            return this.addToLocalStorage('faq', item);
+        }
+    }
+    
+    async updateFAQItem(id, updates) {
+        if (this.useAPI) {
+            try {
+                await this.api.updateFAQItem(id, updates);
+                console.log('✅ FAQ item updated');
+                return { id, ...updates };
+            } catch (error) {
+                console.error('❌ Failed to update FAQ item via API', error);
+                throw error;
+            }
+        } else {
+            return this.updateInLocalStorage('faq', id, updates);
+        }
+    }
+    
+    async deleteFAQItem(id) {
+        if (this.useAPI) {
+            try {
+                await this.api.deleteFAQItem(id);
+                console.log('✅ FAQ item deleted');
+                return true;
+            } catch (error) {
+                console.error('❌ Failed to delete FAQ item via API', error);
+                throw error;
+            }
+        } else {
+            return this.deleteFromLocalStorage('faq', id);
+        }
+    }
+    
+    // ========================================
+    // Orders Methods (API-first)
+    // ========================================
+    
+    async getOrders(filters = {}) {
+        if (this.useAPI) {
+            try {
+                const result = await this.api.getOrders(filters);
+                this.cacheToLocalStorage('orders', result.orders);
+                return result.orders;
+            } catch (error) {
+                console.error('❌ Failed to fetch orders from API, using localStorage fallback', error);
+                return this.getFromLocalStorage('orders') || [];
+            }
+        } else {
+            return this.getFromLocalStorage('orders') || [];
+        }
+    }
+    
+    // ========================================
+    // LocalStorage Helper Methods (Fallback)
+    // ========================================
+    
+    getFromLocalStorage(table) {
+        try {
+            const data = JSON.parse(localStorage.getItem(this.storageKey)) || {};
+            return data[table] || [];
+        } catch (error) {
+            console.error('❌ LocalStorage read error:', error);
+            return [];
+        }
+    }
+    
+    cacheToLocalStorage(table, data) {
+        try {
+            const allData = JSON.parse(localStorage.getItem(this.storageKey)) || {};
+            allData[table] = data;
+            localStorage.setItem(this.storageKey, JSON.stringify(allData));
+        } catch (error) {
+            console.error('❌ LocalStorage write error:', error);
+        }
+    }
+    
+    updateLocalStorage(table, updates) {
+        try {
+            const allData = JSON.parse(localStorage.getItem(this.storageKey)) || {};
+            const current = allData[table] || [{}];
+            allData[table] = [{ ...current[0], ...updates }];
+            localStorage.setItem(this.storageKey, JSON.stringify(allData));
+            return allData[table][0];
+        } catch (error) {
+            console.error('❌ LocalStorage update error:', error);
+            return null;
+        }
+    }
+    
+    addToLocalStorage(table, item) {
+        try {
+            const allData = JSON.parse(localStorage.getItem(this.storageKey)) || {};
+            const data = allData[table] || [];
+            item.id = Date.now() + Math.random().toString(36).substr(2, 9);
+            item.createdAt = new Date().toISOString();
+            item.updatedAt = new Date().toISOString();
+            data.push(item);
+            allData[table] = data;
+            localStorage.setItem(this.storageKey, JSON.stringify(allData));
+            return item;
+        } catch (error) {
+            console.error('❌ LocalStorage add error:', error);
+            return null;
+        }
+    }
+    
+    updateInLocalStorage(table, id, updates) {
+        try {
+            const allData = JSON.parse(localStorage.getItem(this.storageKey)) || {};
+            const data = allData[table] || [];
+            const index = data.findIndex(item => item.id === id);
+            
+            if (index !== -1) {
+                data[index] = {
+                    ...data[index],
+                    ...updates,
+                    updatedAt: new Date().toISOString()
+                };
+                allData[table] = data;
+                localStorage.setItem(this.storageKey, JSON.stringify(allData));
+                return data[index];
+            }
+            return null;
+        } catch (error) {
+            console.error('❌ LocalStorage update error:', error);
+            return null;
+        }
+    }
+    
+    deleteFromLocalStorage(table, id) {
+        try {
+            const allData = JSON.parse(localStorage.getItem(this.storageKey)) || {};
+            const data = allData[table] || [];
+            allData[table] = data.filter(item => item.id !== id);
+            localStorage.setItem(this.storageKey, JSON.stringify(allData));
+            return true;
+        } catch (error) {
+            console.error('❌ LocalStorage delete error:', error);
+            return false;
+        }
+    }
+    
+    // ========================================
+    // Default Data Generators
+    // ========================================
+    
     getDefaultServices() {
         return [
             {
@@ -169,7 +434,7 @@ class Database {
                 price: 'от 50₽/г',
                 active: true,
                 featured: false,
-                order: 1
+                sort_order: 1
             },
             {
                 id: 's2',
@@ -186,7 +451,7 @@ class Database {
                 price: 'от 200₽/г',
                 active: true,
                 featured: true,
-                order: 2
+                sort_order: 2
             },
             {
                 id: 's3',
@@ -203,7 +468,7 @@ class Database {
                 price: 'от 300₽',
                 active: true,
                 featured: false,
-                order: 3
+                sort_order: 3
             },
             {
                 id: 's4',
@@ -220,7 +485,7 @@ class Database {
                 price: 'от 500₽/час',
                 active: true,
                 featured: false,
-                order: 4
+                sort_order: 4
             },
             {
                 id: 's5',
@@ -237,7 +502,7 @@ class Database {
                 price: 'от 1000₽',
                 active: true,
                 featured: false,
-                order: 5
+                sort_order: 5
             },
             {
                 id: 's6',
@@ -254,7 +519,7 @@ class Database {
                 price: 'Индивидуально',
                 active: true,
                 featured: false,
-                order: 6
+                sort_order: 6
             }
         ];
     }
@@ -269,7 +534,7 @@ class Database {
                 rating: 5,
                 text: 'Отличное качество печати! Заказывали прототипы корпусов для нашего устройства. Все выполнено точно в срок, консультации на высшем уровне.',
                 approved: true,
-                order: 1
+                sort_order: 1
             },
             {
                 id: 't2',
@@ -279,7 +544,7 @@ class Database {
                 rating: 5,
                 text: 'Работаю с этой компанией уже год. Печатают мои художественные проекты с невероятной детализацией. Рекомендую!',
                 approved: true,
-                order: 2
+                sort_order: 2
             },
             {
                 id: 't3',
@@ -289,7 +554,7 @@ class Database {
                 rating: 5,
                 text: 'Профессиональный подход к каждому заказу. Помогли с оптимизацией моделей, что сэкономило время и деньги.',
                 approved: true,
-                order: 3
+                sort_order: 3
             },
             {
                 id: 't4',
@@ -299,7 +564,7 @@ class Database {
                 rating: 5,
                 text: 'Заказывала мелкую серию деталей - все изготовлено качественно, упаковано аккуратно. Очень довольна сотрудничеством!',
                 approved: true,
-                order: 4
+                sort_order: 4
             }
         ];
     }
@@ -311,142 +576,52 @@ class Database {
                 question: 'Какие форматы файлов вы принимаете?',
                 answer: 'Мы работаем с форматами STL, OBJ, 3MF, STEP. Если у вас файл в другом формате, свяжитесь с нами - мы найдем решение.',
                 active: true,
-                order: 1
+                sort_order: 1
             },
             {
                 id: 'faq2',
                 question: 'Сколько времени занимает изготовление?',
                 answer: 'Стандартный срок - 3-5 рабочих дней. Для небольших деталей возможна печать за 1 день. Есть услуга срочного изготовления (24 часа).',
                 active: true,
-                order: 2
+                sort_order: 2
             },
             {
                 id: 'faq3',
                 question: 'Какая минимальная толщина стенок?',
                 answer: 'Для FDM печати минимальная толщина - 1мм, для SLA/SLS - 0.5мм. Рекомендуем консультироваться перед печатью тонкостенных деталей.',
                 active: true,
-                order: 3
+                sort_order: 3
             },
             {
                 id: 'faq4',
                 question: 'Можно ли заказать постобработку?',
                 answer: 'Да, мы предлагаем шлифовку, покраску, химическую обработку, сборку. Все услуги можно выбрать в калькуляторе.',
                 active: true,
-                order: 4
+                sort_order: 4
             },
             {
                 id: 'faq5',
                 question: 'Есть ли скидки на большие объемы?',
                 answer: 'Да! При заказе от 10 деталей скидка 10%, от 50 деталей - 15%, от 100 деталей - индивидуальные условия.',
                 active: true,
-                order: 5
+                sort_order: 5
             },
             {
                 id: 'faq6',
                 question: 'Как происходит оплата?',
                 answer: 'Принимаем оплату по безналичному расчету, банковским картам, электронным кошелькам. Для юр.лиц работаем по договору с отсрочкой.',
                 active: true,
-                order: 6
+                sort_order: 6
             }
         ];
     }
     
-getDefaultSettings() {
-    return {
-        siteName: '3D Print Pro',
-        siteDescription: 'Профессиональная 3D печать в Омске',
-        contactEmail: 'info@3dprintpro.ru',
-        contactPhone: '+7 (999) 123-45-67',
-        address: 'г. Омск, ул. Ленина, д. 15',
-        workingHours: 'Пн-Пт: 9:00 - 18:00\nСб-Вс: Выходной',
-        timezone: 'Asia/Omsk',
-        socialLinks: {
-            vk: '',
-            telegram: 'https://t.me/PrintPro_Omsk',
-            whatsapp: '',
-            youtube: ''
-        },
-        theme: 'light',
-        colorPrimary: '#6366f1',
-        colorSecondary: '#ec4899',
-        notifications: {
-            newOrders: true,
-            newReviews: true,
-            newMessages: true
-        },
-        telegram: {
-            chatId: ''
-        },
-        telegramNotifications: true,
-        formFields: CONFIG.formFields,
-        calculator: {
-            materialPrices: CONFIG.materialPrices,
-            servicePrices: CONFIG.servicePrices,
-            qualityMultipliers: CONFIG.qualityMultipliers,
-            discounts: CONFIG.discounts
-        }
-    };
-}
+    // ========================================
+    // Export/Import (LocalStorage based)
+    // ========================================
     
-    getDefaultContent() {
-        return {
-            hero: {
-                title: 'идеи в реальность',
-                subtitle: 'Профессиональная 3D печать любой сложности. Быстро, качественно, доступно.',
-                features: [
-                    'Печать от 1 часа',
-                    '15+ материалов',
-                    'Гарантия качества'
-                ]
-            },
-            about: {
-                title: 'Лидеры в области 3D печати',
-                description: 'Мы - команда профессионалов с более чем 12-летним опытом в области аддитивных технологий. Наша миссия - делать 3D печать доступной и качественной для каждого.',
-                features: [
-                    {
-                        title: 'Современное оборудование',
-                        description: 'Работаем на принтерах последнего поколения'
-                    },
-                    {
-                        title: 'Опытная команда',
-                        description: '15 специалистов с профильным образованием'
-                    },
-                    {
-                        title: 'Гарантия качества',
-                        description: 'Все изделия проходят контроль качества'
-                    }
-                ]
-            }
-        };
-    }
-    
-    getDefaultStats() {
-        return {
-            totalProjects: 1500,
-            happyClients: 850,
-            yearsExperience: 12,
-            awards: 25
-        };
-    }
-    
-    // Search functionality
-    search(table, query) {
-        const data = this.getData(table);
-        const lowerQuery = query.toLowerCase();
-        
-        return data.filter(item => {
-            return Object.values(item).some(value => {
-                if (typeof value === 'string') {
-                    return value.toLowerCase().includes(lowerQuery);
-                }
-                return false;
-            });
-        });
-    }
-    
-    // Export/Import
     exportData() {
-        const data = this.getAllData();
+        const data = JSON.parse(localStorage.getItem(this.storageKey)) || {};
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -459,7 +634,7 @@ getDefaultSettings() {
     importData(jsonData) {
         try {
             const data = JSON.parse(jsonData);
-            this.saveAll(data);
+            localStorage.setItem(this.storageKey, JSON.stringify(data));
             return true;
         } catch (error) {
             console.error('Import error:', error);
@@ -470,3 +645,4 @@ getDefaultSettings() {
 
 // Create global instance
 const db = new Database();
+console.log('✅ Database initialized');
