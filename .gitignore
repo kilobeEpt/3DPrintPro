@@ -105,3 +105,6 @@ dist/
 
 # Test files
 test_*.html
+
+# API configuration (contains sensitive database credentials)
+api/config.php

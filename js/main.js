@@ -592,7 +592,7 @@ class MainApp {
         }
     }
 
-    handleUniversalForm(form) {
+    async handleUniversalForm(form) {
         const validator = new Validator();
         const formData = new FormData(form);
 
@@ -635,6 +635,14 @@ class MainApp {
             return;
         }
 
+        // Disable submit button and show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+        }
+
         // Получаем данные калькулятора
         const calculatorData = window.calculator && window.calculator.calculation ? window.calculator.calculation : null;
 
@@ -659,20 +667,48 @@ class MainApp {
             telegramSent: false
         };
 
-        // Сохраняем в БД
-        const savedOrder = db.addItem('orders', order);
-        console.log('💾 Заказ сохранен в базе данных:', savedOrder);
-
-        // Отправка в Telegram
-        if (CONFIG.features.telegramNotifications) {
-            console.log('📤 Начало отправки в Telegram...');
-            console.log('🔧 Chat ID настроен:', CONFIG.telegram.chatId ? 'Да' : 'Нет');
+        try {
+            console.log('📤 Отправка заявки на сервер...');
             
-            if (!CONFIG.telegram.chatId) {
-                console.warn('⚠️ ВНИМАНИЕ: Chat ID не настроен! Уведомление не будет отправлено.');
-                this.showNotification('✅ Ваше сообщение сохранено. ⚠️ Telegram не настроен - свяжитесь с нами по телефону.', 'warning');
+            // Send to PHP backend
+            const response = await fetch('api/submit-form.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(order)
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log('✅ Заявка успешно сохранена в БД. Order ID:', result.order_id);
+                console.log('📬 Telegram отправлен:', result.telegram_sent);
                 
-                // Все равно очищаем форму и завершаем
+                // Save to localStorage as backup/cache
+                try {
+                    const savedOrder = db.addItem('orders', {
+                        ...order,
+                        id: result.order_id,
+                        orderNumber: result.order_number,
+                        telegramSent: result.telegram_sent
+                    });
+                    console.log('💾 Заявка сохранена в localStorage (резервная копия)');
+                } catch (e) {
+                    console.log('⚠️ localStorage недоступен (возможно, инкогнито режим)');
+                }
+                
+                // Show success message
+                if (result.telegram_sent) {
+                    this.showNotification('✅ Спасибо! Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время.', 'success');
+                } else {
+                    this.showNotification('✅ Спасибо! Ваша заявка сохранена. Мы свяжемся с вами в ближайшее время.', 'success');
+                    if (result.telegram_error) {
+                        console.warn('⚠️ Telegram ошибка:', result.telegram_error);
+                    }
+                }
+                
+                // Clear form
                 form.reset();
                 const calcInfo = document.getElementById('calculationInfo');
                 if (calcInfo) calcInfo.style.display = 'none';
@@ -680,68 +716,27 @@ class MainApp {
                 if (formTitle) {
                     formTitle.innerHTML = '<i class="fas fa-envelope"></i> Свяжитесь с нами';
                 }
-                return;
+                
+            } else {
+                throw new Error(result.error || 'Ошибка при отправке формы');
             }
             
-            const sendMethod = calculatorData ? 'sendOrderNotification' : 'sendContactNotification';
+        } catch (error) {
+            console.error('❌ Ошибка отправки формы:', error);
             
-            // ИСПРАВЛЕНО: Ждем результат и показываем корректное сообщение
-            telegramBot[sendMethod](savedOrder).then(result => {
-                console.log('📬 Результат отправки в Telegram:', result);
-                
-                if (result.success) {
-                    console.log('✅ Telegram уведомление отправлено успешно!');
-                    db.updateItem('orders', savedOrder.id, { telegramSent: true });
-                    this.showNotification('✅ Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.', 'success');
-                } else {
-                    console.error('❌ Ошибка отправки в Telegram:', result.error);
-                    
-                    // Показываем предупреждение, но не блокируем пользователя
-                    if (result.code === 'NO_CHAT_ID') {
-                        this.showNotification('✅ Ваше сообщение сохранено. ⚠️ Telegram не настроен - мы свяжемся с вами другим способом.', 'warning');
-                    } else {
-                        this.showNotification('✅ Ваше сообщение сохранено. ⚠️ Telegram временно недоступен - мы свяжемся с вами по телефону.', 'warning');
-                    }
-                    
-                    // Сохраняем информацию об ошибке
-                    db.updateItem('orders', savedOrder.id, { 
-                        telegramSent: false,
-                        telegramError: result.error
-                    });
-                }
-                
-                // Очистка формы в любом случае
-                form.reset();
-                const calcInfo = document.getElementById('calculationInfo');
-                if (calcInfo) calcInfo.style.display = 'none';
-                const formTitle = document.getElementById('formTitle');
-                if (formTitle) {
-                    formTitle.innerHTML = '<i class="fas fa-envelope"></i> Свяжитесь с нами';
-                }
-            }).catch(error => {
-                console.error('❌ Критическая ошибка при отправке в Telegram:', error);
-                this.showNotification('✅ Ваше сообщение сохранено. ⚠️ Ошибка отправки - мы свяжемся с вами по телефону.', 'warning');
-                
-                // Очистка формы
-                form.reset();
-                const calcInfo = document.getElementById('calculationInfo');
-                if (calcInfo) calcInfo.style.display = 'none';
-                const formTitle = document.getElementById('formTitle');
-                if (formTitle) {
-                    formTitle.innerHTML = '<i class="fas fa-envelope"></i> Свяжитесь с нами';
-                }
-            });
-        } else {
-            console.log('ℹ️ Telegram уведомления отключены в настройках');
-            this.showNotification('✅ Спасибо! Ваше сообщение сохранено. Мы свяжемся с вами в ближайшее время.', 'success');
-            
-            // Очистка формы
-            form.reset();
-            const calcInfo = document.getElementById('calculationInfo');
-            if (calcInfo) calcInfo.style.display = 'none';
-            const formTitle = document.getElementById('formTitle');
-            if (formTitle) {
-                formTitle.innerHTML = '<i class="fas fa-envelope"></i> Свяжитесь с нами';
+            // Fallback: try to save to localStorage
+            try {
+                const savedOrder = db.addItem('orders', order);
+                console.log('💾 Заявка сохранена только в localStorage (fallback)');
+                this.showNotification('✅ Ваша заявка сохранена локально. Мы получим её при следующей синхронизации.', 'warning');
+            } catch (e) {
+                this.showNotification('❌ Ошибка отправки формы. Пожалуйста, попробуйте позже или свяжитесь с нами по телефону.', 'error');
+            }
+        } finally {
+            // Re-enable submit button
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
             }
         }
     }
