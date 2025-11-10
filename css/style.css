@@ -684,6 +684,7 @@ body.dark-theme .header {
     border: 2px solid var(--border);
     border-radius: var(--radius-lg);
     transition: var(--transition);
+    cursor: pointer;
 }
 
 .service-card:hover {
