@@ -9,17 +9,17 @@ class MainApp {
         this.autoSlideInterval = null;
     }
 
-    init() {
+    async init() {
         this.initPreloader();
         this.initNavigation();
         this.initThemeToggle();
         this.initPhoneMasks();
         this.loadContent();
         this.initStats();
-        this.loadServices();
-        this.loadPortfolio();
-        this.loadTestimonials();
-        this.loadFAQ();
+        await this.loadServices();
+        await this.loadPortfolio();
+        await this.loadTestimonials();
+        await this.loadFAQ();
         this.initForms();
         this.initScrollAnimations();
         this.initCalculator();
@@ -311,31 +311,37 @@ class MainApp {
         animateStats();
     }
 
-    loadServices() {
-        let services = db.getData('services').filter(s => s.active);
-        const grid = document.getElementById('servicesGrid');
-        if (!grid) return;
+    async loadServices() {
+        try {
+            let services = await db.getServices();
+            services = services.filter(s => s.active !== false);
+            
+            const grid = document.getElementById('servicesGrid');
+            if (!grid) return;
 
-        const isHomepage = document.body.getAttribute('data-page') === 'home';
-        if (isHomepage && services.length > 4) {
-            services = services.slice(0, 4);
+            const isHomepage = document.body.getAttribute('data-page') === 'home';
+            if (isHomepage && services.length > 4) {
+                services = services.slice(0, 4);
+            }
+
+            grid.innerHTML = services.map(service => `
+                <a href="index.html#calculator" class="service-card ${service.featured ? 'featured' : ''}" style="text-decoration: none; color: inherit; display: block;">
+                    ${service.featured ? '<div class="featured-badge">Популярное</div>' : ''}
+                    <div class="service-icon">
+                        <i class="fas ${service.icon}"></i>
+                    </div>
+                    <h3>${service.name}</h3>
+                    <p>${service.description}</p>
+                    <ul class="service-features">
+                        ${(service.features || []).map(f => `
+                            <li><i class="fas fa-check"></i> ${f}</i>
+                        `).join('')}
+                    </ul>
+                </a>
+            `).join('');
+        } catch (error) {
+            console.error('❌ Failed to load services:', error);
         }
-
-        grid.innerHTML = services.map(service => `
-            <a href="index.html#calculator" class="service-card ${service.featured ? 'featured' : ''}" style="text-decoration: none; color: inherit; display: block;">
-                ${service.featured ? '<div class="featured-badge">Популярное</div>' : ''}
-                <div class="service-icon">
-                    <i class="fas ${service.icon}"></i>
-                </div>
-                <h3>${service.name}</h3>
-                <p>${service.description}</p>
-                <ul class="service-features">
-                    ${(service.features || []).map(f => `
-                        <li><i class="fas fa-check"></i> ${f}</li>
-                    `).join('')}
-                </ul>
-            </a>
-        `).join('');
     }
 
     openServiceModal(slug) {
@@ -376,15 +382,20 @@ class MainApp {
         modal.classList.add('active');
     }
 
-    loadPortfolio() {
-        const items = db.getData('portfolio');
-        this.renderPortfolio(items);
-        this.initPortfolioFilters();
+    async loadPortfolio() {
+        try {
+            const items = await db.getPortfolio();
+            this.portfolioItems = items;
+            this.renderPortfolio(items);
+            this.initPortfolioFilters();
+        } catch (error) {
+            console.error('❌ Failed to load portfolio:', error);
+        }
     }
 
     renderPortfolio(items = null) {
         if (!items) {
-            items = db.getData('portfolio');
+            items = this.portfolioItems || [];
         }
 
         const grid = document.getElementById('portfolioGrid');
@@ -406,7 +417,7 @@ class MainApp {
 
         grid.innerHTML = filtered.map(item => `
             <div class="portfolio-item" data-category="${item.category}" onclick="app.openPortfolioModal('${item.id}')">
-                <img src="${item.image}" alt="${item.title}" class="portfolio-image" loading="lazy">
+                <img src="${item.image_url || item.image}" alt="${item.title}" class="portfolio-image" loading="lazy">
                 <span class="portfolio-category">${this.getCategoryName(item.category)}</span>
                 <div class="portfolio-overlay">
                     <h3>${item.title}</h3>
@@ -441,14 +452,14 @@ class MainApp {
     }
 
     openPortfolioModal(id) {
-        const item = db.getData('portfolio').find(i => i.id === id);
+        const item = (this.portfolioItems || []).find(i => i.id == id);
         if (!item) return;
 
         const modal = document.getElementById('portfolioModal');
         const content = document.getElementById('portfolioModalContent');
 
         content.innerHTML = `
-            <img src="${item.image}" alt="${item.title}" style="width: 100%; border-radius: 12px; margin-bottom: 20px;">
+            <img src="${item.image_url || item.image}" alt="${item.title}" style="width: 100%; border-radius: 12px; margin-bottom: 20px;">
             <h2>${item.title}</h2>
             <p style="color: var(--text-secondary); margin: 15px 0;">${item.description}</p>
             ${item.details ? `
@@ -472,37 +483,40 @@ class MainApp {
         modal.classList.add('active');
     }
 
-    loadTestimonials() {
-        let testimonials = db.getData('testimonials').filter(t => t.approved);
-        const slider = document.getElementById('testimonialsSlider');
-        if (!slider) return;
+    async loadTestimonials() {
+        try {
+            let testimonials = await db.getTestimonials();
+            testimonials = testimonials.filter(t => t.approved !== false);
+            
+            const slider = document.getElementById('testimonialsSlider');
+            if (!slider) return;
 
-        const isHomepage = document.body.getAttribute('data-page') === 'home';
-        if (isHomepage && testimonials.length > 3) {
-            testimonials = testimonials.slice(0, 3);
-        }
+            const isHomepage = document.body.getAttribute('data-page') === 'home';
+            if (isHomepage && testimonials.length > 3) {
+                testimonials = testimonials.slice(0, 3);
+            }
 
-        if (!slider) return;
-        if (!slider) return;
+            if (testimonials.length === 0) {
+                slider.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Отзывов пока нет</p>';
+                return;
+            }
 
-        if (testimonials.length === 0) {
-            slider.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Отзывов пока нет</p>';
-            return;
-        }
-
-        slider.innerHTML = testimonials.map((item, index) => `
-            <div class="testimonial-card ${index === 0 ? 'active' : ''}">
-                <img src="${item.avatar}" alt="${item.name}" class="testimonial-avatar">
-                <div class="testimonial-rating">
-                    ${'★'.repeat(item.rating)}
+            slider.innerHTML = testimonials.map((item, index) => `
+                <div class="testimonial-card ${index === 0 ? 'active' : ''}">
+                    <img src="${item.avatar}" alt="${item.name}" class="testimonial-avatar">
+                    <div class="testimonial-rating">
+                        ${'★'.repeat(item.rating || 5)}
+                    </div>
+                    <p class="testimonial-text">"${item.text}"</p>
+                    <h4 class="testimonial-author">${item.name}</h4>
+                    <p class="testimonial-position">${item.position}</p>
                 </div>
-                <p class="testimonial-text">"${item.text}"</p>
-                <h4 class="testimonial-author">${item.name}</h4>
-                <p class="testimonial-position">${item.position}</p>
-            </div>
-        `).join('');
+            `).join('');
 
-        this.initTestimonialsSlider(testimonials.length);
+            this.initTestimonialsSlider(testimonials.length);
+        } catch (error) {
+            console.error('❌ Failed to load testimonials:', error);
+        }
     }
 
     initTestimonialsSlider(count) {
@@ -532,30 +546,33 @@ class MainApp {
         });
     }
 
-    loadFAQ() {
-        let faqs = db.getData('faq').filter(f => f.active);
-        const list = document.getElementById('faqList');
-        if (!list) return;
+    async loadFAQ() {
+        try {
+            let faqs = await db.getFAQ();
+            faqs = faqs.filter(f => f.active !== false);
+            
+            const list = document.getElementById('faqList');
+            if (!list) return;
 
-        const isHomepage = document.body.getAttribute('data-page') === 'home';
-        if (isHomepage && faqs.length > 5) {
-            faqs = faqs.slice(0, 5);
-        }
+            const isHomepage = document.body.getAttribute('data-page') === 'home';
+            if (isHomepage && faqs.length > 5) {
+                faqs = faqs.slice(0, 5);
+            }
 
-        if (!list) return;
-        if (!list) return;
-
-        list.innerHTML = faqs.map((faq, index) => `
-            <div class="faq-item" id="faq-${index}">
-                <button class="faq-question" onclick="app.toggleFAQ(${index})">
-                    <span>${faq.question}</span>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div class="faq-answer">
-                    <div class="faq-answer-content">${faq.answer}</div>
+            list.innerHTML = faqs.map((faq, index) => `
+                <div class="faq-item" id="faq-${index}">
+                    <button class="faq-question" onclick="app.toggleFAQ(${index})">
+                        <span>${faq.question}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">${faq.answer}</div>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `).join('');
+        } catch (error) {
+            console.error('❌ Failed to load FAQ:', error);
+        }
     }
 
     toggleFAQ(index) {
