@@ -322,7 +322,7 @@ class MainApp {
         }
 
         grid.innerHTML = services.map(service => `
-            <div class="service-card ${service.featured ? 'featured' : ''}">
+            <a href="index.html#calculator" class="service-card ${service.featured ? 'featured' : ''}" style="text-decoration: none; color: inherit; display: block;">
                 ${service.featured ? '<div class="featured-badge">Популярное</div>' : ''}
                 <div class="service-icon">
                     <i class="fas ${service.icon}"></i>
@@ -334,10 +334,7 @@ class MainApp {
                         <li><i class="fas fa-check"></i> ${f}</li>
                     `).join('')}
                 </ul>
-                <button class="btn btn-sm ${service.featured ? 'btn-primary' : ''}" onclick="app.openServiceModal('${service.slug}')">
-                    Подробнее
-                </button>
-            </div>
+            </a>
         `).join('');
     }
 
@@ -368,10 +365,6 @@ class MainApp {
                 <button class="btn btn-primary" onclick="window.location.href='#calculator'">
                     <i class="fas fa-calculator"></i>
                     Рассчитать стоимость
-                </button>
-                <button class="btn btn-outline" onclick="window.location.href='#contact'">
-                    <i class="fas fa-phone"></i>
-                    Консультация
                 </button>
                 <a href="${CONFIG.telegram.contactUrl}" target="_blank" class="btn btn-outline" style="text-decoration: none;">
                     <i class="fab fa-telegram"></i>
