@@ -309,7 +309,7 @@ table {
        MOBILE HEADER & NAVIGATION
        ======================================== */
     .navbar {
-        padding: 16px 32px;
+        padding: 20px 32px;
     }
 
     .nav-menu {
@@ -457,6 +457,11 @@ table {
     /* Container - Mobile padding */
     .container {
         padding: 0 20px;
+    }
+    
+    /* Navbar - Mobile padding */
+    .navbar {
+        padding: 16px 20px;
     }
     
     /* ========================================
@@ -1854,6 +1859,16 @@ table {
 }
 
 @media (max-width: 360px) {
+    /* Container - Tiny mobile padding */
+    .container {
+        padding: 0 12px;
+    }
+    
+    /* Navbar - Tiny mobile padding */
+    .navbar {
+        padding: 16px 12px;
+    }
+    
     .header-left h1,
     #pageTitle {
         font-size: 16px;
