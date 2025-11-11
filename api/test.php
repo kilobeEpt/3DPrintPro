@@ -15,6 +15,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/../scripts/db_audit.php';
+
+$runFullAudit = isset($_GET['audit']) && $_GET['audit'] === 'full';
+
+if ($runFullAudit) {
+    $auditor = new DatabaseAuditor();
+    $auditResults = $auditor->run();
+    
+    $sanitizedResults = $auditResults;
+    if (isset($sanitizedResults['connection']['user'])) {
+        unset($sanitizedResults['connection']['user']);
+    }
+    if (isset($sanitizedResults['connection']['host'])) {
+        $sanitizedResults['connection']['host'] = '***';
+    }
+    if (isset($sanitizedResults['connection']['database'])) {
+        $sanitizedResults['connection']['database'] = '***';
+    }
+    
+    echo json_encode($sanitizedResults, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit(0);
+}
 
 try {
     $db = new Database();
@@ -126,6 +148,8 @@ try {
         $response['sample_data']['testimonials'] = ['error' => $e->getMessage()];
     }
     
+    $response['audit_hint'] = 'For full database audit, visit: /api/test.php?audit=full or run: php scripts/db_audit.php';
+    
     echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     
     $db->close();
@@ -136,6 +160,13 @@ try {
         'success' => false,
         'error' => 'Database connection failed',
         'message' => $e->getMessage(),
-        'timestamp' => date('Y-m-d H:i:s')
+        'timestamp' => date('Y-m-d H:i:s'),
+        'troubleshooting' => [
+            'Run full audit: /api/test.php?audit=full',
+            'Or via CLI: php scripts/db_audit.php',
+            'Check credentials in api/config.php',
+            'Verify MySQL server is running',
+            'See documentation: README.md'
+        ]
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 }

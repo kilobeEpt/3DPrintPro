@@ -35,6 +35,7 @@ python -m http.server 8000
 ### 🔴 Основная документация (ВАЖНО!)
 
 - **[PHP_BACKEND_SETUP.md](./PHP_BACKEND_SETUP.md)** - 🆕 Настройка PHP backend и MySQL
+- **[AUDIT_TOOL.md](./AUDIT_TOOL.md)** - 🆕 Database Audit Tool - диагностика БД
 - **[FORMS_FIX_SUMMARY.md](./FORMS_FIX_SUMMARY.md)** - 🆕 Решение проблем с формами
 - **[DEPLOYMENT_CHECKLIST_PHP.md](./DEPLOYMENT_CHECKLIST_PHP.md)** - 🆕 Чеклист для деплоя с PHP
 - **[TELEGRAM_SETUP_GUIDE.md](./TELEGRAM_SETUP_GUIDE.md)** - Настройка Telegram бота
@@ -75,6 +76,9 @@ python -m http.server 8000
 │
 ├── database/               # 🆕 SQL схемы
 │   └── schema.sql          # Создание таблиц MySQL
+│
+├── scripts/                # 🆕 Утилиты и диагностика
+│   └── db_audit.php        # Аудит базы данных
 │
 ├── css/
 │   ├── style.css           # Основные стили
@@ -137,7 +141,7 @@ python -m http.server 8000
 
 ### Backend 🆕
 - **PHP 7.4+** - серверная логика
-- **MySQL** - база данных (PDO)
+- **MySQL 8.0+** - база данных (PDO)
 - **Telegram Bot API** - уведомления с сервера
 - **cURL** - HTTP запросы
 
@@ -146,6 +150,12 @@ python -m http.server 8000
 - **htmlspecialchars()** - защита от XSS
 - **.htaccess** - защита конфигурации
 - **CORS** - настроенный доступ к API
+
+### Diagnostics & Monitoring 🆕
+- **Database Audit Tool** (`scripts/db_audit.php`) - комплексная диагностика БД
+- **Schema Validation** - автоматическая проверка соответствия схемы
+- **Privilege Checking** - проверка прав доступа к MySQL
+- **CLI & HTTP Support** - запуск из командной строки или браузера
 
 **Минимальные зависимости!** Чистый vanilla JS на фронте, нативный PHP на бэке.
 
@@ -198,6 +208,224 @@ const CONFIG = {
 
 ---
 
+## 🔍 Database Diagnostics & Audit
+
+### Overview
+
+The project includes a comprehensive database audit tool to diagnose connectivity and schema issues. This is especially useful during outages or when troubleshooting API problems.
+
+**📖 Full Documentation:** [AUDIT_TOOL.md](./AUDIT_TOOL.md)
+
+### Usage
+
+#### Via Browser (HTTP)
+```
+# Standard format (human-readable)
+https://your-domain.com/api/test.php?audit=full
+
+# JSON format
+https://your-domain.com/scripts/db_audit.php?format=json
+```
+
+#### Via Command Line (CLI)
+```bash
+# Human-readable output
+php scripts/db_audit.php
+
+# JSON output
+php scripts/db_audit.php --json
+
+# Check exit code
+php scripts/db_audit.php && echo "✅ Success" || echo "❌ Failed"
+```
+
+### What the Audit Checks
+
+1. **Configuration File**
+   - Verifies `api/config.php` exists
+   - Falls back to `api/config.example.php` if needed
+   - Reports which config file is being used
+
+2. **Database Connection**
+   - Attempts PDO connection to MySQL
+   - Reports connection status
+   - Identifies common connection errors:
+     - Access denied (wrong credentials)
+     - Unknown database (DB doesn't exist)
+     - Connection refused (MySQL not running)
+
+3. **MySQL Version**
+   - Checks MySQL version
+   - Warns if version < 8.0
+
+4. **User Privileges**
+   - Checks granted privileges
+   - Verifies required: SELECT, INSERT, UPDATE, DELETE
+   - Checks for CREATE privilege
+   - Reports missing privileges
+
+5. **Table Validation**
+   - Enumerates all 7 expected tables
+   - Reports missing tables
+   - Reports extra/unexpected tables
+   - Shows table record counts
+
+6. **Schema Validation**
+   - Compares actual schema to `database/schema.sql`
+   - Validates column names
+   - Validates indexes
+   - Detects schema drift
+   - Reports specific mismatches
+
+### Output Format
+
+#### Human-Readable Output
+```
+========================================
+DATABASE AUDIT REPORT
+========================================
+Timestamp: 2025-01-15 10:30:00
+
+CONNECTION:
+  Status: ✅ Connected
+  Host: localhost
+  Database: ch167436_3dprint
+  User: ch167436_3dprint
+  MySQL Version: 8.0.32
+
+PRIVILEGES:
+  Status: ✅ OK
+  Granted: SELECT, INSERT, UPDATE, DELETE
+
+TABLES:
+  Expected: 7
+  Found: 7
+  Status: ✅ OK
+
+SCHEMA VALIDATION:
+  Status: ✅ OK
+
+  Table Details:
+    ✅ orders: 17 columns, 7 indexes, 42 records
+    ✅ settings: 4 columns, 3 indexes, 5 records
+    ✅ services: 13 columns, 6 indexes, 6 records
+    ✅ portfolio: 10 columns, 4 indexes, 4 records
+    ✅ testimonials: 11 columns, 5 indexes, 4 records
+    ✅ faq: 7 columns, 3 indexes, 6 records
+    ✅ content_blocks: 10 columns, 5 indexes, 3 records
+
+========================================
+SUMMARY: ✅ All checks passed successfully. Database is fully operational.
+========================================
+```
+
+#### JSON Output
+```json
+{
+  "success": true,
+  "timestamp": "2025-01-15 10:30:00",
+  "connection": {
+    "status": "connected",
+    "mysql_version": "8.0.32",
+    "host": "localhost",
+    "database": "ch167436_3dprint"
+  },
+  "privileges": {
+    "status": "ok",
+    "granted": ["SELECT", "INSERT", "UPDATE", "DELETE"]
+  },
+  "tables": {
+    "expected": 7,
+    "found": 7,
+    "status": "ok"
+  },
+  "schema_validation": {
+    "status": "ok",
+    "drift_detected": false
+  },
+  "summary": "✅ All checks passed successfully.",
+  "errors": [],
+  "warnings": []
+}
+```
+
+### Common Issues & Solutions
+
+#### Issue: "Database connection failed"
+**Error:** `Access denied for user`
+**Solution:**
+1. Check `api/config.php` credentials
+2. Verify DB_USER and DB_PASS are correct
+3. Test MySQL login: `mysql -u username -p`
+
+#### Issue: "Unknown database"
+**Error:** `Unknown database 'ch167436_3dprint'`
+**Solution:**
+1. Create the database in MySQL/PHPMyAdmin
+2. Or run: `CREATE DATABASE ch167436_3dprint CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+
+#### Issue: "Missing tables"
+**Error:** Tables: orders, settings, services not found
+**Solution:**
+1. Import schema: `mysql -u user -p database < database/schema.sql`
+2. Or use PHPMyAdmin: Import → database/schema.sql
+3. Verify: `php scripts/db_audit.php`
+
+#### Issue: "Schema drift detected"
+**Error:** Missing columns or indexes
+**Solution:**
+1. Backup your data first!
+2. Compare `database/schema.sql` with actual schema
+3. Run ALTER TABLE commands to update schema
+4. Or re-import schema (may lose data)
+
+#### Issue: "Connection refused"
+**Error:** `Connection refused`
+**Solution:**
+1. Check if MySQL is running: `systemctl status mysql`
+2. Start MySQL: `systemctl start mysql`
+3. Check DB_HOST in config.php (should be 'localhost' or '127.0.0.1')
+
+### Integration with Other Tools
+
+The audit tool integrates with existing diagnostic tools:
+
+- **api/test.php** - Quick API check + full audit mode (`?audit=full`)
+- **api/init-check.php** - Database initialization check
+- **scripts/db_audit.php** - Comprehensive standalone audit
+
+### When to Run the Audit
+
+Run the audit when you experience:
+- ❌ API returning 500 errors
+- ❌ Database connection failures
+- ❌ Empty data on frontend
+- ❌ Form submissions not saving
+- ❌ After schema changes
+- ❌ After MySQL version upgrade
+- ❌ During production deployment
+- ✅ As part of monitoring/health checks
+
+### Exit Codes (CLI)
+
+The CLI script returns appropriate exit codes:
+- `0` - All checks passed (success)
+- `1` - One or more checks failed (error)
+
+This allows integration with shell scripts and monitoring tools:
+```bash
+#!/bin/bash
+if php scripts/db_audit.php --json > /var/log/db-audit.json; then
+    echo "Database is healthy"
+else
+    echo "Database issues detected!"
+    cat /var/log/db-audit.json
+    # Send alert, page engineer, etc.
+fi
+```
+
+---
+
 ## 📦 Deployment
 
 ### Шаг 1: Подготовка
@@ -228,6 +456,39 @@ const CONFIG = {
 ---
 
 ## 🐛 Troubleshooting
+
+### База данных не работает / API недоступен
+
+**Симптомы:** Ошибки подключения, пустые данные, API возвращает ошибки
+
+**Решение:**
+1. **Запустите диагностику базы данных:**
+   
+   **Через браузер:**
+   ```
+   https://your-domain.com/api/test.php?audit=full
+   ```
+   
+   **Через командную строку (CLI):**
+   ```bash
+   php scripts/db_audit.php
+   # или для JSON вывода:
+   php scripts/db_audit.php --json
+   ```
+
+2. **Проверьте результаты:**
+   - ✅ `CONNECTION: Connected` - соединение работает
+   - ❌ `CONNECTION: Failed` - проверьте credentials в `api/config.php`
+   - ❌ `TABLES: Missing tables` - запустите `database/schema.sql`
+   - ❌ `SCHEMA VALIDATION: Drift detected` - схема устарела, обновите БД
+
+3. **Типичные проблемы:**
+   - `Access denied` → Неверный пароль в `api/config.php`
+   - `Unknown database` → База данных не создана
+   - `Connection refused` → MySQL сервер не запущен
+   - `Missing tables` → Выполните `database/schema.sql`
+
+4. **См. полную документацию:** [DATABASE_ARCHITECTURE.md](./DATABASE_ARCHITECTURE.md)
 
 ### Telegram не работает
 

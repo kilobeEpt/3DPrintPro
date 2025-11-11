@@ -128,6 +128,36 @@ If all 3 steps worked:
 
 ## 🆘 TROUBLESHOOTING
 
+### Problem: Database Connection Issues
+
+**🔍 FIRST: Run Database Audit**
+
+**Via Browser:**
+```
+https://ch167436.tw1.ru/api/test.php?audit=full
+```
+
+**Via SSH/CLI:**
+```bash
+cd /home/ch167436/domains/ch167436.tw1.ru/public_html
+php scripts/db_audit.php
+```
+
+**What the audit checks:**
+- ✅ PDO connection to MySQL
+- ✅ MySQL version (8.0+ recommended)
+- ✅ User privileges (SELECT, INSERT, UPDATE, DELETE)
+- ✅ All 7 tables exist
+- ✅ Schema matches database/schema.sql
+- ✅ Column names and types
+- ✅ Indexes and keys
+
+**Interpreting Results:**
+- `✅ All checks passed` → Database is healthy
+- `❌ CONNECTION: Failed` → Check credentials in api/config.php
+- `❌ TABLES: Missing tables` → Run database/schema.sql
+- `❌ SCHEMA VALIDATION: Drift detected` → Schema needs update
+
 ### Problem: API returns empty arrays
 **Solution:**
 ```
@@ -135,23 +165,27 @@ https://ch167436.tw1.ru/api/init-check.php?fix_active=1
 ```
 
 ### Problem: "Database connection failed"
-**Check:** api/config.php has correct credentials:
+**Step 1:** Run audit first (see above)
+**Step 2:** Check api/config.php has correct credentials:
 - DB_NAME: ch167436_3dprint
 - DB_USER: ch167436_3dprint
 - DB_PASS: 852789456
+**Step 3:** Verify MySQL server is running
 
 ### Problem: Tables don't exist
 **Solution:**
 1. Open PHPMyAdmin
 2. Select database: ch167436_3dprint
 3. Import: database/schema.sql
+4. Run audit to confirm: `php scripts/db_audit.php`
 
 ### Problem: Console shows errors
 **Check:**
 1. Press F12 → Console tab
 2. Read the error message
 3. Check Network tab for failed requests
-4. Verify API endpoints are accessible
+4. Run database audit: `/api/test.php?audit=full`
+5. Verify API endpoints are accessible
 
 ---
 
@@ -174,8 +208,10 @@ https://ch167436.tw1.ru/api/init-check.php?fix_active=1
 
 ### Diagnostic Tools:
 - **Test API:** https://ch167436.tw1.ru/api/test.php
+- **Full Database Audit:** https://ch167436.tw1.ru/api/test.php?audit=full
 - **Check DB:** https://ch167436.tw1.ru/api/init-check.php
 - **Fix DB:** https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+- **CLI Audit:** `php scripts/db_audit.php` (SSH access required)
 
 ---
 
