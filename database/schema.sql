@@ -1,8 +1,44 @@
 -- ========================================
 -- 3D Print Pro Database Schema
+-- Version: 2.0 (Complete)
+-- Last Updated: January 2025
+-- ========================================
+--
+-- This schema creates 7 tables for the 3D printing service platform:
+-- 1. orders - Customer orders and inquiries
+-- 2. settings - Application configuration (NO 'active' column)
+-- 3. services - Service offerings
+-- 4. portfolio - Project showcase
+-- 5. testimonials - Customer reviews
+-- 6. faq - Frequently asked questions
+-- 7. content_blocks - Dynamic page content
+--
+-- IMPORTANT NOTES:
+-- - Tables WITHOUT 'active' column: orders, settings
+-- - Tables WITH 'active' column: services, portfolio, testimonials, faq, content_blocks
+-- - This file is IDEMPOTENT - safe to run multiple times
+-- - For HARD RESET: uncomment the DROP TABLE statements below
+--
 -- ========================================
 
--- Create orders table
+-- ========================================
+-- OPTIONAL: Hard Reset (DANGER!)
+-- Uncomment these lines to drop all tables before recreating
+-- WARNING: This will DELETE ALL DATA permanently!
+-- ========================================
+-- DROP TABLE IF EXISTS orders;
+-- DROP TABLE IF EXISTS settings;
+-- DROP TABLE IF EXISTS services;
+-- DROP TABLE IF EXISTS portfolio;
+-- DROP TABLE IF EXISTS testimonials;
+-- DROP TABLE IF EXISTS faq;
+-- DROP TABLE IF EXISTS content_blocks;
+
+-- ========================================
+-- TABLE: orders
+-- Stores customer orders and contact form submissions
+-- NO 'active' column - all orders are kept for history
+-- ========================================
 CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_number VARCHAR(50) NOT NULL UNIQUE,
@@ -37,10 +73,15 @@ CREATE TABLE IF NOT EXISTS orders (
     INDEX idx_phone (phone),
     INDEX idx_email (email),
     INDEX idx_status (status),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_type (type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Create settings table (for storing configuration)
+-- ========================================
+-- TABLE: settings
+-- Application configuration and settings
+-- NO 'active' column - all settings are always active
+-- ========================================
 CREATE TABLE IF NOT EXISTS settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     setting_key VARCHAR(100) NOT NULL UNIQUE,
@@ -50,12 +91,16 @@ CREATE TABLE IF NOT EXISTS settings (
     INDEX idx_setting_key (setting_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert default Telegram Chat ID setting (empty by default)
+-- Insert default Telegram Chat ID setting (idempotent)
 INSERT INTO settings (setting_key, setting_value) 
 VALUES ('telegram_chat_id', '') 
 ON DUPLICATE KEY UPDATE setting_key=setting_key;
 
--- Create services table
+-- ========================================
+-- TABLE: services
+-- Service offerings and pricing
+-- HAS 'active' column for visibility control
+-- ========================================
 CREATE TABLE IF NOT EXISTS services (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -74,10 +119,15 @@ CREATE TABLE IF NOT EXISTS services (
     INDEX idx_active (active),
     INDEX idx_featured (featured),
     INDEX idx_sort (sort_order),
-    INDEX idx_slug (slug)
+    INDEX idx_slug (slug),
+    INDEX idx_category (category)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Create portfolio table
+-- ========================================
+-- TABLE: portfolio
+-- Project showcase and case studies
+-- HAS 'active' column for visibility control
+-- ========================================
 CREATE TABLE IF NOT EXISTS portfolio (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -95,7 +145,11 @@ CREATE TABLE IF NOT EXISTS portfolio (
     INDEX idx_sort (sort_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Create testimonials table
+-- ========================================
+-- TABLE: testimonials
+-- Customer reviews and ratings
+-- HAS 'active' column and 'approved' for moderation
+-- ========================================
 CREATE TABLE IF NOT EXISTS testimonials (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -112,10 +166,16 @@ CREATE TABLE IF NOT EXISTS testimonials (
     INDEX idx_active (active),
     INDEX idx_approved (approved),
     INDEX idx_rating (rating),
-    INDEX idx_sort (sort_order)
+    INDEX idx_sort (sort_order),
+    
+    CHECK (rating >= 1 AND rating <= 5)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Create faq table
+-- ========================================
+-- TABLE: faq
+-- Frequently asked questions
+-- HAS 'active' column for visibility control
+-- ========================================
 CREATE TABLE IF NOT EXISTS faq (
     id INT AUTO_INCREMENT PRIMARY KEY,
     question VARCHAR(500) NOT NULL,
@@ -129,7 +189,11 @@ CREATE TABLE IF NOT EXISTS faq (
     INDEX idx_sort (sort_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Create content_blocks table
+-- ========================================
+-- TABLE: content_blocks
+-- Dynamic content blocks for pages
+-- HAS 'active' column for visibility control
+-- ========================================
 CREATE TABLE IF NOT EXISTS content_blocks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     block_name VARCHAR(255) NOT NULL UNIQUE,
@@ -146,3 +210,12 @@ CREATE TABLE IF NOT EXISTS content_blocks (
     INDEX idx_page (page),
     INDEX idx_active (active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- Schema Creation Complete
+-- ========================================
+-- Next Steps:
+-- 1. Verify tables: SHOW TABLES;
+-- 2. Run seed script: Visit /api/init-database.php
+-- 3. Verify data: SELECT COUNT(*) FROM [table_name];
+-- ========================================
