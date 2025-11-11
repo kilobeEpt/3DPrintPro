@@ -30,11 +30,14 @@ try {
     
     // Check tables
     echo "<h3>Tables Status:</h3>";
-    $tables = ['settings', 'services', 'portfolio', 'testimonials', 'faq', 'orders', 'content_blocks'];
+    $tables_with_active = ['services', 'portfolio', 'testimonials', 'faq', 'content_blocks'];
+    $tables_without_active = ['settings', 'orders'];
+    
     echo "<table border='1' cellpadding='10' cellspacing='0' style='background:#fff;border-collapse:collapse'>";
     echo "<tr><th>Table</th><th>Total Records</th><th>Active Records</th><th>Status</th></tr>";
     
-    foreach ($tables as $table) {
+    // Tables with 'active' column
+    foreach ($tables_with_active as $table) {
         try {
             $total = $db->getCount($table);
             $active = $db->getCount($table, ['active' => 1]);
@@ -47,6 +50,27 @@ try {
             echo "<td>$total</td>";
             echo "<td>$active</td>";
             echo "<td class='$statusClass'>$status</td>";
+            echo "</tr>";
+        } catch (Exception $e) {
+            echo "<tr>";
+            echo "<td><strong>$table</strong></td>";
+            echo "<td colspan='3' class='error'>❌ Error: " . $e->getMessage() . "</td>";
+            echo "</tr>";
+        }
+    }
+    
+    // Tables without 'active' column
+    foreach ($tables_without_active as $table) {
+        try {
+            $total = $db->getCount($table);
+            
+            $status = "N/A (no active column)";
+            
+            echo "<tr>";
+            echo "<td><strong>$table</strong></td>";
+            echo "<td>$total</td>";
+            echo "<td>N/A</td>";
+            echo "<td>$status</td>";
             echo "</tr>";
         } catch (Exception $e) {
             echo "<tr>";
@@ -130,7 +154,8 @@ try {
     echo "<h3>🔧 Fix Actions:</h3>";
     
     $emptyTables = [];
-    foreach ($tables as $table) {
+    $all_tables = array_merge($tables_with_active, $tables_without_active);
+    foreach ($all_tables as $table) {
         try {
             $count = $db->getCount($table);
             if ($count === 0) {
@@ -153,9 +178,7 @@ try {
     echo "<h4>Quick Fix: Set all records to active=1</h4>";
     if (isset($_GET['fix_active'])) {
         echo "<div style='background:#fff;padding:15px;border-radius:8px;margin:15px 0'>";
-        foreach ($tables as $table) {
-            if ($table === 'settings' || $table === 'orders') continue; // Skip these
-            
+        foreach ($tables_with_active as $table) {
             try {
                 $pdo = $db->getPDO();
                 $stmt = $pdo->prepare("UPDATE `$table` SET active = 1 WHERE 1=1");

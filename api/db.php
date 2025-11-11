@@ -72,6 +72,14 @@ class Database {
     // ========================================
     
     public function getRecords($table, $where = [], $orderBy = 'sort_order', $limit = null, $offset = 0) {
+        // Tables that don't have 'active' column
+        $tables_without_active = ['settings', 'orders'];
+        
+        // Remove 'active' filter for tables that don't have this column
+        if (in_array($table, $tables_without_active) && isset($where['active'])) {
+            unset($where['active']);
+        }
+        
         $sql = "SELECT * FROM " . $this->escapeIdentifier($table) . " WHERE 1=1";
         $params = [];
         
@@ -179,6 +187,14 @@ class Database {
     }
     
     public function getCount($table, $where = []) {
+        // Tables that don't have 'active' column
+        $tables_without_active = ['settings', 'orders'];
+        
+        // Remove 'active' filter for tables that don't have this column
+        if (in_array($table, $tables_without_active) && isset($where['active'])) {
+            unset($where['active']);
+        }
+        
         $sql = "SELECT COUNT(*) as total FROM " . $this->escapeIdentifier($table) . " WHERE 1=1";
         $params = [];
         
