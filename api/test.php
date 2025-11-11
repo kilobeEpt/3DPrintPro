@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers/response.php';
+require_once __DIR__ . '/helpers/logger.php';
 require_once __DIR__ . '/../scripts/db_audit.php';
 
 $runFullAudit = isset($_GET['audit']) && $_GET['audit'] === 'full';
@@ -155,11 +157,12 @@ try {
     $db->close();
     
 } catch (Exception $e) {
+    ApiLogger::error("Database connection failed in test endpoint", ['exception' => $e]);
     http_response_code(500);
     echo json_encode([
         'success' => false,
         'error' => 'Database connection failed',
-        'message' => $e->getMessage(),
+        'message' => 'Could not connect to database. Please check configuration.',
         'timestamp' => date('Y-m-d H:i:s'),
         'troubleshooting' => [
             'Run full audit: /api/test.php?audit=full',

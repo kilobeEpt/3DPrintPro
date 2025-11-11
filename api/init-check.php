@@ -14,6 +14,7 @@ echo "<h1>🔧 Database Integration Check</h1>";
 try {
     require_once __DIR__ . '/config.php';
     require_once __DIR__ . '/db.php';
+    require_once __DIR__ . '/helpers/logger.php';
     
     echo "<h2 class='success'>✅ Config & DB class loaded successfully</h2>";
     

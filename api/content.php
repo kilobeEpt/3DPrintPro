@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers/response.php';
+require_once __DIR__ . '/helpers/logger.php';
 
 $db = new Database();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -24,35 +26,28 @@ try {
         case 'GET':
             // Get all content blocks or single block
             if (isset($_GET['id'])) {
-                $block = $db->getRecordById('content_blocks', $_GET['id']);
+                $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+                if (!$id) {
+                    ApiResponse::validationError('Invalid content block ID');
+                }
+                
+                $block = $db->getRecordById('content_blocks', $id);
                 
                 if ($block) {
-                    echo json_encode([
-                        'success' => true,
-                        'block' => $block
-                    ], JSON_UNESCAPED_UNICODE);
+                    ApiResponse::success(['block' => $block]);
                 } else {
-                    http_response_code(404);
-                    echo json_encode([
-                        'success' => false,
-                        'error' => 'Content block not found'
-                    ]);
+                    ApiLogger::warning("Content block not found", ['id' => $id]);
+                    ApiResponse::notFound('Content block not found');
                 }
             } elseif (isset($_GET['name'])) {
                 // Get by block name
                 $blocks = $db->getRecords('content_blocks', ['block_name' => $_GET['name']], 'sort_order', 1);
                 
                 if (!empty($blocks)) {
-                    echo json_encode([
-                        'success' => true,
-                        'block' => $blocks[0]
-                    ], JSON_UNESCAPED_UNICODE);
+                    ApiResponse::success(['block' => $blocks[0]]);
                 } else {
-                    http_response_code(404);
-                    echo json_encode([
-                        'success' => false,
-                        'error' => 'Content block not found'
-                    ]);
+                    ApiLogger::warning("Content block not found", ['name' => $_GET['name']]);
+                    ApiResponse::notFound('Content block not found');
                 }
             } else {
                 // Get all content blocks with optional filters
@@ -64,17 +59,19 @@ try {
                     $where['page'] = $_GET['page'];
                 }
                 
-                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
-                $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+                $limit = isset($_GET['limit']) ? filter_var($_GET['limit'], FILTER_VALIDATE_INT) : null;
+                $offset = isset($_GET['offset']) ? filter_var($_GET['offset'], FILTER_VALIDATE_INT) : 0;
+                
+                if ($limit !== null && ($limit === false || $limit < 1)) $limit = null;
+                if ($offset === false || $offset < 0) $offset = 0;
                 
                 $blocks = $db->getRecords('content_blocks', $where, 'sort_order', $limit, $offset);
                 $total = $db->getCount('content_blocks', $where);
                 
-                echo json_encode([
-                    'success' => true,
-                    'blocks' => $blocks,
-                    'total' => $total
-                ], JSON_UNESCAPED_UNICODE);
+                ApiResponse::success(
+                    ['blocks' => $blocks],
+                    ['total' => $total]
+                );
             }
             break;
             
@@ -83,17 +80,38 @@ try {
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
             
-            if (!$data || empty($data['block_name'])) {
-                throw new Exception('Block name is required');
+            if (!$data) {
+                ApiLogger::warning('Invalid JSON in POST request', ['raw_input' => substr($input, 0, 200)]);
+                ApiResponse::validationError('Invalid JSON data');
             }
             
-            $id = $db->insertRecord('content_blocks', $data);
+            // Validate required fields
+            $validationErrors = [];
             
-            echo json_encode([
-                'success' => true,
+            if (empty($data['block_name']) || !is_string($data['block_name'])) {
+                $validationErrors['block_name'] = 'Block name is required and must be a string';
+            }
+            
+            if (!empty($validationErrors)) {
+                ApiLogger::validationError('POST /api/content.php', $validationErrors);
+                ApiResponse::validationError('Validation failed', $validationErrors);
+            }
+            
+            try {
+                $id = $db->insertRecord('content_blocks', $data);
+                ApiLogger::info("Content block created successfully", [
+                    'block_id' => $id,
+                    'block_name' => $data['block_name']
+                ]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('INSERT', 'content_blocks', $e, ['data_keys' => array_keys($data)]);
+                ApiResponse::serverError('Failed to create content block. Please try again.');
+            }
+            
+            ApiResponse::created([
                 'id' => $id,
                 'message' => 'Content block created successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            ]);
             break;
             
         case 'PUT':
@@ -101,50 +119,91 @@ try {
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
             
-            if (!$data || empty($data['id'])) {
-                throw new Exception('Content block ID is required');
+            if (!$data) {
+                ApiLogger::warning('Invalid JSON in PUT request', ['raw_input' => substr($input, 0, 200)]);
+                ApiResponse::validationError('Invalid JSON data');
             }
             
-            $id = $data['id'];
+            if (empty($data['id'])) {
+                ApiResponse::validationError('Content block ID is required');
+            }
+            
+            $id = filter_var($data['id'], FILTER_VALIDATE_INT);
+            if (!$id) {
+                ApiResponse::validationError('Invalid content block ID');
+            }
+            
+            // Check if content block exists
+            $existingBlock = $db->getRecordById('content_blocks', $id);
+            if (!$existingBlock) {
+                ApiLogger::warning("Attempt to update non-existent content block", ['id' => $id]);
+                ApiResponse::notFound('Content block not found');
+            }
+            
             unset($data['id']);
             
-            $db->updateRecord('content_blocks', $id, $data);
+            try {
+                $db->updateRecord('content_blocks', $id, $data);
+                ApiLogger::info("Content block updated successfully", [
+                    'block_id' => $id,
+                    'updated_fields' => array_keys($data)
+                ]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('UPDATE', 'content_blocks', $e, ['block_id' => $id]);
+                ApiResponse::serverError('Failed to update content block. Please try again.');
+            }
             
-            echo json_encode([
-                'success' => true,
-                'message' => 'Content block updated successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            ApiResponse::success([
+                'message' => 'Content block updated successfully',
+                'block_id' => $id
+            ]);
             break;
             
         case 'DELETE':
             // Delete content block
             if (empty($_GET['id'])) {
-                throw new Exception('Content block ID is required');
+                ApiResponse::validationError('Content block ID is required');
             }
             
-            $db->deleteRecord('content_blocks', $_GET['id']);
+            $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+            if (!$id) {
+                ApiResponse::validationError('Invalid content block ID');
+            }
             
-            echo json_encode([
-                'success' => true,
-                'message' => 'Content block deleted successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            // Check if content block exists
+            $existingBlock = $db->getRecordById('content_blocks', $id);
+            if (!$existingBlock) {
+                ApiLogger::warning("Attempt to delete non-existent content block", ['id' => $id]);
+                ApiResponse::notFound('Content block not found');
+            }
+            
+            try {
+                $db->deleteRecord('content_blocks', $id);
+                ApiLogger::info("Content block deleted successfully", ['block_id' => $id]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('DELETE', 'content_blocks', $e, ['block_id' => $id]);
+                ApiResponse::serverError('Failed to delete content block. Please try again.');
+            }
+            
+            ApiResponse::success([
+                'message' => 'Content block deleted successfully',
+                'block_id' => $id
+            ]);
             break;
             
         default:
-            http_response_code(405);
-            echo json_encode([
-                'success' => false,
-                'error' => 'Method not allowed'
-            ]);
+            ApiLogger::warning("Method not allowed", ['method' => $method]);
+            ApiResponse::methodNotAllowed();
             break;
     }
     
+} catch (PDOException $e) {
+    ApiLogger::dbError('QUERY', 'content_blocks', $e);
+    ApiResponse::serverError('Database error occurred. Please try again later.');
+    
 } catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
+    ApiLogger::error("Unexpected error in content endpoint", ['exception' => $e]);
+    ApiResponse::serverError('An unexpected error occurred. Please try again later.');
 }
 
 $db->close();
