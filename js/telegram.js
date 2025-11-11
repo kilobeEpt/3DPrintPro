@@ -5,19 +5,26 @@
 class TelegramBot {
     constructor() {
         this.botToken = CONFIG.telegram.botToken;
-        this.chatId = this.getChatId();
+        this.chatId = CONFIG.telegram.chatId;
         this.apiUrl = `${CONFIG.telegram.apiUrl}${this.botToken}`;
     }
 
-    getChatId() {
-        // Получаем chat_id из настроек
-        const settings = db.getData('settings')[0];
-        return settings?.telegram?.chatId || CONFIG.telegram.chatId;
+    async getChatId() {
+        // Получаем chat_id из настроек базы данных
+        try {
+            if (typeof db !== 'undefined' && db.getOrCreateSettings) {
+                const settings = await db.getOrCreateSettings();
+                return settings?.telegram_chat_id || CONFIG.telegram.chatId;
+            }
+        } catch (error) {
+            console.warn('⚠️ Failed to get chat_id from database:', error);
+        }
+        return CONFIG.telegram.chatId;
     }
 
     async sendMessage(text, options = {}) {
         // Обновляем chatId перед отправкой
-        this.chatId = this.getChatId();
+        this.chatId = await this.getChatId();
         
         if (!this.chatId) {
             console.warn('Telegram Chat ID не настроен');
@@ -97,7 +104,6 @@ formatContactMessage(contact) {
     message += `📧 <b>Email:</b> ${contact.email}\n`;
     message += `📱 <b>Телефон:</b> ${contact.phone}\n`;
     
-    // ДОБАВЛЕНО: Telegram username
     if (contact.telegram) {
         message += `💬 <b>Telegram:</b> ${contact.telegram}\n`;
     }
@@ -130,7 +136,6 @@ formatContactMessage(contact) {
         return await this.sendMessage(message);
     }
 
-    // Получить обновления для определения chat_id
     async getUpdates() {
         const url = `${this.apiUrl}/getUpdates`;
         
@@ -139,7 +144,6 @@ formatContactMessage(contact) {
             const result = await response.json();
             
             if (result.ok && result.result.length > 0) {
-                // Возвращаем последний chat_id
                 const lastUpdate = result.result[result.result.length - 1];
                 const chatId = lastUpdate.message?.chat?.id || lastUpdate.callback_query?.message?.chat?.id;
                 
@@ -157,13 +161,11 @@ formatContactMessage(contact) {
         }
     }
 
-    // Тестовое сообщение
     async sendTestMessage() {
         const message = `✅ <b>Тестовое сообщение</b>\n\nСвязь с Telegram ботом установлена!\n\n⏰ ${new Date().toLocaleString('ru-RU')}`;
         return await this.sendMessage(message);
     }
 
-    // НОВОЕ: Метод для настройки webhook (опционально, для будущего расширения)
     async setWebhook(url) {
         const webhookUrl = `${this.apiUrl}/setWebhook`;
         
@@ -183,7 +185,6 @@ formatContactMessage(contact) {
         }
     }
 
-    // НОВОЕ: Удалить webhook
     async deleteWebhook() {
         const url = `${this.apiUrl}/deleteWebhook`;
         

@@ -616,6 +616,41 @@ class Database {
         ];
     }
     
+    getDefaultSettings() {
+        return {
+            siteName: '3D Print Pro',
+            address: 'г. Омск',
+            contactPhone: '+7 (XXX) XXX-XX-XX',
+            contactEmail: 'info@3dprintpro.ru',
+            workingHours: 'Пн-Пт: 10:00-18:00\nСб-Вс: 10:00-16:00',
+            socialLinks: {
+                telegram: CONFIG.telegram?.contactUrl || '',
+                vk: '',
+                whatsapp: '',
+                youtube: ''
+            },
+            telegram_chat_id: ''
+        };
+    }
+    
+    getDefaultContent() {
+        return {
+            hero: {
+                title: 'идеи в реальность',
+                subtitle: 'Профессиональные услуги 3D печати в Омске'
+            }
+        };
+    }
+    
+    getDefaultStats() {
+        return {
+            totalProjects: 1500,
+            happyClients: 850,
+            yearsExperience: 12,
+            awards: 25
+        };
+    }
+    
     // ========================================
     // Export/Import (LocalStorage based)
     // ========================================
