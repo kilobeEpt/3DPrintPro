@@ -7,6 +7,7 @@ class MainApp {
         this.currentTestimonial = 0;
         this.currentFilter = 'all';
         this.autoSlideInterval = null;
+        this.dataLoaded = false;
     }
 
     async init() {
@@ -23,6 +24,23 @@ class MainApp {
         this.initForms();
         this.initScrollAnimations();
         this.initCalculator();
+        this.dataLoaded = true;
+    }
+    
+    async reloadData() {
+        console.log('🔄 Reloading all data from API...');
+        try {
+            await this.loadContent();
+            await this.loadServices();
+            await this.loadPortfolio();
+            await this.loadTestimonials();
+            await this.loadFAQ();
+            console.log('✅ Data reloaded successfully');
+            this.showNotification('✅ Данные обновлены', 'success');
+        } catch (error) {
+            console.error('❌ Failed to reload data:', error);
+            this.showNotification('❌ Не удалось обновить данные', 'error');
+        }
     }
 
     initPreloader() {
@@ -348,8 +366,16 @@ class MainApp {
                     </ul>
                 </a>
             `).join('');
+            
+            const syncInfo = db.getSyncInfo('services');
+            if (syncInfo.source === 'cache' && this.dataLoaded) {
+                console.log('⚠️ Services loaded from cache');
+            }
         } catch (error) {
             console.error('❌ Failed to load services:', error);
+            if (this.dataLoaded) {
+                this.showNotification('⚠️ Не удалось загрузить услуги. Используются сохранённые данные.', 'warning');
+            }
         }
     }
 
@@ -701,7 +727,14 @@ class MainApp {
         try {
             console.log('📤 Отправка заявки на сервер...');
             
-            // Send to PHP backend
+            const apiStatus = typeof apiClient !== 'undefined' ? apiClient.getStatus() : null;
+            if (apiStatus && !apiStatus.isOnline) {
+                throw {
+                    message: 'API недоступен',
+                    isNetworkError: true
+                };
+            }
+            
             const response = await fetch('api/submit-form.php', {
                 method: 'POST',
                 headers: {
@@ -716,7 +749,6 @@ class MainApp {
                 console.log('✅ Заявка успешно сохранена в БД. Order ID:', result.order_id);
                 console.log('📬 Telegram отправлен:', result.telegram_sent);
                 
-                // Save to localStorage as backup/cache
                 try {
                     const savedOrder = db.addItem('orders', {
                         ...order,
@@ -729,7 +761,6 @@ class MainApp {
                     console.log('⚠️ localStorage недоступен (возможно, инкогнито режим)');
                 }
                 
-                // Show success message
                 if (result.telegram_sent) {
                     this.showNotification('✅ Спасибо! Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время.', 'success');
                 } else {
@@ -739,7 +770,6 @@ class MainApp {
                     }
                 }
                 
-                // Clear form
                 form.reset();
                 const calcInfo = document.getElementById('calculationInfo');
                 if (calcInfo) calcInfo.style.display = 'none';
@@ -755,13 +785,30 @@ class MainApp {
         } catch (error) {
             console.error('❌ Ошибка отправки формы:', error);
             
-            // Fallback: try to save to localStorage
+            const isNetworkError = error.isNetworkError || error.name === 'TypeError' || error.message.includes('Failed to fetch');
+            
             try {
                 const savedOrder = db.addItem('orders', order);
                 console.log('💾 Заявка сохранена только в localStorage (fallback)');
-                this.showNotification('✅ Ваша заявка сохранена локально. Мы получим её при следующей синхронизации.', 'warning');
+                
+                if (isNetworkError) {
+                    this.showNotification(
+                        '⚠️ Нет подключения к серверу. Ваша заявка сохранена локально и будет отправлена при восстановлении связи. ' +
+                        'Или свяжитесь с нами напрямую по телефону.',
+                        'warning'
+                    );
+                } else {
+                    this.showNotification(
+                        '⚠️ Ваша заявка сохранена локально. Пожалуйста, попробуйте повторить отправку позже или свяжитесь с нами по телефону.',
+                        'warning'
+                    );
+                }
             } catch (e) {
-                this.showNotification('❌ Ошибка отправки формы. Пожалуйста, попробуйте позже или свяжитесь с нами по телефону.', 'error');
+                this.showNotification(
+                    '❌ Не удалось отправить заявку. Пожалуйста, попробуйте позже или свяжитесь с нами по телефону: ' + 
+                    (typeof CONFIG !== 'undefined' && CONFIG.phone ? CONFIG.phone : '+7 (999) 123-45-67'),
+                    'error'
+                );
             }
         } finally {
             // Re-enable submit button

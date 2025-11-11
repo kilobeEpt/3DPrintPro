@@ -3,17 +3,78 @@
 // ========================================
 
 class APIClient {
-    constructor(baseUrl = '/api') {
-        this.baseUrl = baseUrl;
+    constructor(baseUrl = null) {
+        this.baseUrl = baseUrl || (typeof window.CONFIG !== 'undefined' && window.CONFIG.apiBaseUrl) || '/api';
+        this.isOnline = true;
+        this.lastSuccessfulRequest = Date.now();
+        this.retryConfig = {
+            maxRetries: 3,
+            initialDelay: 1000,
+            maxDelay: 5000,
+            backoffMultiplier: 2
+        };
+        this.listeners = {
+            online: [],
+            offline: []
+        };
+        
+        this.checkConnectivity();
+    }
+    
+    on(event, callback) {
+        if (this.listeners[event]) {
+            this.listeners[event].push(callback);
+        }
+    }
+    
+    emit(event, data) {
+        if (this.listeners[event]) {
+            this.listeners[event].forEach(callback => callback(data));
+        }
+    }
+    
+    async checkConnectivity() {
+        const wasOnline = this.isOnline;
+        
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const response = await fetch(`${this.baseUrl}/test.php`, {
+                method: 'HEAD',
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            this.isOnline = response.ok;
+            
+            if (this.isOnline) {
+                this.lastSuccessfulRequest = Date.now();
+            }
+        } catch (error) {
+            this.isOnline = false;
+        }
+        
+        if (wasOnline !== this.isOnline) {
+            const event = this.isOnline ? 'online' : 'offline';
+            console.log(`🌐 Connectivity status changed: ${event.toUpperCase()}`);
+            this.emit(event, { timestamp: Date.now() });
+        }
+        
+        return this.isOnline;
+    }
+    
+    async sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
     
     // ========================================
     // Generic HTTP Methods
     // ========================================
     
-    async request(endpoint, method = 'GET', data = null) {
+    async request(endpoint, method = 'GET', data = null, options = {}) {
         const url = `${this.baseUrl}/${endpoint}`;
-        const options = {
+        const fetchOptions = {
             method,
             headers: {
                 'Content-Type': 'application/json'
@@ -21,25 +82,99 @@ class APIClient {
         };
         
         if (data && (method === 'POST' || method === 'PUT')) {
-            options.body = JSON.stringify(data);
+            fetchOptions.body = JSON.stringify(data);
         }
         
-        try {
-            console.log(`🔄 API ${method} ${endpoint}`, data);
-            const response = await fetch(url, options);
-            const result = await response.json();
-            
-            if (!response.ok || !result.success) {
-                console.error(`❌ API Error ${endpoint}:`, result.error);
-                throw new Error(result.error || 'API request failed');
+        const maxRetries = options.skipRetry ? 0 : this.retryConfig.maxRetries;
+        let lastError = null;
+        
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            try {
+                console.log(`🔄 API ${method} ${endpoint}${attempt > 0 ? ` (retry ${attempt}/${maxRetries})` : ''}`, data);
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+                
+                const response = await fetch(url, {
+                    ...fetchOptions,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                const result = await response.json();
+                
+                if (!response.ok || !result.success) {
+                    const errorObj = {
+                        message: result.error || 'API request failed',
+                        statusCode: response.status,
+                        endpoint,
+                        method,
+                        isServerError: response.status >= 500,
+                        isClientError: response.status >= 400 && response.status < 500,
+                        isNetworkError: false,
+                        timestamp: Date.now(),
+                        retryable: response.status >= 500 || response.status === 429
+                    };
+                    
+                    console.error(`❌ API Error ${endpoint}:`, errorObj);
+                    
+                    if (errorObj.retryable && attempt < maxRetries) {
+                        const delay = Math.min(
+                            this.retryConfig.initialDelay * Math.pow(this.retryConfig.backoffMultiplier, attempt),
+                            this.retryConfig.maxDelay
+                        );
+                        console.log(`⏳ Retrying in ${delay}ms...`);
+                        await this.sleep(delay);
+                        lastError = errorObj;
+                        continue;
+                    }
+                    
+                    throw errorObj;
+                }
+                
+                this.isOnline = true;
+                this.lastSuccessfulRequest = Date.now();
+                console.log(`✅ API ${method} ${endpoint} success`, result);
+                return result;
+                
+            } catch (error) {
+                const isNetworkError = error.name === 'AbortError' || error.name === 'TypeError' || !error.statusCode;
+                
+                const errorObj = error.statusCode ? error : {
+                    message: error.message || 'Network request failed',
+                    endpoint,
+                    method,
+                    isNetworkError,
+                    isServerError: false,
+                    isClientError: false,
+                    timestamp: Date.now(),
+                    retryable: isNetworkError
+                };
+                
+                console.error(`❌ API ${method} ${endpoint} failed:`, errorObj);
+                
+                if (isNetworkError) {
+                    this.isOnline = false;
+                    this.emit('offline', { timestamp: Date.now() });
+                }
+                
+                if (errorObj.retryable && attempt < maxRetries) {
+                    const delay = Math.min(
+                        this.retryConfig.initialDelay * Math.pow(this.retryConfig.backoffMultiplier, attempt),
+                        this.retryConfig.maxDelay
+                    );
+                    console.log(`⏳ Retrying in ${delay}ms...`);
+                    await this.sleep(delay);
+                    lastError = errorObj;
+                    continue;
+                }
+                
+                throw errorObj;
             }
-            
-            console.log(`✅ API ${method} ${endpoint} success`, result);
-            return result;
-        } catch (error) {
-            console.error(`❌ API ${method} ${endpoint} failed:`, error);
-            throw error;
         }
+        
+        throw lastError || new Error('Request failed after all retries');
     }
     
     async get(endpoint) {
@@ -275,6 +410,22 @@ class APIClient {
     
     async deleteContentBlock(id) {
         return this.delete(`content.php?id=${id}`);
+    }
+    
+    // ========================================
+    // Connectivity Status
+    // ========================================
+    
+    getStatus() {
+        const now = Date.now();
+        const timeSinceLastSuccess = now - this.lastSuccessfulRequest;
+        
+        return {
+            isOnline: this.isOnline,
+            lastSuccessfulRequest: this.lastSuccessfulRequest,
+            timeSinceLastSuccess,
+            isStale: timeSinceLastSuccess > 300000
+        };
     }
 }
 

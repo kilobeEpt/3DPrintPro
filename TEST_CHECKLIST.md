@@ -488,9 +488,157 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 
 ---
 
+### Test 18: Online/Offline Behavior
+**Steps:**
+1. Open site in browser: https://ch167436.tw1.ru/
+2. Open Console (F12)
+3. Verify data loads from API
+4. Turn off API (or go to Network tab → Throttling → Offline)
+5. Refresh the page
+6. Check UI status banner and console messages
+7. Submit a form while offline
+8. Restore connection
+9. Verify data reloads
+
+**Expected Result:**
+
+**When API is available (online):**
+- Console shows: `✅ Database using API`
+- Console shows: `🌐 Status: ONLINE`
+- Data loads from MySQL
+- No warning banner shown
+- Form submissions go to server
+
+**When API is unavailable (offline):**
+- Console shows: `⚠️ Services loaded from cache`
+- Console shows: `🌐 Status: OFFLINE - Using cached data`
+- Warning banner appears: "⚠️ Нет соединения с сервером. Используются сохранённые данные."
+- Banner has "Повторить" button
+- Data loads from localStorage
+- Form submission shows: "⚠️ Нет подключения к серверу. Ваша заявка сохранена локально..."
+- Orders saved to localStorage as fallback
+
+**When connection restored:**
+- Click "Повторить" button in banner
+- Console shows: `🌐 Status: ONLINE - API connection restored`
+- Success notification: "✅ Соединение восстановлено"
+- Data reloads from API
+- Banner disappears
+
+**✅ Pass Criteria:**
+- Clear UI feedback for all connectivity states
+- No JavaScript errors in console
+- Graceful degradation to localStorage
+- Form submissions work offline (saved locally)
+- Automatic status detection and recovery
+- Timestamps tracked for cache freshness
+
+**Test with different scenarios:**
+1. **Slow network:** Data should retry with backoff
+2. **Stale cache:** Warning shown if cache > 5 minutes old
+3. **No localStorage:** Error message with phone number contact info
+4. **Intermittent connection:** Automatic retry with exponential backoff
+
+---
+
+### Test 19: Cache Freshness Detection
+**Steps:**
+1. Open site and load data from API
+2. Open Console and type: `db.getAllSyncInfo()`
+3. Verify all tables show `source: 'api'` and recent timestamps
+4. Disconnect from internet
+5. Refresh page
+6. Check sync info again: `db.getAllSyncInfo()`
+7. Wait 6+ minutes offline
+8. Reload the page
+9. Check for stale data warnings
+
+**Expected Result:**
+- Sync info shows timestamp, source, age, and isStale flag
+- When using API: `source: 'api'`, `isStale: false`
+- When using cache: `source: 'cache'`, `isStale: false` (if < 5 min)
+- When cache is old: `source: 'cache'`, `isStale: true` (if > 5 min)
+- Stale data triggers warning banner
+
+**✅ Pass Criteria:**
+- Cache metadata tracked for all tables
+- Age calculated correctly
+- Stale flag accurate (> 5 minutes)
+- UI shows appropriate warnings for stale data
+
+---
+
+### Test 20: API Retry Logic
+**Steps:**
+1. Open site with Network tab (F12)
+2. Throttle network to "Slow 3G"
+3. Refresh page
+4. Observe API requests in Network tab
+5. Check Console for retry messages
+
+**Expected Result:**
+- Console shows retry attempts: `🔄 API GET services.php (retry 1/3)`
+- Exponential backoff delays: 1s, 2s, 4s
+- Maximum 3 retry attempts
+- After retries exhausted, falls back to cache
+- User sees notification about using cached data
+
+**✅ Pass Criteria:**
+- Automatic retries for network errors
+- Exponential backoff implemented
+- Max retries respected (3 attempts)
+- Graceful fallback after retries fail
+- Clear console logging of retry attempts
+
+---
+
+### Test 21: Status Indicator Component
+**Steps:**
+1. Open site
+2. Look for connectivity status banner (hidden by default when online)
+3. Open Console and type: `statusIndicator.getSummary()`
+4. Disconnect from internet
+5. Wait 5 seconds
+6. Verify banner appears
+
+**Expected Result:**
+
+**Console output of getSummary():**
+```javascript
+{
+  currentStatus: "online",
+  api: {
+    isOnline: true,
+    lastSuccessfulRequest: 1234567890,
+    timeSinceLastSuccess: 1234,
+    isStale: false
+  },
+  database: {
+    services: { lastSync: 1234567890, source: "api", age: 1234, isStale: false },
+    // ... other tables
+  }
+}
+```
+
+**When offline:**
+- Banner slides down from top
+- Shows warning message
+- "Повторить" button visible
+- "×" dismiss button visible
+- Banner persists until dismissed or online
+
+**✅ Pass Criteria:**
+- Status indicator initializes without errors
+- getSummary() returns detailed status
+- Banner shows/hides based on connectivity
+- Retry button triggers reconnection attempt
+- Dismiss button hides banner for 5 minutes
+
+---
+
 ## 🔐 SECURITY TESTS
 
-### Test 18: Config File Protection
+### Test 22: Config File Protection
 **URL:** https://ch167436.tw1.ru/api/config.php
 
 **Expected Result:**
@@ -508,7 +656,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 
 ---
 
-### Test 19: SQL Injection Protection
+### Test 23: SQL Injection Protection
 **Test:** Submit form with SQL injection attempt
 
 **Steps:**

@@ -5,9 +5,74 @@
 class Database {
     constructor() {
         this.storageKey = '3dprintpro_data';
+        this.metadataKey = '3dprintpro_metadata';
         this.api = typeof apiClient !== 'undefined' ? apiClient : null;
         this.useAPI = this.api !== null;
+        this.lastSync = {};
+        this.loadMetadata();
         console.log(this.useAPI ? '✅ Database using API' : '⚠️ Database using localStorage fallback');
+    }
+    
+    loadMetadata() {
+        try {
+            const metadata = localStorage.getItem(this.metadataKey);
+            if (metadata) {
+                this.lastSync = JSON.parse(metadata);
+            }
+        } catch (error) {
+            console.error('❌ Failed to load metadata:', error);
+            this.lastSync = {};
+        }
+    }
+    
+    saveMetadata() {
+        try {
+            localStorage.setItem(this.metadataKey, JSON.stringify(this.lastSync));
+        } catch (error) {
+            console.error('❌ Failed to save metadata:', error);
+        }
+    }
+    
+    updateSyncTimestamp(table, source = 'api') {
+        this.lastSync[table] = {
+            timestamp: Date.now(),
+            source
+        };
+        this.saveMetadata();
+    }
+    
+    getSyncInfo(table) {
+        const syncInfo = this.lastSync[table];
+        if (!syncInfo) {
+            return {
+                lastSync: null,
+                source: 'never',
+                age: null,
+                isStale: true
+            };
+        }
+        
+        const now = Date.now();
+        const age = now - syncInfo.timestamp;
+        const isStale = age > 300000;
+        
+        return {
+            lastSync: syncInfo.timestamp,
+            source: syncInfo.source,
+            age,
+            isStale
+        };
+    }
+    
+    getAllSyncInfo() {
+        const tables = ['services', 'portfolio', 'testimonials', 'faq', 'settings', 'orders'];
+        const info = {};
+        
+        tables.forEach(table => {
+            info[table] = this.getSyncInfo(table);
+        });
+        
+        return info;
     }
     
     // ========================================
@@ -18,14 +83,17 @@ class Database {
         if (this.useAPI) {
             try {
                 const settings = await this.api.getAllSettings();
-                // Cache to localStorage as backup
                 this.cacheToLocalStorage('settings', [settings]);
+                this.updateSyncTimestamp('settings', 'api');
                 return settings;
             } catch (error) {
                 console.error('❌ Failed to fetch settings from API, using localStorage fallback', error);
-                return this.getFromLocalStorage('settings');
+                const cached = this.getFromLocalStorage('settings');
+                this.updateSyncTimestamp('settings', 'cache');
+                return cached;
             }
         } else {
+            this.updateSyncTimestamp('settings', 'cache');
             return this.getFromLocalStorage('settings');
         }
     }
@@ -55,14 +123,17 @@ class Database {
         if (this.useAPI) {
             try {
                 const result = await this.api.getServices({ active: true, ...filters });
-                // Cache to localStorage
                 this.cacheToLocalStorage('services', result.services);
+                this.updateSyncTimestamp('services', 'api');
                 return result.services;
             } catch (error) {
                 console.error('❌ Failed to fetch services from API, using localStorage fallback', error);
-                return this.getFromLocalStorage('services') || this.getDefaultServices();
+                const cached = this.getFromLocalStorage('services') || this.getDefaultServices();
+                this.updateSyncTimestamp('services', 'cache');
+                return cached;
             }
         } else {
+            this.updateSyncTimestamp('services', 'cache');
             return this.getFromLocalStorage('services') || this.getDefaultServices();
         }
     }
@@ -121,12 +192,16 @@ class Database {
             try {
                 const result = await this.api.getPortfolio({ active: true, ...filters });
                 this.cacheToLocalStorage('portfolio', result.items);
+                this.updateSyncTimestamp('portfolio', 'api');
                 return result.items;
             } catch (error) {
                 console.error('❌ Failed to fetch portfolio from API, using localStorage fallback', error);
-                return this.getFromLocalStorage('portfolio') || [];
+                const cached = this.getFromLocalStorage('portfolio') || [];
+                this.updateSyncTimestamp('portfolio', 'cache');
+                return cached;
             }
         } else {
+            this.updateSyncTimestamp('portfolio', 'cache');
             return this.getFromLocalStorage('portfolio') || [];
         }
     }
@@ -185,12 +260,16 @@ class Database {
             try {
                 const result = await this.api.getTestimonials({ active: true, approved: true, ...filters });
                 this.cacheToLocalStorage('testimonials', result.testimonials);
+                this.updateSyncTimestamp('testimonials', 'api');
                 return result.testimonials;
             } catch (error) {
                 console.error('❌ Failed to fetch testimonials from API, using localStorage fallback', error);
-                return this.getFromLocalStorage('testimonials') || this.getDefaultTestimonials();
+                const cached = this.getFromLocalStorage('testimonials') || this.getDefaultTestimonials();
+                this.updateSyncTimestamp('testimonials', 'cache');
+                return cached;
             }
         } else {
+            this.updateSyncTimestamp('testimonials', 'cache');
             return this.getFromLocalStorage('testimonials') || this.getDefaultTestimonials();
         }
     }
@@ -249,12 +328,16 @@ class Database {
             try {
                 const result = await this.api.getFAQ({ active: true, ...filters });
                 this.cacheToLocalStorage('faq', result.items);
+                this.updateSyncTimestamp('faq', 'api');
                 return result.items;
             } catch (error) {
                 console.error('❌ Failed to fetch FAQ from API, using localStorage fallback', error);
-                return this.getFromLocalStorage('faq') || this.getDefaultFAQ();
+                const cached = this.getFromLocalStorage('faq') || this.getDefaultFAQ();
+                this.updateSyncTimestamp('faq', 'cache');
+                return cached;
             }
         } else {
+            this.updateSyncTimestamp('faq', 'cache');
             return this.getFromLocalStorage('faq') || this.getDefaultFAQ();
         }
     }
@@ -313,12 +396,16 @@ class Database {
             try {
                 const result = await this.api.getOrders(filters);
                 this.cacheToLocalStorage('orders', result.orders);
+                this.updateSyncTimestamp('orders', 'api');
                 return result.orders;
             } catch (error) {
                 console.error('❌ Failed to fetch orders from API, using localStorage fallback', error);
-                return this.getFromLocalStorage('orders') || [];
+                const cached = this.getFromLocalStorage('orders') || [];
+                this.updateSyncTimestamp('orders', 'cache');
+                return cached;
             }
         } else {
+            this.updateSyncTimestamp('orders', 'cache');
             return this.getFromLocalStorage('orders') || [];
         }
     }
