@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers/response.php';
+require_once __DIR__ . '/helpers/logger.php';
 
 $db = new Database();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -24,19 +26,18 @@ try {
         case 'GET':
             // Get all FAQ items or single item
             if (isset($_GET['id'])) {
-                $item = $db->getRecordById('faq', $_GET['id']);
+                $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+                if (!$id) {
+                    ApiResponse::validationError('Invalid FAQ item ID');
+                }
+                
+                $item = $db->getRecordById('faq', $id);
                 
                 if ($item) {
-                    echo json_encode([
-                        'success' => true,
-                        'item' => $item
-                    ], JSON_UNESCAPED_UNICODE);
+                    ApiResponse::success(['item' => $item]);
                 } else {
-                    http_response_code(404);
-                    echo json_encode([
-                        'success' => false,
-                        'error' => 'FAQ item not found'
-                    ]);
+                    ApiLogger::warning("FAQ item not found", ['id' => $id]);
+                    ApiResponse::notFound('FAQ item not found');
                 }
             } else {
                 // Get all FAQ items with optional filters
@@ -45,17 +46,19 @@ try {
                     $where['active'] = $_GET['active'] === 'true' ? 1 : 0;
                 }
                 
-                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
-                $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+                $limit = isset($_GET['limit']) ? filter_var($_GET['limit'], FILTER_VALIDATE_INT) : null;
+                $offset = isset($_GET['offset']) ? filter_var($_GET['offset'], FILTER_VALIDATE_INT) : 0;
+                
+                if ($limit !== null && ($limit === false || $limit < 1)) $limit = null;
+                if ($offset === false || $offset < 0) $offset = 0;
                 
                 $items = $db->getRecords('faq', $where, 'sort_order', $limit, $offset);
                 $total = $db->getCount('faq', $where);
                 
-                echo json_encode([
-                    'success' => true,
-                    'items' => $items,
-                    'total' => $total
-                ], JSON_UNESCAPED_UNICODE);
+                ApiResponse::success(
+                    ['items' => $items],
+                    ['total' => $total]
+                );
             }
             break;
             
@@ -64,17 +67,42 @@ try {
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
             
-            if (!$data || empty($data['question']) || empty($data['answer'])) {
-                throw new Exception('Question and answer are required');
+            if (!$data) {
+                ApiLogger::warning('Invalid JSON in POST request', ['raw_input' => substr($input, 0, 200)]);
+                ApiResponse::validationError('Invalid JSON data');
             }
             
-            $id = $db->insertRecord('faq', $data);
+            // Validate required fields
+            $validationErrors = [];
             
-            echo json_encode([
-                'success' => true,
+            if (empty($data['question']) || !is_string($data['question'])) {
+                $validationErrors['question'] = 'Question is required and must be a string';
+            }
+            
+            if (empty($data['answer']) || !is_string($data['answer'])) {
+                $validationErrors['answer'] = 'Answer is required and must be a string';
+            }
+            
+            if (!empty($validationErrors)) {
+                ApiLogger::validationError('POST /api/faq.php', $validationErrors);
+                ApiResponse::validationError('Validation failed', $validationErrors);
+            }
+            
+            try {
+                $id = $db->insertRecord('faq', $data);
+                ApiLogger::info("FAQ item created successfully", [
+                    'faq_id' => $id,
+                    'question' => substr($data['question'], 0, 50)
+                ]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('INSERT', 'faq', $e, ['data_keys' => array_keys($data)]);
+                ApiResponse::serverError('Failed to create FAQ item. Please try again.');
+            }
+            
+            ApiResponse::created([
                 'id' => $id,
                 'message' => 'FAQ item created successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            ]);
             break;
             
         case 'PUT':
@@ -82,50 +110,91 @@ try {
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
             
-            if (!$data || empty($data['id'])) {
-                throw new Exception('FAQ item ID is required');
+            if (!$data) {
+                ApiLogger::warning('Invalid JSON in PUT request', ['raw_input' => substr($input, 0, 200)]);
+                ApiResponse::validationError('Invalid JSON data');
             }
             
-            $id = $data['id'];
+            if (empty($data['id'])) {
+                ApiResponse::validationError('FAQ item ID is required');
+            }
+            
+            $id = filter_var($data['id'], FILTER_VALIDATE_INT);
+            if (!$id) {
+                ApiResponse::validationError('Invalid FAQ item ID');
+            }
+            
+            // Check if FAQ item exists
+            $existingItem = $db->getRecordById('faq', $id);
+            if (!$existingItem) {
+                ApiLogger::warning("Attempt to update non-existent FAQ item", ['id' => $id]);
+                ApiResponse::notFound('FAQ item not found');
+            }
+            
             unset($data['id']);
             
-            $db->updateRecord('faq', $id, $data);
+            try {
+                $db->updateRecord('faq', $id, $data);
+                ApiLogger::info("FAQ item updated successfully", [
+                    'faq_id' => $id,
+                    'updated_fields' => array_keys($data)
+                ]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('UPDATE', 'faq', $e, ['faq_id' => $id]);
+                ApiResponse::serverError('Failed to update FAQ item. Please try again.');
+            }
             
-            echo json_encode([
-                'success' => true,
-                'message' => 'FAQ item updated successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            ApiResponse::success([
+                'message' => 'FAQ item updated successfully',
+                'faq_id' => $id
+            ]);
             break;
             
         case 'DELETE':
             // Delete FAQ item
             if (empty($_GET['id'])) {
-                throw new Exception('FAQ item ID is required');
+                ApiResponse::validationError('FAQ item ID is required');
             }
             
-            $db->deleteRecord('faq', $_GET['id']);
+            $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+            if (!$id) {
+                ApiResponse::validationError('Invalid FAQ item ID');
+            }
             
-            echo json_encode([
-                'success' => true,
-                'message' => 'FAQ item deleted successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            // Check if FAQ item exists
+            $existingItem = $db->getRecordById('faq', $id);
+            if (!$existingItem) {
+                ApiLogger::warning("Attempt to delete non-existent FAQ item", ['id' => $id]);
+                ApiResponse::notFound('FAQ item not found');
+            }
+            
+            try {
+                $db->deleteRecord('faq', $id);
+                ApiLogger::info("FAQ item deleted successfully", ['faq_id' => $id]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('DELETE', 'faq', $e, ['faq_id' => $id]);
+                ApiResponse::serverError('Failed to delete FAQ item. Please try again.');
+            }
+            
+            ApiResponse::success([
+                'message' => 'FAQ item deleted successfully',
+                'faq_id' => $id
+            ]);
             break;
             
         default:
-            http_response_code(405);
-            echo json_encode([
-                'success' => false,
-                'error' => 'Method not allowed'
-            ]);
+            ApiLogger::warning("Method not allowed", ['method' => $method]);
+            ApiResponse::methodNotAllowed();
             break;
     }
     
+} catch (PDOException $e) {
+    ApiLogger::dbError('QUERY', 'faq', $e);
+    ApiResponse::serverError('Database error occurred. Please try again later.');
+    
 } catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
+    ApiLogger::error("Unexpected error in FAQ endpoint", ['exception' => $e]);
+    ApiResponse::serverError('An unexpected error occurred. Please try again later.');
 }
 
 $db->close();

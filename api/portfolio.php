@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers/response.php';
+require_once __DIR__ . '/helpers/logger.php';
 
 $db = new Database();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -24,19 +26,18 @@ try {
         case 'GET':
             // Get all portfolio items or single item
             if (isset($_GET['id'])) {
-                $item = $db->getRecordById('portfolio', $_GET['id']);
+                $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+                if (!$id) {
+                    ApiResponse::validationError('Invalid portfolio item ID');
+                }
+                
+                $item = $db->getRecordById('portfolio', $id);
                 
                 if ($item) {
-                    echo json_encode([
-                        'success' => true,
-                        'item' => $item
-                    ], JSON_UNESCAPED_UNICODE);
+                    ApiResponse::success(['item' => $item]);
                 } else {
-                    http_response_code(404);
-                    echo json_encode([
-                        'success' => false,
-                        'error' => 'Portfolio item not found'
-                    ]);
+                    ApiLogger::warning("Portfolio item not found", ['id' => $id]);
+                    ApiResponse::notFound('Portfolio item not found');
                 }
             } else {
                 // Get all portfolio items with optional filters
@@ -48,17 +49,19 @@ try {
                     $where['category'] = $_GET['category'];
                 }
                 
-                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
-                $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+                $limit = isset($_GET['limit']) ? filter_var($_GET['limit'], FILTER_VALIDATE_INT) : null;
+                $offset = isset($_GET['offset']) ? filter_var($_GET['offset'], FILTER_VALIDATE_INT) : 0;
+                
+                if ($limit !== null && ($limit === false || $limit < 1)) $limit = null;
+                if ($offset === false || $offset < 0) $offset = 0;
                 
                 $items = $db->getRecords('portfolio', $where, 'sort_order', $limit, $offset);
                 $total = $db->getCount('portfolio', $where);
                 
-                echo json_encode([
-                    'success' => true,
-                    'items' => $items,
-                    'total' => $total
-                ], JSON_UNESCAPED_UNICODE);
+                ApiResponse::success(
+                    ['items' => $items],
+                    ['total' => $total]
+                );
             }
             break;
             
@@ -67,17 +70,38 @@ try {
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
             
-            if (!$data || empty($data['title'])) {
-                throw new Exception('Portfolio title is required');
+            if (!$data) {
+                ApiLogger::warning('Invalid JSON in POST request', ['raw_input' => substr($input, 0, 200)]);
+                ApiResponse::validationError('Invalid JSON data');
             }
             
-            $id = $db->insertRecord('portfolio', $data);
+            // Validate required fields
+            $validationErrors = [];
             
-            echo json_encode([
-                'success' => true,
+            if (empty($data['title']) || !is_string($data['title'])) {
+                $validationErrors['title'] = 'Portfolio title is required and must be a string';
+            }
+            
+            if (!empty($validationErrors)) {
+                ApiLogger::validationError('POST /api/portfolio.php', $validationErrors);
+                ApiResponse::validationError('Validation failed', $validationErrors);
+            }
+            
+            try {
+                $id = $db->insertRecord('portfolio', $data);
+                ApiLogger::info("Portfolio item created successfully", [
+                    'item_id' => $id,
+                    'title' => $data['title']
+                ]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('INSERT', 'portfolio', $e, ['data_keys' => array_keys($data)]);
+                ApiResponse::serverError('Failed to create portfolio item. Please try again.');
+            }
+            
+            ApiResponse::created([
                 'id' => $id,
                 'message' => 'Portfolio item created successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            ]);
             break;
             
         case 'PUT':
@@ -85,50 +109,91 @@ try {
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
             
-            if (!$data || empty($data['id'])) {
-                throw new Exception('Portfolio item ID is required');
+            if (!$data) {
+                ApiLogger::warning('Invalid JSON in PUT request', ['raw_input' => substr($input, 0, 200)]);
+                ApiResponse::validationError('Invalid JSON data');
             }
             
-            $id = $data['id'];
+            if (empty($data['id'])) {
+                ApiResponse::validationError('Portfolio item ID is required');
+            }
+            
+            $id = filter_var($data['id'], FILTER_VALIDATE_INT);
+            if (!$id) {
+                ApiResponse::validationError('Invalid portfolio item ID');
+            }
+            
+            // Check if item exists
+            $existingItem = $db->getRecordById('portfolio', $id);
+            if (!$existingItem) {
+                ApiLogger::warning("Attempt to update non-existent portfolio item", ['id' => $id]);
+                ApiResponse::notFound('Portfolio item not found');
+            }
+            
             unset($data['id']);
             
-            $db->updateRecord('portfolio', $id, $data);
+            try {
+                $db->updateRecord('portfolio', $id, $data);
+                ApiLogger::info("Portfolio item updated successfully", [
+                    'item_id' => $id,
+                    'updated_fields' => array_keys($data)
+                ]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('UPDATE', 'portfolio', $e, ['item_id' => $id]);
+                ApiResponse::serverError('Failed to update portfolio item. Please try again.');
+            }
             
-            echo json_encode([
-                'success' => true,
-                'message' => 'Portfolio item updated successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            ApiResponse::success([
+                'message' => 'Portfolio item updated successfully',
+                'item_id' => $id
+            ]);
             break;
             
         case 'DELETE':
             // Delete portfolio item
             if (empty($_GET['id'])) {
-                throw new Exception('Portfolio item ID is required');
+                ApiResponse::validationError('Portfolio item ID is required');
             }
             
-            $db->deleteRecord('portfolio', $_GET['id']);
+            $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+            if (!$id) {
+                ApiResponse::validationError('Invalid portfolio item ID');
+            }
             
-            echo json_encode([
-                'success' => true,
-                'message' => 'Portfolio item deleted successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            // Check if item exists
+            $existingItem = $db->getRecordById('portfolio', $id);
+            if (!$existingItem) {
+                ApiLogger::warning("Attempt to delete non-existent portfolio item", ['id' => $id]);
+                ApiResponse::notFound('Portfolio item not found');
+            }
+            
+            try {
+                $db->deleteRecord('portfolio', $id);
+                ApiLogger::info("Portfolio item deleted successfully", ['item_id' => $id]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('DELETE', 'portfolio', $e, ['item_id' => $id]);
+                ApiResponse::serverError('Failed to delete portfolio item. Please try again.');
+            }
+            
+            ApiResponse::success([
+                'message' => 'Portfolio item deleted successfully',
+                'item_id' => $id
+            ]);
             break;
             
         default:
-            http_response_code(405);
-            echo json_encode([
-                'success' => false,
-                'error' => 'Method not allowed'
-            ]);
+            ApiLogger::warning("Method not allowed", ['method' => $method]);
+            ApiResponse::methodNotAllowed();
             break;
     }
     
+} catch (PDOException $e) {
+    ApiLogger::dbError('QUERY', 'portfolio', $e);
+    ApiResponse::serverError('Database error occurred. Please try again later.');
+    
 } catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
+    ApiLogger::error("Unexpected error in portfolio endpoint", ['exception' => $e]);
+    ApiResponse::serverError('An unexpected error occurred. Please try again later.');
 }
 
 $db->close();

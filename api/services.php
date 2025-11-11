@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers/response.php';
+require_once __DIR__ . '/helpers/logger.php';
 
 $db = new Database();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -24,19 +26,18 @@ try {
         case 'GET':
             // Get all services or single service
             if (isset($_GET['id'])) {
-                $service = $db->getRecordById('services', $_GET['id']);
+                $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+                if (!$id) {
+                    ApiResponse::validationError('Invalid service ID');
+                }
+                
+                $service = $db->getRecordById('services', $id);
                 
                 if ($service) {
-                    echo json_encode([
-                        'success' => true,
-                        'service' => $service
-                    ], JSON_UNESCAPED_UNICODE);
+                    ApiResponse::success(['service' => $service]);
                 } else {
-                    http_response_code(404);
-                    echo json_encode([
-                        'success' => false,
-                        'error' => 'Service not found'
-                    ]);
+                    ApiLogger::warning("Service not found", ['id' => $id]);
+                    ApiResponse::notFound('Service not found');
                 }
             } else {
                 // Get all services with optional filters
@@ -48,17 +49,19 @@ try {
                     $where['featured'] = $_GET['featured'] === 'true' ? 1 : 0;
                 }
                 
-                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
-                $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+                $limit = isset($_GET['limit']) ? filter_var($_GET['limit'], FILTER_VALIDATE_INT) : null;
+                $offset = isset($_GET['offset']) ? filter_var($_GET['offset'], FILTER_VALIDATE_INT) : 0;
+                
+                if ($limit !== null && ($limit === false || $limit < 1)) $limit = null;
+                if ($offset === false || $offset < 0) $offset = 0;
                 
                 $services = $db->getRecords('services', $where, 'sort_order', $limit, $offset);
                 $total = $db->getCount('services', $where);
                 
-                echo json_encode([
-                    'success' => true,
-                    'services' => $services,
-                    'total' => $total
-                ], JSON_UNESCAPED_UNICODE);
+                ApiResponse::success(
+                    ['services' => $services],
+                    ['total' => $total]
+                );
             }
             break;
             
@@ -67,22 +70,43 @@ try {
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
             
-            if (!$data || empty($data['name'])) {
-                throw new Exception('Service name is required');
+            if (!$data) {
+                ApiLogger::warning('Invalid JSON in POST request', ['raw_input' => substr($input, 0, 200)]);
+                ApiResponse::validationError('Invalid JSON data');
+            }
+            
+            // Validate required fields
+            $validationErrors = [];
+            
+            if (empty($data['name']) || !is_string($data['name'])) {
+                $validationErrors['name'] = 'Service name is required and must be a string';
+            }
+            
+            if (!empty($validationErrors)) {
+                ApiLogger::validationError('POST /api/services.php', $validationErrors);
+                ApiResponse::validationError('Validation failed', $validationErrors);
             }
             
             // Generate slug if not provided
             if (empty($data['slug'])) {
-                $data['slug'] = $this->generateSlug($data['name']);
+                $data['slug'] = generateSlug($data['name']);
             }
             
-            $id = $db->insertRecord('services', $data);
+            try {
+                $id = $db->insertRecord('services', $data);
+                ApiLogger::info("Service created successfully", [
+                    'service_id' => $id,
+                    'name' => $data['name']
+                ]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('INSERT', 'services', $e, ['data_keys' => array_keys($data)]);
+                ApiResponse::serverError('Failed to create service. Please try again.');
+            }
             
-            echo json_encode([
-                'success' => true,
+            ApiResponse::created([
                 'id' => $id,
                 'message' => 'Service created successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            ]);
             break;
             
         case 'PUT':
@@ -90,50 +114,91 @@ try {
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
             
-            if (!$data || empty($data['id'])) {
-                throw new Exception('Service ID is required');
+            if (!$data) {
+                ApiLogger::warning('Invalid JSON in PUT request', ['raw_input' => substr($input, 0, 200)]);
+                ApiResponse::validationError('Invalid JSON data');
             }
             
-            $id = $data['id'];
+            if (empty($data['id'])) {
+                ApiResponse::validationError('Service ID is required');
+            }
+            
+            $id = filter_var($data['id'], FILTER_VALIDATE_INT);
+            if (!$id) {
+                ApiResponse::validationError('Invalid service ID');
+            }
+            
+            // Check if service exists
+            $existingService = $db->getRecordById('services', $id);
+            if (!$existingService) {
+                ApiLogger::warning("Attempt to update non-existent service", ['id' => $id]);
+                ApiResponse::notFound('Service not found');
+            }
+            
             unset($data['id']);
             
-            $db->updateRecord('services', $id, $data);
+            try {
+                $db->updateRecord('services', $id, $data);
+                ApiLogger::info("Service updated successfully", [
+                    'service_id' => $id,
+                    'updated_fields' => array_keys($data)
+                ]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('UPDATE', 'services', $e, ['service_id' => $id]);
+                ApiResponse::serverError('Failed to update service. Please try again.');
+            }
             
-            echo json_encode([
-                'success' => true,
-                'message' => 'Service updated successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            ApiResponse::success([
+                'message' => 'Service updated successfully',
+                'service_id' => $id
+            ]);
             break;
             
         case 'DELETE':
             // Delete service
             if (empty($_GET['id'])) {
-                throw new Exception('Service ID is required');
+                ApiResponse::validationError('Service ID is required');
             }
             
-            $db->deleteRecord('services', $_GET['id']);
+            $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+            if (!$id) {
+                ApiResponse::validationError('Invalid service ID');
+            }
             
-            echo json_encode([
-                'success' => true,
-                'message' => 'Service deleted successfully'
-            ], JSON_UNESCAPED_UNICODE);
+            // Check if service exists
+            $existingService = $db->getRecordById('services', $id);
+            if (!$existingService) {
+                ApiLogger::warning("Attempt to delete non-existent service", ['id' => $id]);
+                ApiResponse::notFound('Service not found');
+            }
+            
+            try {
+                $db->deleteRecord('services', $id);
+                ApiLogger::info("Service deleted successfully", ['service_id' => $id]);
+            } catch (PDOException $e) {
+                ApiLogger::dbError('DELETE', 'services', $e, ['service_id' => $id]);
+                ApiResponse::serverError('Failed to delete service. Please try again.');
+            }
+            
+            ApiResponse::success([
+                'message' => 'Service deleted successfully',
+                'service_id' => $id
+            ]);
             break;
             
         default:
-            http_response_code(405);
-            echo json_encode([
-                'success' => false,
-                'error' => 'Method not allowed'
-            ]);
+            ApiLogger::warning("Method not allowed", ['method' => $method]);
+            ApiResponse::methodNotAllowed();
             break;
     }
     
+} catch (PDOException $e) {
+    ApiLogger::dbError('QUERY', 'services', $e);
+    ApiResponse::serverError('Database error occurred. Please try again later.');
+    
 } catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
+    ApiLogger::error("Unexpected error in services endpoint", ['exception' => $e]);
+    ApiResponse::serverError('An unexpected error occurred. Please try again later.');
 }
 
 $db->close();
