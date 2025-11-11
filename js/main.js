@@ -14,7 +14,7 @@ class MainApp {
         this.initNavigation();
         this.initThemeToggle();
         this.initPhoneMasks();
-        this.loadContent();
+        await this.loadContent();
         this.initStats();
         await this.loadServices();
         await this.loadPortfolio();
@@ -202,38 +202,47 @@ class MainApp {
         });
     }
 
-    loadContent() {
-        const content = db.getData('content')[0] || db.getDefaultContent();
-        const settings = db.getData('settings')[0] || db.getDefaultSettings();
-        const stats = db.getData('stats')[0] || db.getDefaultStats();
+    async loadContent() {
+        try {
+            const content = db.getDefaultContent();
+            const settings = await db.getOrCreateSettings() || db.getDefaultSettings();
+            const stats = db.getDefaultStats();
 
-        if (content.hero) {
-            const heroTitle = document.getElementById('heroTitle');
-            if (heroTitle) heroTitle.textContent = content.hero.title || 'идеи в реальность';
+            if (content.hero) {
+                const heroTitle = document.getElementById('heroTitle');
+                if (heroTitle) heroTitle.textContent = content.hero.title || 'идеи в реальность';
 
-            const heroDescription = document.getElementById('heroDescription');
-            if (heroDescription) heroDescription.textContent = content.hero.subtitle || '';
+                const heroDescription = document.getElementById('heroDescription');
+                if (heroDescription) heroDescription.textContent = content.hero.subtitle || '';
+            }
+
+            const contactAddress = document.getElementById('contactAddress');
+            if (contactAddress) contactAddress.textContent = settings.address || settings.company_address || '';
+
+            const contactPhone = document.getElementById('contactPhone');
+            if (contactPhone) contactPhone.textContent = settings.contactPhone || settings.company_phone || '';
+
+            const contactEmail = document.getElementById('contactEmail');
+            if (contactEmail) contactEmail.textContent = settings.contactEmail || settings.company_email || '';
+
+            const contactHours = document.getElementById('contactHours');
+            if (contactHours) contactHours.innerHTML = (settings.workingHours || settings.company_hours || '').replace(/\n/g, '<br>');
+
+            const siteName = document.getElementById('siteName');
+            if (siteName && (settings.siteName || settings.site_name)) {
+                const name = settings.siteName || settings.site_name;
+                siteName.innerHTML = name.replace('Pro', '<strong>Pro</strong>');
+            }
+
+            this.loadSocialLinks(settings.socialLinks || {});
+            this.updateStatsTargets(stats);
+        } catch (error) {
+            console.error('❌ Failed to load content:', error);
+            const settings = db.getDefaultSettings();
+            const stats = db.getDefaultStats();
+            this.loadSocialLinks(settings.socialLinks || {});
+            this.updateStatsTargets(stats);
         }
-
-        const contactAddress = document.getElementById('contactAddress');
-        if (contactAddress) contactAddress.textContent = settings.address || '';
-
-        const contactPhone = document.getElementById('contactPhone');
-        if (contactPhone) contactPhone.textContent = settings.contactPhone || '';
-
-        const contactEmail = document.getElementById('contactEmail');
-        if (contactEmail) contactEmail.textContent = settings.contactEmail || '';
-
-        const contactHours = document.getElementById('contactHours');
-        if (contactHours) contactHours.innerHTML = (settings.workingHours || '').replace(/\n/g, '<br>');
-
-        const siteName = document.getElementById('siteName');
-        if (siteName && settings.siteName) {
-            siteName.innerHTML = settings.siteName.replace('Pro', '<strong>Pro</strong>');
-        }
-
-        this.loadSocialLinks(settings.socialLinks || {});
-        this.updateStatsTargets(stats);
     }
 
     loadSocialLinks(links) {
@@ -344,42 +353,47 @@ class MainApp {
         }
     }
 
-    openServiceModal(slug) {
-        const service = db.getData('services').find(s => s.slug === slug);
-        if (!service) return;
+    async openServiceModal(slug) {
+        try {
+            const services = await db.getServices();
+            const service = services.find(s => s.slug === slug);
+            if (!service) return;
 
-        const modal = document.getElementById('serviceModal');
-        const content = document.getElementById('serviceModalContent');
+            const modal = document.getElementById('serviceModal');
+            const content = document.getElementById('serviceModalContent');
 
-        content.innerHTML = `
-            <h2>${service.name}</h2>
-            <p style="color: var(--text-secondary); margin: 20px 0;">${service.description}</p>
-            <h3 style="margin: 25px 0 15px;">Преимущества:</h3>
-            <ul style="list-style: none; padding: 0;">
-                ${(service.features || []).map(f => `
-                    <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
-                        <span>${f}</span>
-                    </li>
-                `).join('')}
-            </ul>
-            <div style="margin-top: 30px; padding: 20px; background: var(--bg-secondary); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 18px; font-weight: 600;">Стоимость:</span>
-                <span style="font-size: 24px; color: var(--primary); font-weight: 700;">${service.price}</span>
-            </div>
-            <div style="display: flex; gap: 15px; margin-top: 25px; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="window.location.href='#calculator'">
-                    <i class="fas fa-calculator"></i>
-                    Рассчитать стоимость
-                </button>
-                <a href="${CONFIG.telegram.contactUrl}" target="_blank" class="btn btn-outline" style="text-decoration: none;">
-                    <i class="fab fa-telegram"></i>
-                    Написать в Telegram
-                </a>
-            </div>
-        `;
+            content.innerHTML = `
+                <h2>${service.name}</h2>
+                <p style="color: var(--text-secondary); margin: 20px 0;">${service.description}</p>
+                <h3 style="margin: 25px 0 15px;">Преимущества:</h3>
+                <ul style="list-style: none; padding: 0;">
+                    ${(service.features || []).map(f => `
+                        <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            <span>${f}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+                <div style="margin-top: 30px; padding: 20px; background: var(--bg-secondary); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 18px; font-weight: 600;">Стоимость:</span>
+                    <span style="font-size: 24px; color: var(--primary); font-weight: 700;">${service.price}</span>
+                </div>
+                <div style="display: flex; gap: 15px; margin-top: 25px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="window.location.href='#calculator'">
+                        <i class="fas fa-calculator"></i>
+                        Рассчитать стоимость
+                    </button>
+                    <a href="${CONFIG.telegram.contactUrl}" target="_blank" class="btn btn-outline" style="text-decoration: none;">
+                        <i class="fab fa-telegram"></i>
+                        Написать в Telegram
+                    </a>
+                </div>
+            `;
 
-        modal.classList.add('active');
+            modal.classList.add('active');
+        } catch (error) {
+            console.error('❌ Failed to open service modal:', error);
+        }
     }
 
     async loadPortfolio() {
@@ -847,13 +861,18 @@ class MainApp {
         form.reset();
     }
 
-    generateOrderNumber() {
-        const orders = db.getData('orders');
-        const maxNumber = orders.reduce((max, o) => {
-            const num = parseInt(o.orderNumber) || 0;
-            return num > max ? num : max;
-        }, 1000);
-        return (maxNumber + 1).toString();
+    async generateOrderNumber() {
+        try {
+            const orders = await db.getOrders();
+            const maxNumber = orders.reduce((max, o) => {
+                const num = parseInt(o.order_number || o.orderNumber) || 0;
+                return num > max ? num : max;
+            }, 1000);
+            return (maxNumber + 1).toString();
+        } catch (error) {
+            console.error('❌ Failed to generate order number:', error);
+            return Date.now().toString();
+        }
     }
 
     initCalculator() {
