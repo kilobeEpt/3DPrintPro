@@ -1,216 +1,183 @@
 <?php
 // ========================================
 // Database Initialization Script
-// Populates database with default data
+// Fills empty tables with default data
 // ========================================
 
 header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit(0);
+}
+
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
 
-$db = new Database();
+$response = [
+    'status' => 'OK',
+    'actions' => []
+];
 
 try {
-    // Initialize Services
-    $services = [
-        [
-            'name' => 'FDM печать',
-            'slug' => 'fdm',
-            'icon' => 'fa-cube',
-            'description' => 'Печать методом послойного наплавления. Идеально для прототипов и функциональных деталей.',
-            'features' => ['Быстрое изготовление', 'Низкая стоимость', 'Прочные детали', 'Широкий выбор материалов'],
-            'price' => 'от 50₽/г',
-            'active' => 1,
-            'featured' => 0,
-            'sort_order' => 1
-        ],
-        [
-            'name' => 'SLA/SLS печать',
-            'slug' => 'sla',
-            'icon' => 'fa-gem',
-            'description' => 'Высокоточная печать с невероятной детализацией для самых требовательных проектов.',
-            'features' => ['Высокая точность', 'Гладкая поверхность', 'Сложная геометрия', 'Идеально для ювелирки'],
-            'price' => 'от 200₽/г',
-            'active' => 1,
-            'featured' => 1,
-            'sort_order' => 2
-        ],
-        [
-            'name' => 'Post-обработка',
-            'slug' => 'post',
-            'icon' => 'fa-cogs',
-            'description' => 'Шлифовка, покраска, сборка. Доводим изделия до идеального состояния.',
-            'features' => ['Профессиональная покраска', 'Химическая обработка', 'Сборка узлов', 'Гарантия качества'],
-            'price' => 'от 300₽',
-            'active' => 1,
-            'featured' => 0,
-            'sort_order' => 3
-        ],
-        [
-            'name' => '3D моделирование',
-            'slug' => 'modeling',
-            'icon' => 'fa-drafting-compass',
-            'description' => 'Создание 3D моделей по вашим эскизам, чертежам или идеям.',
-            'features' => ['Опытные дизайнеры', 'Любая сложность', 'Быстрые правки', 'Оптимизация для печати'],
-            'price' => 'от 500₽/час',
-            'active' => 1,
-            'featured' => 0,
-            'sort_order' => 4
-        ],
-        [
-            'name' => '3D сканирование',
-            'slug' => 'scanning',
-            'icon' => 'fa-scanner',
-            'description' => 'Создание точных цифровых копий физических объектов.',
-            'features' => ['Точность до 0.05мм', 'Объекты любого размера', 'Обработка моделей', 'Быстрое выполнение'],
-            'price' => 'от 1000₽',
-            'active' => 1,
-            'featured' => 0,
-            'sort_order' => 5
-        ],
-        [
-            'name' => 'Мелкосерийное производство',
-            'slug' => 'production',
-            'icon' => 'fa-industry',
-            'description' => 'Изготовление партий деталей от 10 до 10000 штук.',
-            'features' => ['Скидки на объем', 'Контроль качества', 'Быстрые сроки', 'Упаковка и доставка'],
-            'price' => 'Индивидуально',
-            'active' => 1,
-            'featured' => 0,
-            'sort_order' => 6
-        ]
+    $db = new Database();
+    $pdo = $db->getPDO();
+    
+    // ========================================
+    // PORTFOLIO
+    // ========================================
+    $portfolio_count = $db->getCount('portfolio');
+    
+    if ($portfolio_count == 0) {
+        $portfolio_items = [
+            [
+                'title' => 'Визуализация архитектурного проекта',
+                'description' => 'Профессиональная 3D визуализация архитектурного комплекса с использованием современных материалов и текстур',
+                'category' => 'architecture',
+                'sort_order' => 1
+            ],
+            [
+                'title' => 'Прототип изделия из пластика',
+                'description' => 'Быстрое прототипирование изделия с помощью FDM печати. Позволило заказчику оценить эргономику и внести коррективы',
+                'category' => 'prototyping',
+                'sort_order' => 2
+            ],
+            [
+                'title' => 'Детальная статуэтка',
+                'description' => 'Высокодетальная фигурка, напечатанная на SLA принтере с последующей постобработкой и раскраской',
+                'category' => 'decorative',
+                'sort_order' => 3
+            ],
+            [
+                'title' => 'Промышленная деталь',
+                'description' => 'Сложная техническая деталь для производственного оборудования. Печать выполнена из прочного полимера',
+                'category' => 'industrial',
+                'sort_order' => 4
+            ]
+        ];
+        
+        foreach ($portfolio_items as $item) {
+            $db->insertRecord('portfolio', [
+                'title' => $item['title'],
+                'description' => $item['description'],
+                'category' => $item['category'],
+                'sort_order' => $item['sort_order'],
+                'active' => 1
+            ]);
+        }
+        
+        $response['actions'][] = 'Portfolio заполнен 4 проектами';
+    } else {
+        $response['actions'][] = 'Portfolio уже содержит данные (' . $portfolio_count . ' записей)';
+    }
+    
+    // ========================================
+    // CONTENT BLOCKS
+    // ========================================
+    $content_count = $db->getCount('content_blocks');
+    
+    if ($content_count == 0) {
+        $content_blocks = [
+            [
+                'block_name' => 'home_hero',
+                'title' => 'Профессиональная 3D печать в Омске',
+                'content' => 'Высококачественные услуги 3D печати с использованием современного оборудования',
+                'page' => 'index',
+                'sort_order' => 1
+            ],
+            [
+                'block_name' => 'home_features',
+                'title' => 'Наши преимущества',
+                'content' => 'Быстрая доставка, качество работ, профессиональный подход',
+                'page' => 'index',
+                'sort_order' => 2
+            ],
+            [
+                'block_name' => 'about_intro',
+                'title' => 'О нас',
+                'content' => 'Компания 3D PrintPro специализируется на высокоточной 3D печати',
+                'page' => 'about',
+                'sort_order' => 1
+            ]
+        ];
+        
+        foreach ($content_blocks as $block) {
+            $db->insertRecord('content_blocks', [
+                'block_name' => $block['block_name'],
+                'title' => $block['title'],
+                'content' => $block['content'],
+                'page' => $block['page'],
+                'sort_order' => $block['sort_order'],
+                'active' => 1
+            ]);
+        }
+        
+        $response['actions'][] = 'Content blocks заполнены 3 блоками';
+    } else {
+        $response['actions'][] = 'Content blocks уже содержат данные (' . $content_count . ' записей)';
+    }
+    
+    // ========================================
+    // SETTINGS
+    // ========================================
+    $required_settings = [
+        'site_name' => '3D PrintPro',
+        'site_description' => 'Профессиональные услуги 3D печати в Омске',
+        'company_name' => '3D PrintPro',
+        'company_address' => 'Омск',
+        'company_phone' => '+7 (383) 000-00-00',
+        'company_email' => 'info@3dprintpro.ru',
+        'company_hours' => 'Пн-Пт: 10:00-18:00, Сб-Вс: 10:00-16:00',
+        'telegram_token' => '',
+        'telegram_chat_id' => ''
     ];
     
-    $servicesCreated = 0;
-    foreach ($services as $service) {
-        try {
-            $db->insertRecord('services', $service);
-            $servicesCreated++;
-        } catch (Exception $e) {
-            // Skip if already exists
+    $settings_updated = 0;
+    foreach ($required_settings as $key => $value) {
+        $existing = $db->getSetting($key);
+        
+        if ($existing === null) {
+            $db->saveSetting($key, $value);
+            $settings_updated++;
         }
     }
     
-    // Initialize Testimonials
-    $testimonials = [
-        [
-            'name' => 'Алексей Иванов',
-            'position' => 'Директор, Tech Solutions',
-            'avatar' => 'https://i.pravatar.cc/150?img=1',
-            'text' => 'Отличное качество печати! Заказывали прототипы корпусов для нашего устройства. Все выполнено точно в срок, консультации на высшем уровне.',
-            'rating' => 5,
-            'approved' => 1,
-            'active' => 1,
-            'sort_order' => 1
-        ],
-        [
-            'name' => 'Мария Петрова',
-            'position' => 'Дизайнер',
-            'avatar' => 'https://i.pravatar.cc/150?img=2',
-            'text' => 'Работаю с этой компанией уже год. Печатают мои художественные проекты с невероятной детализацией. Рекомендую!',
-            'rating' => 5,
-            'approved' => 1,
-            'active' => 1,
-            'sort_order' => 2
-        ],
-        [
-            'name' => 'Дмитрий Сидоров',
-            'position' => 'Инженер-конструктор',
-            'avatar' => 'https://i.pravatar.cc/150?img=3',
-            'text' => 'Профессиональный подход к каждому заказу. Помогли с оптимизацией моделей, что сэкономило время и деньги.',
-            'rating' => 5,
-            'approved' => 1,
-            'active' => 1,
-            'sort_order' => 3
-        ],
-        [
-            'name' => 'Елена Смирнова',
-            'position' => 'Владелец бизнеса',
-            'avatar' => 'https://i.pravatar.cc/150?img=4',
-            'text' => 'Заказывала мелкую серию деталей - все изготовлено качественно, упаковано аккуратно. Очень довольна сотрудничеством!',
-            'rating' => 5,
-            'approved' => 1,
-            'active' => 1,
-            'sort_order' => 4
-        ]
-    ];
-    
-    $testimonialsCreated = 0;
-    foreach ($testimonials as $testimonial) {
-        try {
-            $db->insertRecord('testimonials', $testimonial);
-            $testimonialsCreated++;
-        } catch (Exception $e) {
-            // Skip if already exists
-        }
+    if ($settings_updated > 0) {
+        $response['actions'][] = "Settings добавлено $settings_updated новых ключей";
+    } else {
+        $response['actions'][] = 'Settings уже содержат все необходимые ключи';
     }
     
-    // Initialize FAQ
-    $faqs = [
-        [
-            'question' => 'Какие форматы файлов вы принимаете?',
-            'answer' => 'Мы работаем с форматами STL, OBJ, 3MF, STEP. Если у вас файл в другом формате, свяжитесь с нами - мы найдем решение.',
-            'active' => 1,
-            'sort_order' => 1
-        ],
-        [
-            'question' => 'Сколько времени занимает изготовление?',
-            'answer' => 'Стандартный срок - 3-5 рабочих дней. Для небольших деталей возможна печать за 1 день. Есть услуга срочного изготовления (24 часа).',
-            'active' => 1,
-            'sort_order' => 2
-        ],
-        [
-            'question' => 'Какая минимальная толщина стенок?',
-            'answer' => 'Для FDM печати минимальная толщина - 1мм, для SLA/SLS - 0.5мм. Рекомендуем консультироваться перед печатью тонкостенных деталей.',
-            'active' => 1,
-            'sort_order' => 3
-        ],
-        [
-            'question' => 'Можно ли заказать постобработку?',
-            'answer' => 'Да, мы предлагаем шлифовку, покраску, химическую обработку, сборку. Все услуги можно выбрать в калькуляторе.',
-            'active' => 1,
-            'sort_order' => 4
-        ],
-        [
-            'question' => 'Есть ли скидки на большие объемы?',
-            'answer' => 'Да! При заказе от 10 деталей скидка 10%, от 50 деталей - 15%, от 100 деталей - индивидуальные условия.',
-            'active' => 1,
-            'sort_order' => 5
-        ],
-        [
-            'question' => 'Как происходит оплата?',
-            'answer' => 'Принимаем оплату по безналичному расчету, банковским картам, электронным кошелькам. Для юр.лиц работаем по договору с отсрочкой.',
-            'active' => 1,
-            'sort_order' => 6
-        ]
-    ];
+    // ========================================
+    // ACTIVATE ALL RECORDS
+    // ========================================
+    $tables_to_activate = ['services', 'portfolio', 'testimonials', 'faq', 'content_blocks'];
+    $activated_count = 0;
     
-    $faqsCreated = 0;
-    foreach ($faqs as $faq) {
-        try {
-            $db->insertRecord('faq', $faq);
-            $faqsCreated++;
-        } catch (Exception $e) {
-            // Skip if already exists
-        }
+    foreach ($tables_to_activate as $table) {
+        $stmt = $pdo->prepare("UPDATE `$table` SET active = 1 WHERE active = 0 OR active IS NULL");
+        $stmt->execute();
+        $activated_count += $stmt->rowCount();
     }
     
-    echo json_encode([
-        'success' => true,
-        'message' => 'Database initialized successfully',
-        'created' => [
-            'services' => $servicesCreated,
-            'testimonials' => $testimonialsCreated,
-            'faq' => $faqsCreated
-        ]
-    ], JSON_UNESCAPED_UNICODE);
+    if ($activated_count > 0) {
+        $response['actions'][] = "Активировано $activated_count записей";
+    } else {
+        $response['actions'][] = 'Все записи уже активны';
+    }
+    
+    $response['summary'] = 'БД инициализирована успешно ✅';
+    
+    $db->close();
     
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'error' => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
+    $response['status'] = 'Error';
+    $response['error'] = $e->getMessage();
 }
 
-$db->close();
+echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+?>

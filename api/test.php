@@ -34,16 +34,35 @@ try {
     ];
     
     // Count records in each table
-    $tables = ['settings', 'services', 'portfolio', 'testimonials', 'faq', 'orders', 'content_blocks'];
+    $tables_with_active = ['services', 'portfolio', 'testimonials', 'faq', 'content_blocks'];
+    $tables_without_active = ['settings', 'orders'];
     
-    foreach ($tables as $table) {
+    // Check tables WITH active column
+    foreach ($tables_with_active as $table) {
         try {
             $total = $db->getCount($table);
             $active = $db->getCount($table, ['active' => 1]);
             
             $response['tables_info'][$table] = [
                 'total' => $total,
-                'active' => $active
+                'active' => $active,
+                'status' => $total > 0 ? '✅ OK' : '⚠️ Empty'
+            ];
+        } catch (Exception $e) {
+            $response['tables_info'][$table] = [
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+    
+    // Check tables WITHOUT active column
+    foreach ($tables_without_active as $table) {
+        try {
+            $total = $db->getCount($table);
+            
+            $response['tables_info'][$table] = [
+                'total' => $total,
+                'status' => 'N/A (no active column)'
             ];
         } catch (Exception $e) {
             $response['tables_info'][$table] = [
