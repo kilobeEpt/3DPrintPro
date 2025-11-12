@@ -3,23 +3,18 @@
 // Content Blocks API Endpoint
 // ========================================
 
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit(0);
-}
-
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers/security_headers.php';
+require_once __DIR__ . '/helpers/rate_limiter.php';
 require_once __DIR__ . '/helpers/response.php';
 require_once __DIR__ . '/helpers/logger.php';
+require_once __DIR__ . '/db.php';
+
+SecurityHeaders::apply();
+SecurityHeaders::handlePreflight();
 
 $db = new Database();
 $method = $_SERVER['REQUEST_METHOD'];
+$rateLimiter = new RateLimiter();
 
 try {
     switch ($method) {
@@ -76,6 +71,9 @@ try {
             break;
             
         case 'POST':
+            // Apply rate limiting for write operations
+            $rateLimiter->apply('content_create');
+            
             // Create new content block
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
@@ -115,6 +113,9 @@ try {
             break;
             
         case 'PUT':
+            // Apply rate limiting for write operations
+            $rateLimiter->apply('content_update');
+            
             // Update content block
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
@@ -160,6 +161,9 @@ try {
             break;
             
         case 'DELETE':
+            // Apply rate limiting for write operations
+            $rateLimiter->apply('content_delete');
+            
             // Delete content block
             if (empty($_GET['id'])) {
                 ApiResponse::validationError('Content block ID is required');

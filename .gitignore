@@ -115,6 +115,7 @@ test_*.html
 logs/*.log
 logs/*.json
 logs/api.log
+logs/rate_limits/*.json
 
 # Temporary exports and data
 exports/

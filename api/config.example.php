@@ -45,6 +45,14 @@ define('SITE_URL', 'https://ch167436.tw1.ru'); // Production URL
 define('SITE_NAME', '3D Print Pro');
 
 // ========================================
+// Rate Limiting Configuration
+// ========================================
+// Protects API endpoints from abuse
+define('RATE_LIMIT_MAX_REQUESTS', 60); // Maximum requests per time window
+define('RATE_LIMIT_TIME_WINDOW', 60); // Time window in seconds (60 = 1 minute)
+// Default: 60 requests per minute per IP address
+
+// ========================================
 // Error Reporting
 // ========================================
 // IMPORTANT: Set based on environment

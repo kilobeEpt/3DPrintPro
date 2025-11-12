@@ -67,7 +67,45 @@ class ApiResponse {
         ];
         
         if (!empty($errors)) {
-            $response['validation_errors'] = $errors;
+            $response['errors'] = $errors;
+        }
+        
+        echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        exit(0);
+    }
+    
+    /**
+     * Send an unprocessable entity error response (422)
+     */
+    public static function unprocessableEntity($message, $errors = []) {
+        http_response_code(422);
+        
+        $response = [
+            'success' => false,
+            'error' => $message
+        ];
+        
+        if (!empty($errors)) {
+            $response['errors'] = $errors;
+        }
+        
+        echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        exit(0);
+    }
+    
+    /**
+     * Send a rate limit exceeded error response (429)
+     */
+    public static function rateLimitExceeded($message = 'Rate limit exceeded', $meta = []) {
+        http_response_code(429);
+        
+        $response = [
+            'success' => false,
+            'error' => $message
+        ];
+        
+        if (!empty($meta)) {
+            $response['meta'] = $meta;
         }
         
         echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
