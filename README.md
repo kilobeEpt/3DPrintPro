@@ -1,661 +1,440 @@
 # 3D Print Pro - Омск
 
-Профессиональная 3D печать в Омске. Статический сайт с интерактивным калькулятором, админ-панелью, PHP backend и интеграцией с Telegram.
+Профессиональный сервис 3D печати с интерактивным калькулятором, админ-панелью, PHP REST API и интеграцией с Telegram.
+
+[![PHP](https://img.shields.io/badge/PHP-7.4%2B-blue)](https://www.php.net/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0%2B-orange)](https://www.mysql.com/)
+[![License](https://img.shields.io/badge/License-Proprietary-red)]()
 
 ---
 
 ## 🚀 Quick Start
 
-### Для пользователей (Production)
+### For New Installations
 
-1. **Настройте PHP Backend** (см. [PHP_BACKEND_SETUP.md](./PHP_BACKEND_SETUP.md))
-2. **Настройте MySQL БД** (выполните `database/schema.sql`)
-3. **Настройте Telegram** (см. [TELEGRAM_SETUP_GUIDE.md](./TELEGRAM_SETUP_GUIDE.md))
-4. Готово! Сайт работает.
+1. **Setup Database & Backend** → See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md)
+2. **Deploy to Production** → See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+3. **Configure Admin Panel** → See [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)
 
-### Для разработчиков (локально)
+### For Existing Installations
 
-```bash
-# Клонировать репозиторий
-git clone <repository_url>
+1. **Access admin panel:** `https://your-domain.com/admin/login.php`
+2. **Configure Telegram:** Settings → Telegram Configuration
+3. **Manage content:** Edit services, portfolio, FAQ via admin panel
 
-# Запустить локальный PHP сервер
-php -S localhost:8000
-
-# Или использовать Python для тестирования статики
-python -m http.server 8000
-
-# Откройте http://localhost:8000
-```
+**Total setup time:** ~10 minutes
 
 ---
 
-## 📚 Документация
+## 📚 Documentation
 
-### 🔴 Основная документация (ВАЖНО!)
+### Core Guides
 
-- **[PHP_BACKEND_SETUP.md](./PHP_BACKEND_SETUP.md)** - 🆕 Настройка PHP backend и MySQL
-- **[AUDIT_TOOL.md](./AUDIT_TOOL.md)** - 🆕 Database Audit Tool - диагностика БД
-- **[FORMS_FIX_SUMMARY.md](./FORMS_FIX_SUMMARY.md)** - 🆕 Решение проблем с формами
-- **[DEPLOYMENT_CHECKLIST_PHP.md](./DEPLOYMENT_CHECKLIST_PHP.md)** - 🆕 Чеклист для деплоя с PHP
-- **[TELEGRAM_SETUP_GUIDE.md](./TELEGRAM_SETUP_GUIDE.md)** - Настройка Telegram бота
-- **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - 🆕 Миграция из localStorage в MySQL
+| Document | Description |
+|----------|-------------|
+| **[SETUP_GUIDE.md](docs/SETUP_GUIDE.md)** | Complete installation and configuration guide |
+| **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** | Production deployment checklist and procedures |
+| **[API_REFERENCE.md](docs/API_REFERENCE.md)** | REST API endpoints and usage documentation |
+| **[ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)** | Admin panel features and usage instructions |
+| **[DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)** | Database tables, columns, and relationships |
+| **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** | Common issues and solutions |
 
-### 🧪 Тестирование и QA (НОВОЕ!)
+### Additional Documentation
 
-- **[docs/TESTING_REPORT.md](./docs/TESTING_REPORT.md)** - 🆕 Полный отчет QA тестирования (81 тест, 100% успех)
-- **[docs/QA_EXECUTION_SUMMARY.md](./docs/QA_EXECUTION_SUMMARY.md)** - 🆕 Краткое резюме тестирования
-- **[docs/TEST_MATRIX.md](./docs/TEST_MATRIX.md)** - 🆕 Визуальная матрица тестов
-- **[docs/QA_TEST_EVIDENCE.md](./docs/QA_TEST_EVIDENCE.md)** - 🆕 Руководство по сбору доказательств тестирования
-- **[TEST_CHECKLIST.md](./TEST_CHECKLIST.md)** - Подробный чеклист для тестирования
-
-### Дополнительная документация
-
-- [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRODUCTION_DEPLOYMENT_GUIDE.md) - Общий чеклист деплоя
-- [TECHNICAL_AUDIT_SUMMARY.md](./TECHNICAL_AUDIT_SUMMARY.md) - Результаты технического аудита
-- [MOBILE_REDESIGN_SUMMARY.md](./MOBILE_REDESIGN_SUMMARY.md) - Мобильная оптимизация
-- [CONTENT_PAGES_SUMMARY.md](./CONTENT_PAGES_SUMMARY.md) - Структура страниц
-- [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Детали реализации
+- **[TELEGRAM_INTEGRATION.md](docs/TELEGRAM_INTEGRATION.md)** - Telegram bot setup and configuration
+- **[ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md)** - Security and authentication details
+- **[TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md)** - Testing procedures and checklist
 
 ---
 
-## 🏗️ Структура проекта
+## ✨ Features
+
+### For Customers
+- ✅ Interactive price calculator with real-time updates
+- ✅ Responsive design (mobile, tablet, desktop)
+- ✅ Contact forms with validation
+- ✅ Service catalog with detailed descriptions
+- ✅ Portfolio showcase
+- ✅ Customer testimonials
+- ✅ FAQ section
+
+### For Business Owners
+- ✅ **Admin Panel** - Full-featured dashboard at `/admin`
+- ✅ **Order Management** - View, update, and track orders
+- ✅ **Content Management** - Edit services, portfolio, FAQ, testimonials
+- ✅ **Telegram Notifications** - Instant notifications for new orders
+- ✅ **Database-Driven** - All data stored in MySQL
+- ✅ **Secure Authentication** - PHP sessions with CSRF protection
+- ✅ **Statistics Dashboard** - Orders, revenue, and trends
+- ✅ **CSV Export** - Download orders as spreadsheet
+
+---
+
+## 🏗️ Architecture
+
+### Technology Stack
+
+**Frontend:**
+- HTML5, CSS3, Vanilla JavaScript (ES6+)
+- Responsive design with mobile-first approach
+- Font Awesome icons
+- Chart.js for statistics
+
+**Backend:**
+- PHP 7.4+ with PDO
+- MySQL 8.0+ database
+- RESTful API architecture
+- Rate limiting (60 req/min)
+
+**Security:**
+- PDO prepared statements (SQL injection protection)
+- XSS protection (htmlspecialchars)
+- CSRF tokens on admin operations
+- Session security (HttpOnly, SameSite, Secure)
+- Login rate limiting (5 attempts, 15-min lockout)
+- Password hashing (bcrypt)
+
+### Project Structure
 
 ```
 /
-├── index.html              # Главная страница
-├── services.html           # Услуги
-├── portfolio.html          # Портфолио
-├── about.html              # О компании
-├── contact.html            # Контакты
-├── blog.html               # Блог
-├── districts.html          # Районы обслуживания
-├── why-us.html             # Почему мы
-├── admin.html              # Админ-панель
+├── admin/              # Admin panel (PHP session-based)
+│   ├── login.php       # Login page
+│   ├── index.php       # Dashboard
+│   ├── orders.php      # Order management
+│   ├── services.php    # Service management
+│   ├── settings.php    # Configuration
+│   ├── css/            # Admin styles
+│   ├── js/             # Admin JavaScript
+│   └── includes/       # Auth & session management
 │
-├── config.js               # Глобальная конфигурация
+├── api/                # REST API endpoints
+│   ├── orders.php      # Orders CRUD
+│   ├── services.php    # Services CRUD
+│   ├── portfolio.php   # Portfolio CRUD
+│   ├── testimonials.php # Testimonials CRUD
+│   ├── faq.php         # FAQ CRUD
+│   ├── content.php     # Content blocks CRUD
+│   ├── settings.php    # Settings management
+│   ├── telegram-test.php # Telegram testing
+│   ├── test.php        # API health check
+│   ├── config.php      # Database credentials (not in git)
+│   └── helpers/        # Shared utilities
 │
-├── api/                    # 🆕 PHP Backend
-│   ├── config.php          # Конфигурация БД/Telegram (не в git)
-│   ├── config.example.php  # Пример конфигурации
-│   ├── submit-form.php     # API: отправка форм
-│   ├── get-orders.php      # API: получение заявок
-│   └── .htaccess           # Защита и CORS
+├── database/           # Database schema and utilities
+│   ├── schema.sql      # Complete database schema
+│   ├── seed-data.php   # Initial data
+│   ├── verify-schema.php # Schema validation
+│   └── backup.php      # Backup utility
 │
-├── database/               # 🆕 SQL схемы
-│   └── schema.sql          # Создание таблиц MySQL
+├── scripts/            # Utility scripts
+│   ├── setup-admin-credentials.php # Admin setup
+│   ├── db_audit.php    # Database diagnostics
+│   └── api_smoke_test.php # API testing
 │
-├── scripts/                # 🆕 Утилиты и диагностика
-│   └── db_audit.php        # Аудит базы данных
+├── docs/               # Documentation
+│   ├── SETUP_GUIDE.md
+│   ├── DEPLOYMENT.md
+│   ├── API_REFERENCE.md
+│   ├── ADMIN_GUIDE.md
+│   ├── DATABASE_SCHEMA.md
+│   └── TROUBLESHOOTING.md
 │
-├── css/
-│   ├── style.css           # Основные стили
-│   ├── mobile-polish.css   # Адаптивные стили
-│   └── animations.css      # Анимации
+├── css/                # Stylesheets
+│   ├── style.css       # Base styles
+│   ├── responsive.css  # Responsive/mobile styles
+│   └── animations.css  # Animations
 │
-├── js/
-│   ├── main.js             # Главное приложение (обновлен для PHP API)
-│   ├── calculator.js       # Калькулятор
-│   ├── telegram.js         # Telegram интеграция
-│   ├── database.js         # localStorage обертка (резервная копия)
-│   ├── validator.js        # Валидация форм
-│   └── admin.js            # Админ-панель
+├── js/                 # JavaScript
+│   ├── api-client.js   # API wrapper with retry logic
+│   ├── database.js     # Database abstraction
+│   ├── calculator.js   # Price calculator
+│   ├── utils.js        # Shared utilities
+│   ├── status-indicator.js # Connectivity status
+│   └── main.js         # Main application
 │
-├── assets/                 # Изображения, шрифты
+├── *.html              # Public pages
+│   ├── index.html      # Homepage
+│   ├── services.html   # Services
+│   ├── portfolio.html  # Portfolio
+│   ├── about.html      # About
+│   ├── contact.html    # Contact
+│   └── ...
 │
-├── robots.txt              # SEO: robots
-├── sitemap.xml             # SEO: sitemap
-│
-└── *.md                    # Документация
+├── config.js           # Frontend configuration
+├── robots.txt          # SEO: Robots
+└── sitemap.xml         # SEO: Sitemap
 ```
 
----
+### Database Schema
 
-## ✨ Функциональность
+7 tables storing all application data:
 
-### Для посетителей
+| Table | Purpose | Records |
+|-------|---------|---------|
+| `orders` | Customer orders and contact forms | Dynamic |
+| `settings` | Application configuration | ~15 |
+| `services` | Service offerings | ~6 |
+| `portfolio` | Project showcase | ~4 |
+| `testimonials` | Customer reviews | ~4 |
+| `faq` | FAQ items | ~8 |
+| `content_blocks` | Dynamic page content | ~3 |
 
-- ✅ **Интерактивный калькулятор** стоимости 3D печати
-- ✅ **Многостраничный сайт** (8 страниц)
-- ✅ **Контактные формы** с валидацией и loading state
-- ✅ **Адаптивный дизайн** (мобильные устройства)
-- ✅ **SEO оптимизация** (Омск)
-- ✅ **Telegram уведомления** владельцу
-- ✅ **Работает в инкогнито режиме** 🆕
-- ✅ **Работает для всех пользователей** 🆕
+See [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) for complete schema reference.
 
-### Для владельца
+### API Endpoints
 
-- ✅ **Админ-панель** (/admin.html)
-- ✅ **Управление заказами** (сохраняются в MySQL) 🆕
-- ✅ **Управление услугами**
-- ✅ **Управление портфолио**
-- ✅ **Настройки сайта**
-- ✅ **Telegram интеграция**
-- ✅ **Статистика**
-- ✅ **Централизованная БД** 🆕
+| Endpoint | Methods | Auth | Description |
+|----------|---------|------|-------------|
+| `/api/orders.php` | GET, POST, PUT, DELETE | POST=Public, Others=Admin | Order management |
+| `/api/services.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | Service management |
+| `/api/portfolio.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | Portfolio management |
+| `/api/testimonials.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | Testimonials management |
+| `/api/faq.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | FAQ management |
+| `/api/content.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | Content blocks management |
+| `/api/settings.php` | GET, POST, PUT, DELETE | All=Admin | Settings management |
+| `/api/telegram-test.php` | POST | Admin | Telegram connection test |
+| `/api/test.php` | GET | Public | API health check |
 
----
-
-## 🔧 Технологии
-
-### Frontend
-- **HTML5** - разметка
-- **CSS3** - стили (flexbox, grid, animations)
-- **JavaScript ES6** - логика (классы, async/await, fetch API)
-- **localStorage** - резервное хранение данных
-- **Font Awesome** - иконки
-- **Chart.js** - графики в админке
-
-### Backend 🆕
-- **PHP 7.4+** - серверная логика
-- **MySQL 8.0+** - база данных (PDO)
-- **Telegram Bot API** - уведомления с сервера
-- **cURL** - HTTP запросы
-
-### Security 🆕
-- **PDO Prepared Statements** - защита от SQL injection
-- **htmlspecialchars()** - защита от XSS
-- **.htaccess** - защита конфигурации
-- **CORS** - настроенный доступ к API
-
-### Diagnostics & Monitoring 🆕
-- **Database Audit Tool** (`scripts/db_audit.php`) - комплексная диагностика БД
-- **Schema Validation** - автоматическая проверка соответствия схемы
-- **Privilege Checking** - проверка прав доступа к MySQL
-- **CLI & HTTP Support** - запуск из командной строки или браузера
-
-**Минимальные зависимости!** Чистый vanilla JS на фронте, нативный PHP на бэке.
+See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for complete API documentation.
 
 ---
 
-## ⚙️ Конфигурация
+## 🔧 Requirements
 
-### config.js
-
-Основные настройки находятся в `config.js`:
-
-```javascript
-const CONFIG = {
-    siteName: '3D Print Pro',
-    siteUrl: 'https://3dprintpro.ru',
-    
-    telegram: {
-        botToken: 'YOUR_BOT_TOKEN',
-        chatId: '',  // Настроить в админке!
-        apiUrl: 'https://api.telegram.org/bot',
-        contactUrl: 'https://t.me/PrintPro_Omsk'
-    },
-    
-    // Цены, материалы, услуги...
-};
-```
-
-### Админ-панель
-
-**URL:** `/admin.html`  
-**Логин по умолчанию:** `admin`  
-**Пароль по умолчанию:** `admin123`
-
-⚠️ **ВАЖНО:** Измените пароль после первого входа!
+- **Web Server:** Apache 2.4+ or Nginx 1.18+ with mod_rewrite/rewrite module
+- **PHP:** 7.4 or higher with extensions:
+  - PDO
+  - PDO_MySQL
+  - cURL
+  - mbstring
+  - JSON
+- **Database:** MySQL 8.0+ or MariaDB 10.5+
+- **HTTPS:** SSL certificate (required for secure sessions)
 
 ---
 
-## 🔴 КРИТИЧНО: Настройка Telegram
+## 📦 Installation
 
-После деплоя на хостинг **ОБЯЗАТЕЛЬНО** настройте Telegram:
+### Quick Installation (7 Minutes)
 
-1. Откройте `/admin.html`
-2. Перейдите в **Настройки → Telegram**
-3. Введите **Bot Token** и **Chat ID**
-4. Сохраните и отправьте тестовое сообщение
-
-**Подробная инструкция:** [TELEGRAM_SETUP_GUIDE.md](./TELEGRAM_SETUP_GUIDE.md)
-
-Без настройки Telegram заявки будут сохраняться в БД, но не придут вам!
-
----
-
-## 🔍 Database Diagnostics & Audit
-
-### Overview
-
-The project includes a comprehensive database audit tool to diagnose connectivity and schema issues. This is especially useful during outages or when troubleshooting API problems.
-
-**📖 Full Documentation:** [AUDIT_TOOL.md](./AUDIT_TOOL.md)
-
-### Usage
-
-#### Via Browser (HTTP)
-```
-# Standard format (human-readable)
-https://your-domain.com/api/test.php?audit=full
-
-# JSON format
-https://your-domain.com/scripts/db_audit.php?format=json
-```
-
-#### Via Command Line (CLI)
 ```bash
-# Human-readable output
+# 1. Upload files to server
+scp -r * user@your-server:/var/www/html/
+
+# 2. Create database and import schema
+mysql -u root -p
+CREATE DATABASE your_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+exit
+mysql -u user -p your_db < database/schema.sql
+
+# 3. Configure backend
+cp api/config.example.php api/config.php
+nano api/config.php  # Edit credentials
+
+# 4. Setup admin credentials
+php scripts/setup-admin-credentials.php
+
+# 5. Seed initial data
+curl https://your-domain.com/api/init-database.php
+
+# 6. Verify installation
+curl https://your-domain.com/api/test.php?audit=full
+```
+
+See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) for detailed installation instructions.
+
+---
+
+## 🔐 Security
+
+### Built-in Security Features
+
+- ✅ SQL injection protection via PDO prepared statements
+- ✅ XSS protection via htmlspecialchars()
+- ✅ CSRF token validation on all state-changing operations
+- ✅ Password hashing with bcrypt
+- ✅ Secure PHP sessions (HttpOnly, SameSite, Secure)
+- ✅ Login rate limiting (5 attempts, 15-minute lockout)
+- ✅ API rate limiting (60 requests/minute per IP)
+- ✅ Security headers (X-Frame-Options, X-Content-Type-Options, etc.)
+- ✅ Protected configuration files via .htaccess
+
+### Security Best Practices
+
+1. **Change default credentials** immediately after installation
+2. **Use HTTPS** for all traffic (Let's Encrypt recommended)
+3. **Set strong admin passwords** (12+ characters, mixed case, numbers, symbols)
+4. **Keep backups** of database and files
+5. **Monitor logs** regularly for suspicious activity
+6. **Update PHP/MySQL** to latest stable versions
+7. **Restrict admin access** to specific IPs if possible
+
+See [docs/ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md) for security details.
+
+---
+
+## 🧪 Testing
+
+### Run Diagnostics
+
+```bash
+# Database health check
 php scripts/db_audit.php
 
-# JSON output
-php scripts/db_audit.php --json
+# API smoke test
+php scripts/api_smoke_test.php
 
-# Check exit code
-php scripts/db_audit.php && echo "✅ Success" || echo "❌ Failed"
+# Web-based audit
+curl https://your-domain.com/api/test.php?audit=full
 ```
 
-### What the Audit Checks
+### Manual Testing
 
-1. **Configuration File**
-   - Verifies `api/config.php` exists
-   - Falls back to `api/config.example.php` if needed
-   - Reports which config file is being used
+1. **Frontend:**
+   - Visit homepage
+   - Open DevTools (F12)
+   - Check console for ✅ success messages
 
-2. **Database Connection**
-   - Attempts PDO connection to MySQL
-   - Reports connection status
-   - Identifies common connection errors:
-     - Access denied (wrong credentials)
-     - Unknown database (DB doesn't exist)
-     - Connection refused (MySQL not running)
+2. **Forms:**
+   - Submit contact form
+   - Verify order appears in database
+   - Check Telegram notification
 
-3. **MySQL Version**
-   - Checks MySQL version
-   - Warns if version < 8.0
+3. **Admin Panel:**
+   - Login at `/admin/login.php`
+   - View orders list
+   - Edit a service
+   - Send test Telegram message
 
-4. **User Privileges**
-   - Checks granted privileges
-   - Verifies required: SELECT, INSERT, UPDATE, DELETE
-   - Checks for CREATE privilege
-   - Reports missing privileges
-
-5. **Table Validation**
-   - Enumerates all 7 expected tables
-   - Reports missing tables
-   - Reports extra/unexpected tables
-   - Shows table record counts
-
-6. **Schema Validation**
-   - Compares actual schema to `database/schema.sql`
-   - Validates column names
-   - Validates indexes
-   - Detects schema drift
-   - Reports specific mismatches
-
-### Output Format
-
-#### Human-Readable Output
-```
-========================================
-DATABASE AUDIT REPORT
-========================================
-Timestamp: 2025-01-15 10:30:00
-
-CONNECTION:
-  Status: ✅ Connected
-  Host: localhost
-  Database: ch167436_3dprint
-  User: ch167436_3dprint
-  MySQL Version: 8.0.32
-
-PRIVILEGES:
-  Status: ✅ OK
-  Granted: SELECT, INSERT, UPDATE, DELETE
-
-TABLES:
-  Expected: 7
-  Found: 7
-  Status: ✅ OK
-
-SCHEMA VALIDATION:
-  Status: ✅ OK
-
-  Table Details:
-    ✅ orders: 17 columns, 7 indexes, 42 records
-    ✅ settings: 4 columns, 3 indexes, 5 records
-    ✅ services: 13 columns, 6 indexes, 6 records
-    ✅ portfolio: 10 columns, 4 indexes, 4 records
-    ✅ testimonials: 11 columns, 5 indexes, 4 records
-    ✅ faq: 7 columns, 3 indexes, 6 records
-    ✅ content_blocks: 10 columns, 5 indexes, 3 records
-
-========================================
-SUMMARY: ✅ All checks passed successfully. Database is fully operational.
-========================================
-```
-
-#### JSON Output
-```json
-{
-  "success": true,
-  "timestamp": "2025-01-15 10:30:00",
-  "connection": {
-    "status": "connected",
-    "mysql_version": "8.0.32",
-    "host": "localhost",
-    "database": "ch167436_3dprint"
-  },
-  "privileges": {
-    "status": "ok",
-    "granted": ["SELECT", "INSERT", "UPDATE", "DELETE"]
-  },
-  "tables": {
-    "expected": 7,
-    "found": 7,
-    "status": "ok"
-  },
-  "schema_validation": {
-    "status": "ok",
-    "drift_detected": false
-  },
-  "summary": "✅ All checks passed successfully.",
-  "errors": [],
-  "warnings": []
-}
-```
-
-### Common Issues & Solutions
-
-#### Issue: "Database connection failed"
-**Error:** `Access denied for user`
-**Solution:**
-1. Check `api/config.php` credentials
-2. Verify DB_USER and DB_PASS are correct
-3. Test MySQL login: `mysql -u username -p`
-
-#### Issue: "Unknown database"
-**Error:** `Unknown database 'ch167436_3dprint'`
-**Solution:**
-1. Create the database in MySQL/PHPMyAdmin
-2. Or run: `CREATE DATABASE ch167436_3dprint CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
-
-#### Issue: "Missing tables"
-**Error:** Tables: orders, settings, services not found
-**Solution:**
-1. Import schema: `mysql -u user -p database < database/schema.sql`
-2. Or use PHPMyAdmin: Import → database/schema.sql
-3. Verify: `php scripts/db_audit.php`
-
-#### Issue: "Schema drift detected"
-**Error:** Missing columns or indexes
-**Solution:**
-1. Backup your data first!
-2. Compare `database/schema.sql` with actual schema
-3. Run ALTER TABLE commands to update schema
-4. Or re-import schema (may lose data)
-
-#### Issue: "Connection refused"
-**Error:** `Connection refused`
-**Solution:**
-1. Check if MySQL is running: `systemctl status mysql`
-2. Start MySQL: `systemctl start mysql`
-3. Check DB_HOST in config.php (should be 'localhost' or '127.0.0.1')
-
-### Integration with Other Tools
-
-The audit tool integrates with existing diagnostic tools:
-
-- **api/test.php** - Quick API check + full audit mode (`?audit=full`)
-- **api/init-check.php** - Database initialization check
-- **scripts/db_audit.php** - Comprehensive standalone audit
-
-### When to Run the Audit
-
-Run the audit when you experience:
-- ❌ API returning 500 errors
-- ❌ Database connection failures
-- ❌ Empty data on frontend
-- ❌ Form submissions not saving
-- ❌ After schema changes
-- ❌ After MySQL version upgrade
-- ❌ During production deployment
-- ✅ As part of monitoring/health checks
-
-### Exit Codes (CLI)
-
-The CLI script returns appropriate exit codes:
-- `0` - All checks passed (success)
-- `1` - One or more checks failed (error)
-
-This allows integration with shell scripts and monitoring tools:
-```bash
-#!/bin/bash
-if php scripts/db_audit.php --json > /var/log/db-audit.json; then
-    echo "Database is healthy"
-else
-    echo "Database issues detected!"
-    cat /var/log/db-audit.json
-    # Send alert, page engineer, etc.
-fi
-```
-
----
-
-## 📦 Deployment
-
-### Шаг 1: Подготовка
-
-1. Прочитайте [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRODUCTION_DEPLOYMENT_GUIDE.md)
-2. Проверьте все пункты чеклиста
-
-### Шаг 2: Upload
-
-1. Upload все файлы на хостинг (FTP/SFTP)
-2. Сохраните структуру папок
-3. Настройте HTTPS
-
-### Шаг 3: Настройка
-
-1. Откройте сайт в браузере
-2. Зайдите в `/admin.html`
-3. Настройте Telegram (Chat ID)
-4. Измените пароль админки
-
-### Шаг 4: Тестирование
-
-1. Отправьте заявку из калькулятора
-2. Отправьте сообщение из контактной формы
-3. Проверьте что пришли в Telegram
-4. Проверьте админ-панель (заказы сохранены)
+See [docs/TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md) for comprehensive testing procedures.
 
 ---
 
 ## 🐛 Troubleshooting
 
-### База данных не работает / API недоступен
+### Quick Fixes
 
-**Симптомы:** Ошибки подключения, пустые данные, API возвращает ошибки
+| Issue | Solution |
+|-------|----------|
+| Database connection failed | Check credentials in `api/config.php` |
+| Tables not found | Run `mysql -u user -p db < database/schema.sql` |
+| No data showing | Run `https://your-domain.com/api/init-database.php` |
+| Cannot login to admin | Run `php scripts/setup-admin-credentials.php` |
+| Telegram test fails | Check bot token and chat ID in settings |
+| Forms not submitting | Check browser console for errors |
+| Session expired immediately | Use HTTPS and enable cookies |
 
-**Решение:**
-1. **Запустите диагностику базы данных:**
-   
-   **Через браузер:**
-   ```
-   https://your-domain.com/api/test.php?audit=full
-   ```
-   
-   **Через командную строку (CLI):**
-   ```bash
-   php scripts/db_audit.php
-   # или для JSON вывода:
-   php scripts/db_audit.php --json
-   ```
-
-2. **Проверьте результаты:**
-   - ✅ `CONNECTION: Connected` - соединение работает
-   - ❌ `CONNECTION: Failed` - проверьте credentials в `api/config.php`
-   - ❌ `TABLES: Missing tables` - запустите `database/schema.sql`
-   - ❌ `SCHEMA VALIDATION: Drift detected` - схема устарела, обновите БД
-
-3. **Типичные проблемы:**
-   - `Access denied` → Неверный пароль в `api/config.php`
-   - `Unknown database` → База данных не создана
-   - `Connection refused` → MySQL сервер не запущен
-   - `Missing tables` → Выполните `database/schema.sql`
-
-4. **См. полную документацию:** [DATABASE_ARCHITECTURE.md](./DATABASE_ARCHITECTURE.md)
-
-### Telegram не работает
-
-**Симптомы:** Заявки не приходят в Telegram
-
-**Решение:**
-1. Откройте консоль браузера (F12)
-2. Проверьте логи (должны быть эмодзи: 📤, ✅, ❌)
-3. Если видите `❌ Chat ID не настроен` → настройте в админке
-4. См. [TELEGRAM_SETUP_GUIDE.md](./TELEGRAM_SETUP_GUIDE.md)
-
-### localStorage пустая
-
-**Симптомы:** Нет данных, настройки сбрасываются
-
-**Решение:**
-1. База инициализируется автоматически при первом визите
-2. Проверьте консоль: `✅ CONFIG загружен из БД`
-3. На разных доменах разная localStorage (это нормально)
-
-### Формы не работают
-
-**Симптомы:** Кнопка "Отправить" не реагирует
-
-**Решение:**
-1. Откройте консоль (F12)
-2. Проверьте JS ошибки
-3. Убедитесь что все скрипты загрузились
-4. Проверьте что checkbox "Согласен на обработку" отмечен
-
-### CSS не загружается
-
-**Симптомы:** Сайт выглядит сломанным
-
-**Решение:**
-1. Очистите кэш браузера (Ctrl+Shift+R)
-2. Проверьте пути к файлам (должны быть относительные)
-3. Проверьте консоль на 404 ошибки
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for detailed troubleshooting guide.
 
 ---
 
-## 📊 Performance
+## 📊 Production Deployment
 
-### Lighthouse Scores
+### Pre-Deployment Checklist
 
-- **Desktop:** 95/100 ⭐⭐⭐⭐⭐
-- **Mobile:** 78/100 ⭐⭐⭐⭐
+- [ ] All files uploaded
+- [ ] Database created and seeded
+- [ ] `api/config.php` configured
+- [ ] Admin credentials set
+- [ ] HTTPS enabled
+- [ ] Telegram configured
+- [ ] Forms tested
+- [ ] Mobile responsive verified
+- [ ] SEO tags configured
 
-### Optimization Tips
+### Deployment Steps
 
-1. **Изображения:** Конвертировать в WebP
-2. **Lazy loading:** Добавить для portfolio
-3. **Минификация:** CSS/JS (опционально)
+1. Upload files via FTP/SFTP
+2. Import database schema
+3. Configure `api/config.php`
+4. Setup admin credentials
+5. Seed initial data
+6. Configure Telegram
+7. Test thoroughly
+8. Go live!
 
----
-
-## 🔒 Security
-
-- ✅ HTTPS на production
-- ✅ Form validation
-- ✅ Admin panel protected
-- ⚠️ Измените пароль админки!
-- ⚠️ Не публикуйте Bot Token в git
-
----
-
-## 📈 SEO
-
-- ✅ Title tags оптимизированы (Омск)
-- ✅ Meta descriptions уникальны
-- ✅ JSON-LD structured data
-- ✅ sitemap.xml
-- ✅ robots.txt
-- ✅ Local SEO (Омск координаты)
-
-**Google/Yandex:**
-1. Добавьте сайт в Search Console / Webmaster
-2. Загрузите sitemap.xml
-3. Проверьте индексацию
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete deployment guide.
 
 ---
 
-## 🆘 Support
+## 🔄 Maintenance
 
-### Проблемы с Telegram
+### Regular Tasks
 
-→ [TELEGRAM_SETUP_GUIDE.md](./TELEGRAM_SETUP_GUIDE.md)
+**Daily:**
+- Check new orders in admin panel
+- Monitor Telegram notifications
 
-### Проблемы с deployment
+**Weekly:**
+- Review error logs: `tail -f logs/api.log`
+- Update content via admin panel
+- Check database backups
 
-→ [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRODUCTION_DEPLOYMENT_GUIDE.md)
+**Monthly:**
+- Change admin password
+- Optimize database tables
+- Review security logs
+- Update services/pricing
 
-### Технический аудит
+### Backup
 
-→ [TECHNICAL_AUDIT_SUMMARY.md](./TECHNICAL_AUDIT_SUMMARY.md)
+```bash
+# Database backup
+php database/backup.php
 
-### Консоль браузера (F12)
-
-Все операции логируются в консоль с эмодзи:
-- 📤 Отправка
-- ✅ Успех
-- ❌ Ошибка
-- ⚠️ Предупреждение
-- 🔄 Загрузка
-
----
-
-## 📝 Changelog
-
-### v2.0 - 15.01.2025 (Production Ready)
-
-**✅ ИСПРАВЛЕНО:**
-- ✅ Telegram формы работают с полной диагностикой
-- ✅ Добавлена обработка всех ошибок
-- ✅ Подробное логирование для отладки
-- ✅ Удален дубликат функции handleUniversalForm
-- ✅ Улучшена обратная связь пользователю
-
-**✅ ДОБАВЛЕНО:**
-- ✅ TELEGRAM_SETUP_GUIDE.md
-- ✅ PRODUCTION_DEPLOYMENT_GUIDE.md
-- ✅ TECHNICAL_AUDIT_SUMMARY.md
-- ✅ robots.txt
-- ✅ sitemap.xml
-- ✅ Проверка настройки Telegram при старте
-
-**✅ ОПТИМИЗИРОВАНО:**
-- ✅ Полный технический аудит пройден
-- ✅ SEO оптимизация
-- ✅ Mobile responsive design
-- ✅ Performance улучшен
+# Or manual backup
+mysqldump -u user -p database > backup_$(date +%Y%m%d).sql
+```
 
 ---
 
-## 📄 License
+## 📞 Support
 
-Proprietary - 3D Print Pro © 2025
+### Documentation
+
+- [Setup Guide](docs/SETUP_GUIDE.md) - Installation and configuration
+- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment
+- [API Reference](docs/API_REFERENCE.md) - API documentation
+- [Admin Guide](docs/ADMIN_GUIDE.md) - Admin panel usage
+- [Database Schema](docs/DATABASE_SCHEMA.md) - Database reference
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues
+
+### Diagnostics
+
+```bash
+# Full database audit
+php scripts/db_audit.php
+
+# API health check
+curl https://your-domain.com/api/test.php?audit=full
+
+# Check logs
+tail -f logs/api.log
+```
 
 ---
 
-## 👨‍💻 Разработка
+## 📝 License
 
-**Архитектура:** Vanilla JavaScript + localStorage  
-**Стиль кода:** ES6, классы, async/await  
-**Нет зависимостей:** Нет npm, webpack, или фреймворков  
-**Деплой:** Просто upload файлов на хостинг
+Proprietary. All rights reserved.
 
 ---
 
-## ✅ Status: PRODUCTION READY
+## 🎉 Credits
 
-Сайт полностью готов к production deployment.
+**Version:** 2.0 (January 2025)  
+**Architecture:** Complete rewrite with MySQL + PHP REST API  
+**Status:** Production Ready ✅
 
-**Что дальше:**
-1. Deploy на хостинг
-2. Настроить Telegram Chat ID
-3. Изменить пароль админки
-4. Готово! 🚀
+**Features:**
+- 7-table database architecture
+- 8 REST API endpoints with rate limiting
+- Secure PHP session-based authentication
+- Admin panel with modular JavaScript
+- Telegram integration with database-driven config
+- Complete documentation suite
 
 ---
 
-**Вопросы?** Проверьте документацию выше или консоль браузера (F12).
+**Made with ❤️ for 3D printing enthusiasts in Omsk**
