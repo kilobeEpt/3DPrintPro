@@ -81,6 +81,11 @@ class APIClient {
             }
         };
         
+        // Add CSRF token for admin requests (if available)
+        if (window.ADMIN_SESSION && window.ADMIN_SESSION.csrfToken) {
+            fetchOptions.headers['X-CSRF-Token'] = window.ADMIN_SESSION.csrfToken;
+        }
+        
         if (data && (method === 'POST' || method === 'PUT')) {
             fetchOptions.body = JSON.stringify(data);
         }

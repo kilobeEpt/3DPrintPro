@@ -8,6 +8,7 @@ require_once __DIR__ . '/helpers/rate_limiter.php';
 require_once __DIR__ . '/helpers/response.php';
 require_once __DIR__ . '/helpers/logger.php';
 require_once __DIR__ . '/helpers/telegram.php';
+require_once __DIR__ . '/helpers/admin_auth.php';
 require_once __DIR__ . '/db.php';
 
 SecurityHeaders::apply();
@@ -20,6 +21,9 @@ $rateLimiter = new RateLimiter();
 try {
     switch ($method) {
         case 'GET':
+            // Require admin authentication for viewing orders
+            requireAdminAuth();
+            
             // Get all orders or single order
             if (isset($_GET['id'])) {
                 $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
@@ -183,6 +187,9 @@ try {
             break;
             
         case 'PUT':
+            // Require admin authentication and CSRF token
+            requireAdminAuthWithCsrf();
+            
             // Apply rate limiting for write operations
             $rateLimiter->apply('orders_update');
             
@@ -231,6 +238,9 @@ try {
             break;
             
         case 'DELETE':
+            // Require admin authentication and CSRF token
+            requireAdminAuthWithCsrf();
+            
             // Apply rate limiting for write operations
             $rateLimiter->apply('orders_delete');
             
