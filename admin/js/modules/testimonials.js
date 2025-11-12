@@ -3,6 +3,11 @@ class TestimonialsModule {
     constructor() { this.items = []; }
     async init() {
         console.log('💬 Loading testimonials...');
+        if (!window.adminApi) {
+            console.warn('⚠️ adminApi not ready yet, retrying...');
+            setTimeout(() => this.init(), 100);
+            return;
+        }
         const btn = document.getElementById('addTestimonialBtn');
         if (btn) btn.addEventListener('click', () => AdminMain.prototype.showToast('Функция в разработке', 'info'));
         await this.loadTestimonials();
@@ -12,7 +17,7 @@ class TestimonialsModule {
         if (!container) return;
         try {
             AdminMain.prototype.showLoading(container);
-            this.items = await adminApi.getTestimonials();
+            this.items = await window.adminApi.getTestimonials();
             if (this.items.length === 0) { AdminMain.prototype.showEmpty(container, 'Нет отзывов'); return; }
             container.innerHTML = this.items.map(item => `<div class="testimonial-card"><h4>${item.name}</h4><p>${item.text}</p></div>`).join('');
             console.log(`✅ Loaded ${this.items.length} testimonials`);

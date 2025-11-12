@@ -10,6 +10,13 @@ class ServicesModule {
     
     async init() {
         console.log('🛠️ Loading services...');
+        
+        if (!window.adminApi) {
+            console.warn('⚠️ adminApi not ready yet, retrying...');
+            setTimeout(() => this.init(), 100);
+            return;
+        }
+        
         this.initButtons();
         await this.loadServices();
     }
@@ -28,7 +35,7 @@ class ServicesModule {
         try {
             AdminMain.prototype.showLoading(container);
             
-            this.services = await adminApi.getServices();
+            this.services = await window.adminApi.getServices();
             this.renderServices();
             
             console.log(`✅ Loaded ${this.services.length} services`);
@@ -154,10 +161,10 @@ class ServicesModule {
         
         try {
             if (this.editingId) {
-                await adminApi.updateService(this.editingId, data);
+                await window.adminApi.updateService(this.editingId, data);
                 AdminMain.prototype.showToast('Услуга обновлена', 'success');
             } else {
-                await adminApi.createService(data);
+                await window.adminApi.createService(data);
                 AdminMain.prototype.showToast('Услуга добавлена', 'success');
             }
             
@@ -173,7 +180,7 @@ class ServicesModule {
         if (!AdminMain.prototype.showConfirm('Удалить эту услугу?')) return;
         
         try {
-            await adminApi.deleteService(id);
+            await window.adminApi.deleteService(id);
             AdminMain.prototype.showToast('Услуга удалена', 'success');
             await this.loadServices();
         } catch (error) {

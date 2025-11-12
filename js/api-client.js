@@ -435,5 +435,5 @@ class APIClient {
 }
 
 // Create global instance
-const apiClient = new APIClient();
+window.apiClient = new APIClient();
 console.log('✅ APIClient initialized');

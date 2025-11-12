@@ -17,6 +17,13 @@ class OrdersModule {
     
     async init() {
         console.log('📦 Loading orders...');
+        
+        if (!window.adminApi) {
+            console.warn('⚠️ adminApi not ready yet, retrying...');
+            setTimeout(() => this.init(), 100);
+            return;
+        }
+        
         this.initFilters();
         await this.loadOrders();
     }
@@ -63,7 +70,7 @@ class OrdersModule {
         try {
             AdminMain.prototype.showLoading(container);
             
-            this.orders = await adminApi.getOrders();
+            this.orders = await window.adminApi.getOrders();
             this.orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             
             this.applyFilters();
@@ -246,7 +253,7 @@ class OrdersModule {
     
     async updateStatus(orderId, newStatus) {
         try {
-            await adminApi.updateOrder(orderId, { status: newStatus });
+            await window.adminApi.updateOrder(orderId, { status: newStatus });
             
             // Update local data
             const order = this.orders.find(o => o.id === orderId);
@@ -273,7 +280,7 @@ class OrdersModule {
         }
         
         try {
-            await adminApi.deleteOrder(orderId);
+            await window.adminApi.deleteOrder(orderId);
             this.orders = this.orders.filter(o => o.id !== orderId);
             this.applyFilters();
             AdminMain.prototype.showToast('Заказ удалён', 'success');

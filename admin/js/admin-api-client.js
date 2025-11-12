@@ -200,6 +200,17 @@ class AdminApiClient {
     }
 }
 
-// Initialize global admin API client
-window.adminApi = new AdminApiClient();
-console.log('🔐 Admin API Client ready');
+// Initialize global admin API client after apiClient is ready
+function initAdminApiClient() {
+    if (!window.apiClient) {
+        console.warn('⚠️ Waiting for apiClient to be ready...');
+        setTimeout(initAdminApiClient, 50);
+        return;
+    }
+    
+    window.adminApi = new AdminApiClient();
+    console.log('🔐 Admin API Client ready');
+}
+
+// Start initialization
+initAdminApiClient();
