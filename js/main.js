@@ -55,21 +55,30 @@ class MainApp {
     initPhoneMasks() {
         const phoneInputs = document.querySelectorAll('input[type="tel"]');
         phoneInputs.forEach(input => {
-            input.addEventListener('input', (e) => this.formatPhone(e.target));
-            input.addEventListener('focus', (e) => {
-                if (!e.target.value) {
-                    e.target.value = '+7 ';
-                }
-            });
-            input.addEventListener('blur', (e) => {
-                if (e.target.value === '+7 ') {
-                    e.target.value = '';
-                }
-            });
+            if (typeof Utils !== 'undefined') {
+                Utils.initPhoneMask(input);
+            } else {
+                input.addEventListener('input', (e) => this.formatPhone(e.target));
+                input.addEventListener('focus', (e) => {
+                    if (!e.target.value) {
+                        e.target.value = '+7 ';
+                    }
+                });
+                input.addEventListener('blur', (e) => {
+                    if (e.target.value === '+7 ') {
+                        e.target.value = '';
+                    }
+                });
+            }
         });
     }
 
     formatPhone(input) {
+        if (typeof Utils !== 'undefined') {
+            Utils.formatPhone(input);
+            return;
+        }
+        
         let value = input.value.replace(/\D/g, '');
 
         if (value.length > 0 && value[0] === '8') {
@@ -725,71 +734,74 @@ class MainApp {
         };
 
         try {
-            console.log('📤 Отправка заявки на сервер...');
+            console.log('📤 Отправка заявки через API...');
             
-            const apiStatus = typeof apiClient !== 'undefined' ? apiClient.getStatus() : null;
-            if (apiStatus && !apiStatus.isOnline) {
+            if (typeof apiClient === 'undefined') {
+                throw {
+                    message: 'API клиент недоступен',
+                    isNetworkError: true
+                };
+            }
+            
+            const apiStatus = apiClient.getStatus();
+            if (!apiStatus.isOnline) {
                 throw {
                     message: 'API недоступен',
                     isNetworkError: true
                 };
             }
             
-            const response = await fetch('api/submit-form.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(order)
-            });
-
-            const result = await response.json();
+            const result = await apiClient.createOrder(order);
             
-            if (result.success) {
-                console.log('✅ Заявка успешно сохранена в БД. Order ID:', result.order_id);
-                console.log('📬 Telegram отправлен:', result.telegram_sent);
-                
-                try {
-                    const savedOrder = db.addItem('orders', {
-                        ...order,
-                        id: result.order_id,
-                        orderNumber: result.order_number,
-                        telegramSent: result.telegram_sent
-                    });
-                    console.log('💾 Заявка сохранена в localStorage (резервная копия)');
-                } catch (e) {
-                    console.log('⚠️ localStorage недоступен (возможно, инкогнито режим)');
-                }
-                
-                if (result.telegram_sent) {
-                    this.showNotification('✅ Спасибо! Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время.', 'success');
-                } else {
-                    this.showNotification('✅ Спасибо! Ваша заявка сохранена. Мы свяжемся с вами в ближайшее время.', 'success');
-                    if (result.telegram_error) {
-                        console.warn('⚠️ Telegram ошибка:', result.telegram_error);
-                    }
-                }
-                
-                form.reset();
-                const calcInfo = document.getElementById('calculationInfo');
-                if (calcInfo) calcInfo.style.display = 'none';
-                const formTitle = document.getElementById('formTitle');
-                if (formTitle) {
-                    formTitle.innerHTML = '<i class="fas fa-envelope"></i> Свяжитесь с нами';
-                }
-                
+            console.log('✅ Заявка успешно сохранена в БД. Order ID:', result.id);
+            console.log('📬 Telegram отправлен:', result.telegram_sent);
+            
+            try {
+                await db.getOrders();
+                console.log('💾 Кеш заказов обновлен');
+            } catch (e) {
+                console.log('⚠️ Не удалось обновить кеш заказов');
+            }
+            
+            if (result.telegram_sent) {
+                this.showNotification('✅ Спасибо! Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время.', 'success');
             } else {
-                throw new Error(result.error || 'Ошибка при отправке формы');
+                this.showNotification('✅ Спасибо! Ваша заявка сохранена. Мы свяжемся с вами в ближайшее время.', 'success');
+                if (result.telegram_error) {
+                    console.warn('⚠️ Telegram ошибка:', result.telegram_error);
+                }
+            }
+            
+            form.reset();
+            const calcInfo = document.getElementById('calculationInfo');
+            if (calcInfo) calcInfo.style.display = 'none';
+            const formTitle = document.getElementById('formTitle');
+            if (formTitle) {
+                formTitle.innerHTML = '<i class="fas fa-envelope"></i> Свяжитесь с нами';
             }
             
         } catch (error) {
             console.error('❌ Ошибка отправки формы:', error);
             
-            const isNetworkError = error.isNetworkError || error.name === 'TypeError' || error.message.includes('Failed to fetch');
+            const isNetworkError = error.isNetworkError || error.name === 'TypeError' || 
+                                 error.message.includes('Failed to fetch') || 
+                                 error.message.includes('Network');
             
             try {
-                const savedOrder = db.addItem('orders', order);
-                console.log('💾 Заявка сохранена только в localStorage (fallback)');
+                const orderToSave = {
+                    ...order,
+                    id: Date.now() + Math.random().toString(36).substr(2, 9),
+                    createdAt: new Date().toISOString(),
+                    pendingSync: true
+                };
+                
+                const allData = JSON.parse(localStorage.getItem('3dprintpro_data') || '{}');
+                const orders = allData.orders || [];
+                orders.push(orderToSave);
+                allData.orders = orders;
+                localStorage.setItem('3dprintpro_data', JSON.stringify(allData));
+                
+                console.log('💾 Заявка сохранена в localStorage для последующей синхронизации');
                 
                 if (isNetworkError) {
                     this.showNotification(
@@ -909,6 +921,10 @@ class MainApp {
     }
 
     async generateOrderNumber() {
+        if (typeof Utils !== 'undefined' && Utils.generateOrderNumber) {
+            return await Utils.generateOrderNumber();
+        }
+        
         try {
             const orders = await db.getOrders();
             const maxNumber = orders.reduce((max, o) => {
@@ -955,7 +971,12 @@ class MainApp {
         }
     }
 
-    showNotification(message, type = 'info') {
+    showNotification(message, type = 'info', duration = 5000) {
+        if (typeof Utils !== 'undefined' && Utils.showNotification) {
+            Utils.showNotification(message, type, duration);
+            return;
+        }
+        
         const colors = {
             success: '#10b981',
             error: '#ef4444',
@@ -1000,7 +1021,7 @@ class MainApp {
         setTimeout(() => {
             notification.style.animation = 'slideOutRight 0.3s ease';
             setTimeout(() => notification.remove(), 300);
-        }, 3000);
+        }, duration);
     }
 }
 
