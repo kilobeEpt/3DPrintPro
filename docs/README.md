@@ -1,93 +1,158 @@
 # Documentation
 
-This directory contains all project documentation, including changelogs, summaries, testing guides, and implementation notes.
+Complete documentation suite for 3D Print Pro.
 
-## Essential Documentation
+## Core Guides
 
-For quick start and main information, see these files in the project root:
-- **[README.md](../README.md)** - Main project documentation
-- **[START_HERE.md](../START_HERE.md)** - Quick 7-minute launch guide
+These are the primary documents you'll need for setup, deployment, and maintenance:
 
-## Directory Organization
+### 🚀 [SETUP_GUIDE.md](SETUP_GUIDE.md)
+Complete installation and configuration guide.
+- Prerequisites and requirements
+- Database setup
+- Backend configuration
+- Admin credentials setup
+- Frontend configuration
+- Verification steps
+- Troubleshooting installation issues
 
-This folder contains historical documentation organized by category:
+### 📦 [DEPLOYMENT.md](DEPLOYMENT.md)
+Production deployment procedures and checklist.
+- Pre-deployment checklist
+- File upload and permissions
+- Database setup on production
+- HTTPS configuration
+- Domain configuration
+- Post-deployment verification
+- Production hardening
+- Rollback procedures
 
-### Setup & Deployment
-- DATABASE_ARCHITECTURE.md
-- DATABASE_SETUP_INSTRUCTIONS.md
-- DATABASE_FIX_INSTRUCTIONS.md
-- PRODUCTION_DEPLOYMENT_GUIDE.md
-- DEPLOYMENT_CHECKLIST.md
-- DEPLOYMENT_CHECKLIST_PHP.md
-- QUICK_DEPLOYMENT_GUIDE.md
-- QUICK_START_PRODUCTION.md
-- PHP_BACKEND_SETUP.md
-- TELEGRAM_SETUP_GUIDE.md
+### 🔌 [API_REFERENCE.md](API_REFERENCE.md)
+Complete REST API endpoint documentation.
+- API overview and conventions
+- HTTP status codes
+- Response structures
+- Rate limiting
+- Security headers
+- All 8 API endpoints with examples
+- Error handling
+- JavaScript client usage
 
-### Testing & QA
-- TEST_CHECKLIST.md
-- TESTING_GUIDE.md
-- TESTING.md
-- QA_TESTING_COMPLETE.md
-- QA_TEST_EVIDENCE.md
-- QA_EXECUTION_SUMMARY.md
-- TESTING_REPORT.md
-- TEST_MATRIX.md
-- MOBILE_TESTING.md
+### 👤 [ADMIN_GUIDE.md](ADMIN_GUIDE.md)
+Admin panel features and usage instructions.
+- Accessing the admin panel
+- Dashboard overview
+- Orders management
+- Services, portfolio, testimonials, FAQ management
+- Content blocks editing
+- Settings configuration
+- Telegram setup
+- Security best practices
 
-### Implementation Summaries
-- FINAL_COMPLETION_SUMMARY.md
-- IMPLEMENTATION_SUMMARY.md
-- IMPLEMENTATION_SUMMARY_AUDIT_TOOL.md
-- TASK_COMPLETION_SUMMARY.md
-- TECHNICAL_AUDIT_SUMMARY.md
-- API_HARDENING_SUMMARY.md
-- CLIENT_SUMMARY.md
-- FORMS_FIX_SUMMARY.md
-- DATABASE_FIX_SUMMARY.md
-- MOBILE_POLISH_SUMMARY.md
-- MOBILE_REDESIGN_SUMMARY.md
-- FRONTEND_OFFLINE_STABILIZATION.md
+### 🗄️ [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)
+Database tables, columns, indexes, and relationships.
+- Complete schema for all 7 tables
+- Column types and constraints
+- Indexes and performance
+- Initialization and seeding
+- Backup and restore
+- Maintenance procedures
+- Schema validation
 
-### Changelogs
-- CHANGELOG_REBUILD_SYSTEM.md
-- CHANGELOG_DB_FIX.md
-- CHANGELOG_WEIGHT_INPUT_FIX.md
-- CHANGES.md
+### 🛠️ [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+Common issues and their solutions.
+- Quick diagnostics commands
+- Database issues
+- API issues
+- Frontend issues
+- Admin panel issues
+- Telegram issues
+- Performance issues
+- Security issues
+- Production issues
 
-### Architecture & Design
-- CSS_ARCHITECTURE.md
-- AUDIT_TOOL.md
-- DATABASE_ARCHITECTURE.md
-- DATABASE_MIGRATION_COMPLETE.md
-- MIGRATION_GUIDE.md
+## Additional Documentation
 
-### Task Completion & Verification
-- TASK_COMPLETE.md
-- TASK_COMPLETE_AUDIT.md
-- TASK_SUMMARY_REBUILD_SCHEMA_SEEDING.md
-- VERIFICATION_CHECKLIST.md
-- VERIFICATION_CHECKLIST_AUDIT.md
-- ACCEPTANCE_CHECKLIST.md
-- FINAL_AUDIT_REPORT.md
+### 📱 [TELEGRAM_INTEGRATION.md](TELEGRAM_INTEGRATION.md)
+Telegram bot setup and configuration.
+- Creating a Telegram bot
+- Getting chat ID
+- Configuration in admin panel
+- Notification settings
+- Troubleshooting Telegram issues
+- Security considerations
+- Code architecture
 
-### Layout & UI
-- LAYOUT_FIX_DOCUMENTATION.md
-- LAYOUT_FIX_CHECKLIST.md
-- LAYOUT_FIX_README.md
-- LAYOUT_CHANGES_SUMMARY.md
-- LAYOUT_RESET_SUMMARY.md
-- HEADER_PADDING_FIX_IMPLEMENTATION.md
-- CONTENT_PAGES_SUMMARY.md
+### 🔐 [ADMIN_AUTHENTICATION.md](ADMIN_AUTHENTICATION.md)
+Security and authentication system details.
+- Architecture overview
+- Session security
+- Login rate limiting
+- CSRF protection
+- API endpoint protection
+- Integration with frontend
+- Security best practices
+- Troubleshooting auth issues
 
-### Quick Reference
-- QUICK_START.md
-- QUICK_FIX_CHECKLIST.md
-- REBUILD_QUICK_REFERENCE.md
-- README_DATABASE_FIX.md
-- README_DB_FIX.md
-- README_LAYOUT_RESET.md
+### ✅ [TEST_CHECKLIST.md](TEST_CHECKLIST.md)
+Comprehensive testing procedures and checklist.
+- Frontend testing
+- Forms testing
+- Calculator testing
+- API testing
+- Admin panel testing
+- Security testing
+- Mobile responsive testing
+- Offline/online testing
 
----
+## Quick Reference
 
-**Note:** This documentation is for reference purposes. For current development, always refer to the main [README.md](../README.md) and [START_HERE.md](../START_HERE.md) in the project root.
+### For New Installations
+1. Read [SETUP_GUIDE.md](SETUP_GUIDE.md)
+2. Follow [DEPLOYMENT.md](DEPLOYMENT.md)
+3. Review [ADMIN_GUIDE.md](ADMIN_GUIDE.md)
+
+### For API Development
+1. Read [API_REFERENCE.md](API_REFERENCE.md)
+2. Check [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md)
+3. Review [ADMIN_AUTHENTICATION.md](ADMIN_AUTHENTICATION.md)
+
+### For Troubleshooting
+1. Start with [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+2. Run diagnostics: `php scripts/db_audit.php`
+3. Check specific guide for your issue area
+
+## Document Status
+
+All documents reflect the current architecture:
+- ✅ MySQL 8.0+ database
+- ✅ PHP 7.4+ REST API
+- ✅ Secure session-based admin authentication
+- ✅ Telegram integration with database-driven config
+- ✅ Rate limiting and security headers
+- ✅ Complete CRUD operations for all resources
+
+**Last Updated:** January 2025  
+**Version:** 2.0  
+**Status:** Production Ready
+
+## Contributing
+
+When updating documentation:
+1. Keep guides focused and concise
+2. Include code examples
+3. Add troubleshooting sections
+4. Cross-reference related docs
+5. Update this README if adding new guides
+
+## Archive
+
+Legacy documentation has been moved to [archive/](archive/) for historical reference. These documents are superseded by the current guides but preserved for context.
+
+## Support
+
+For issues not covered in these guides:
+1. Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+2. Run diagnostics: `php scripts/db_audit.php`
+3. Check logs: `tail -f logs/api.log`
+4. Review relevant guide sections
