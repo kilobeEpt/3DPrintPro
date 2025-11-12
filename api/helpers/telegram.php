@@ -5,6 +5,65 @@
 
 class TelegramHelper {
     /**
+     * Get Telegram credentials from database or config
+     * 
+     * @param Database $db Database instance
+     * @return array ['botToken' => string, 'chatId' => string]
+     */
+    private static function getCredentials($db) {
+        $botToken = '';
+        $chatId = '';
+        
+        // Try to get from database first
+        if ($db) {
+            try {
+                $dbBotToken = $db->getSetting('telegram_bot_token');
+                if ($dbBotToken && !empty($dbBotToken)) {
+                    $botToken = $dbBotToken;
+                }
+                
+                $dbChatId = $db->getSetting('telegram_chat_id');
+                if ($dbChatId && !empty($dbChatId)) {
+                    $chatId = $dbChatId;
+                }
+            } catch (Exception $e) {
+                // Ignore database errors
+            }
+        }
+        
+        // Fallback to config constants
+        if (empty($botToken) && defined('TELEGRAM_BOT_TOKEN')) {
+            $botToken = TELEGRAM_BOT_TOKEN;
+        }
+        if (empty($chatId) && defined('TELEGRAM_CHAT_ID')) {
+            $chatId = TELEGRAM_CHAT_ID;
+        }
+        
+        return ['botToken' => $botToken, 'chatId' => $chatId];
+    }
+    
+    /**
+     * Check if notifications are enabled for a specific event
+     * 
+     * @param Database $db Database instance
+     * @param string $eventType Event type (new_order, status_change)
+     * @return bool
+     */
+    private static function isNotificationEnabled($db, $eventType) {
+        if (!$db) {
+            return true; // Default to enabled if DB not available
+        }
+        
+        try {
+            $settingKey = 'telegram_notify_' . $eventType;
+            $enabled = $db->getSetting($settingKey);
+            return $enabled === null ? true : (bool)$enabled;
+        } catch (Exception $e) {
+            return true; // Default to enabled on error
+        }
+    }
+    
+    /**
      * Send order notification to Telegram
      * 
      * @param array $data Order data
@@ -14,22 +73,26 @@ class TelegramHelper {
      * @return array ['success' => bool, 'error' => string|null]
      */
     public static function sendOrderNotification($data, $orderNumber, $orderId, $db) {
-        // Get chat ID from database settings or config
-        $chatId = defined('TELEGRAM_CHAT_ID') ? TELEGRAM_CHAT_ID : '';
-        
-        // Try to get from database
-        if ($db) {
-            try {
-                $dbChatId = $db->getSetting('telegram_chat_id');
-                if ($dbChatId && !empty($dbChatId)) {
-                    $chatId = $dbChatId;
-                }
-            } catch (Exception $e) {
-                // Ignore database errors for chat ID lookup
-            }
+        // Check if new order notifications are enabled
+        if (!self::isNotificationEnabled($db, 'new_order')) {
+            return [
+                'success' => false,
+                'error' => 'New order notifications disabled'
+            ];
         }
         
-        // Check if chat ID is configured
+        // Get credentials
+        $credentials = self::getCredentials($db);
+        $botToken = $credentials['botToken'];
+        $chatId = $credentials['chatId'];
+        
+        // Validate credentials
+        if (empty($botToken)) {
+            return [
+                'success' => false,
+                'error' => 'Bot token not configured'
+            ];
+        }
         if (empty($chatId)) {
             return [
                 'success' => false,
@@ -37,19 +100,119 @@ class TelegramHelper {
             ];
         }
         
-        // Check if bot token is configured
-        if (!defined('TELEGRAM_BOT_TOKEN') || empty(TELEGRAM_BOT_TOKEN)) {
+        // Build message
+        $message = self::buildOrderMessage($data, $orderNumber, $orderId);
+        
+        // Send to Telegram API
+        return self::sendMessage($botToken, $chatId, $message);
+    }
+    
+    /**
+     * Send status change notification to Telegram
+     * 
+     * @param int $orderId Order ID
+     * @param string $orderNumber Order number
+     * @param string $oldStatus Old status
+     * @param string $newStatus New status
+     * @param Database $db Database instance
+     * @return array ['success' => bool, 'error' => string|null]
+     */
+    public static function sendStatusChangeNotification($orderId, $orderNumber, $oldStatus, $newStatus, $db) {
+        // Check if status change notifications are enabled
+        if (!self::isNotificationEnabled($db, 'status_change')) {
+            return [
+                'success' => false,
+                'error' => 'Status change notifications disabled'
+            ];
+        }
+        
+        // Get credentials
+        $credentials = self::getCredentials($db);
+        $botToken = $credentials['botToken'];
+        $chatId = $credentials['chatId'];
+        
+        // Validate credentials
+        if (empty($botToken)) {
             return [
                 'success' => false,
                 'error' => 'Bot token not configured'
             ];
         }
+        if (empty($chatId)) {
+            return [
+                'success' => false,
+                'error' => 'Chat ID not configured'
+            ];
+        }
         
         // Build message
-        $message = self::buildOrderMessage($data, $orderNumber, $orderId);
+        $message = self::buildStatusChangeMessage($orderId, $orderNumber, $oldStatus, $newStatus);
         
         // Send to Telegram API
-        return self::sendMessage($chatId, $message);
+        return self::sendMessage($botToken, $chatId, $message);
+    }
+    
+    /**
+     * Send a test message to verify credentials
+     * 
+     * @param Database $db Database instance
+     * @return array ['success' => bool, 'error' => string|null]
+     */
+    public static function sendTestMessage($db) {
+        // Get credentials
+        $credentials = self::getCredentials($db);
+        $botToken = $credentials['botToken'];
+        $chatId = $credentials['chatId'];
+        
+        // Validate credentials
+        if (empty($botToken)) {
+            return [
+                'success' => false,
+                'error' => 'Bot token not configured'
+            ];
+        }
+        if (empty($chatId)) {
+            return [
+                'success' => false,
+                'error' => 'Chat ID not configured'
+            ];
+        }
+        
+        // Build test message
+        $message = "🧪 <b>Test Message</b>\n\n";
+        $message .= "✅ Telegram integration is working correctly!\n";
+        $message .= "⏰ " . date('d.m.Y H:i:s') . "\n";
+        $message .= "🤖 Bot: Connected\n";
+        $message .= "💬 Chat: Connected";
+        
+        // Send to Telegram API
+        return self::sendMessage($botToken, $chatId, $message);
+    }
+    
+    /**
+     * Build status change message for Telegram
+     */
+    private static function buildStatusChangeMessage($orderId, $orderNumber, $oldStatus, $newStatus) {
+        // Status labels in Russian
+        $statusLabels = [
+            'new' => '🆕 Новая',
+            'processing' => '🔄 В работе',
+            'completed' => '✅ Выполнена',
+            'cancelled' => '❌ Отменена',
+            'on_hold' => '⏸ На паузе'
+        ];
+        
+        $oldLabel = $statusLabels[$oldStatus] ?? $oldStatus;
+        $newLabel = $statusLabels[$newStatus] ?? $newStatus;
+        
+        $message = "🔔 <b>ИЗМЕНЕНИЕ СТАТУСА ЗАКАЗА</b>\n\n";
+        $message .= "📋 <b>Заказ:</b> #{$orderNumber}\n";
+        $message .= "🆔 <b>ID:</b> {$orderId}\n\n";
+        $message .= "📊 <b>Статус изменен:</b>\n";
+        $message .= "   {$oldLabel} → {$newLabel}\n\n";
+        $message .= "⏰ <b>Дата:</b> " . date('d.m.Y H:i');
+        
+        return $message;
     }
     
     /**
@@ -123,8 +286,8 @@ class TelegramHelper {
     /**
      * Send message to Telegram
      */
-    private static function sendMessage($chatId, $message) {
-        $url = "https://api.telegram.org/bot" . TELEGRAM_BOT_TOKEN . "/sendMessage";
+    private static function sendMessage($botToken, $chatId, $message) {
+        $url = "https://api.telegram.org/bot" . $botToken . "/sendMessage";
         
         $postData = [
             'chat_id' => $chatId,

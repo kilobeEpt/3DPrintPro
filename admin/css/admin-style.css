@@ -117,9 +117,14 @@ body.admin-body {
 }
 .btn-primary {background: var(--admin-primary); color: white;}
 .btn-primary:hover {background: var(--admin-primary-dark);}
+.btn-secondary {background: var(--admin-bg); border: 1px solid var(--admin-border); color: var(--admin-text);}
+.btn-secondary:hover {background: var(--admin-border);}
+.btn-info {background: var(--admin-info); color: white;}
+.btn-info:hover {background: #2563eb;}
 .btn-outline {background: white; border: 1px solid var(--admin-border); color: var(--admin-text);}
 .btn-outline:hover {background: var(--admin-bg);}
 .btn-danger {background: var(--admin-danger); color: white;}
+.btn-danger:hover {background: #dc2626;}
 .btn-sm {padding: 6px 12px; font-size: 13px;}
 .btn-block {width: 100%;}
 
@@ -214,6 +219,29 @@ body.admin-body {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 textarea.form-control {resize: vertical; min-height: 100px;}
+
+.input-group {
+    display: flex; align-items: stretch;
+}
+.input-group .form-control {
+    border-top-right-radius: 0; border-bottom-right-radius: 0;
+}
+.input-group .btn {
+    border-top-left-radius: 0; border-bottom-left-radius: 0;
+    border-left: none; margin: 0;
+}
+.input-group .btn-secondary {
+    background: var(--admin-bg); color: var(--admin-text);
+    border: 1px solid var(--admin-border);
+}
+.input-group .btn-secondary:hover {
+    background: var(--admin-border); color: var(--admin-text);
+}
+
+.text-muted {color: var(--admin-text-secondary); font-size: 13px;}
+.form-text {display: block; margin-top: 6px;}
+.ml-3 {margin-left: 1rem;}
+.text-success {color: var(--admin-success);}
 
 .checkbox-label {display: flex; align-items: center; gap: 8px; cursor: pointer;}
 .toggle-switch {position: relative; width: 44px; height: 24px;}
