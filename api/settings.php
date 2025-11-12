@@ -7,10 +7,14 @@ require_once __DIR__ . '/helpers/security_headers.php';
 require_once __DIR__ . '/helpers/rate_limiter.php';
 require_once __DIR__ . '/helpers/response.php';
 require_once __DIR__ . '/helpers/logger.php';
+require_once __DIR__ . '/helpers/admin_auth.php';
 require_once __DIR__ . '/db.php';
 
 SecurityHeaders::apply();
 SecurityHeaders::handlePreflight();
+
+// Settings are admin-only - require authentication for all operations
+requireAdminAuth();
 
 $db = new Database();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -57,6 +61,9 @@ try {
             
         case 'POST':
         case 'PUT':
+            // Verify CSRF token for write operations
+            verifyCsrfToken();
+            
             // Apply rate limiting for write operations
             $rateLimiter->apply('settings_update');
             
@@ -131,6 +138,9 @@ try {
             break;
             
         case 'DELETE':
+            // Verify CSRF token for write operations
+            verifyCsrfToken();
+            
             // Apply rate limiting for write operations
             $rateLimiter->apply('settings_delete');
             

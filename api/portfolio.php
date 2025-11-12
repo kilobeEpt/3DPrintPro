@@ -7,6 +7,7 @@ require_once __DIR__ . '/helpers/security_headers.php';
 require_once __DIR__ . '/helpers/rate_limiter.php';
 require_once __DIR__ . '/helpers/response.php';
 require_once __DIR__ . '/helpers/logger.php';
+require_once __DIR__ . '/helpers/admin_auth.php';
 require_once __DIR__ . '/db.php';
 
 SecurityHeaders::apply();
@@ -61,6 +62,9 @@ try {
             break;
             
         case 'POST':
+            // Require admin authentication and CSRF token
+            requireAdminAuthWithCsrf();
+            
             // Apply rate limiting for write operations
             $rateLimiter->apply('portfolio_create');
             
@@ -103,6 +107,9 @@ try {
             break;
             
         case 'PUT':
+            // Require admin authentication and CSRF token
+            requireAdminAuthWithCsrf();
+            
             // Apply rate limiting for write operations
             $rateLimiter->apply('portfolio_update');
             
@@ -151,6 +158,9 @@ try {
             break;
             
         case 'DELETE':
+            // Require admin authentication and CSRF token
+            requireAdminAuthWithCsrf();
+            
             // Apply rate limiting for write operations
             $rateLimiter->apply('portfolio_delete');
             
