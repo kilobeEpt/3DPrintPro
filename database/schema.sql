@@ -2,6 +2,7 @@
 -- 3D Print Pro Database Schema
 -- Version: 2.0 (Complete)
 -- Last Updated: January 2025
+-- MySQL Version: 8.0+ (tested with MySQL 8.0)
 -- ========================================
 --
 -- This schema creates 7 tables for the 3D printing service platform:
@@ -18,6 +19,18 @@
 -- - Tables WITH 'active' column: services, portfolio, testimonials, faq, content_blocks
 -- - This file is IDEMPOTENT - safe to run multiple times
 -- - For HARD RESET: uncomment the DROP TABLE statements below
+-- - JSON columns are fully supported in MySQL 8.0
+-- - All tables use utf8mb4 for full Unicode support (emojis, Russian, etc.)
+--
+-- EXECUTION ORDER:
+-- 1. Run this file via: mysql -u USER -p DATABASE < schema.sql
+-- 2. Run seed script: Visit /api/init-database.php in browser or curl
+-- 3. Verify: Visit /api/test.php or use database/verify-schema.php
+--
+-- PRODUCTION TARGET:
+-- Host: localhost / ch167436.tw1.ru
+-- Database: ch167436_3dprint
+-- User: ch167436_3dprint
 --
 -- ========================================
 

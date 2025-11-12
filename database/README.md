@@ -4,9 +4,11 @@
 
 This directory contains the source-of-truth schema and seed data for the 3D Print Pro database. The system is designed for **deterministic, idempotent restoration** of database environments.
 
-## Files
+## Files in This Directory
 
-### 1. `schema.sql`
+### Core Schema Files
+
+#### 1. `schema.sql`
 **Purpose:** Creates the complete database structure (7 tables)
 
 **Features:**
@@ -34,7 +36,7 @@ mysql -u username -p database_name < schema.sql
 # SQL tab → paste schema.sql → Execute
 ```
 
-### 2. `seed-data.php`
+#### 2. `seed-data.php`
 **Purpose:** Centralized default data for all tables
 
 **Features:**
@@ -62,6 +64,61 @@ return [
     'settings' => [...]
 ];
 ```
+
+### Verification and Backup Tools
+
+#### 3. `verify-schema.php`
+**Purpose:** Validates database schema correctness
+
+**Features:**
+- ✅ Verifies all 7 tables exist with correct columns
+- ✅ Checks 'active' column presence/absence
+- ✅ Reports missing or extra columns
+- ✅ Validates indexes
+- ✅ CLI and HTTP support
+- ✅ Detailed JSON output
+
+**Usage:**
+```bash
+php database/verify-schema.php
+# Or via HTTP:
+curl https://your-site.com/database/verify-schema.php
+```
+
+See `VERIFICATION_AND_BACKUP.md` for complete documentation.
+
+#### 4. `backup.php`
+**Purpose:** Creates automated timestamped backups
+
+**Features:**
+- ✅ Full database backups (schema + data)
+- ✅ Schema-only or data-only options
+- ✅ Specific table selection
+- ✅ Automatic compression (.gz)
+- ✅ CLI and HTTP support (with token)
+- ✅ Saves to `database/backups/` directory
+
+**Usage:**
+```bash
+php database/backup.php
+php database/backup.php --schema-only
+php database/backup.php --tables=orders,settings
+# Or via HTTP (with token):
+curl "https://your-site.com/database/backup.php?token=TOKEN"
+```
+
+See `VERIFICATION_AND_BACKUP.md` for complete documentation.
+
+### Documentation
+
+#### 5. `README.md` (this file)
+Complete guide to schema, seeding, and restoration system
+
+#### 6. `VERIFICATION_AND_BACKUP.md`
+Comprehensive guide to schema verification and backup automation
+
+#### 7. `QUICK_REFERENCE.md`
+Quick command reference and common workflows
 
 ## Restoration Process
 
@@ -267,38 +324,98 @@ If you encounter duplicates:
 2. Verify api/init-database.php hasn't been modified
 3. Consider using hard reset mode to clean up
 
+## Schema Verification and Backups
+
+### Verify Schema
+
+After applying schema or making changes, verify everything is correct:
+```bash
+php database/verify-schema.php
+```
+
+This will check:
+- All 7 tables exist
+- All expected columns are present
+- 'active' column is correct for each table
+- No critical columns are missing
+
+See `VERIFICATION_AND_BACKUP.md` for complete details.
+
+### Create Backups
+
+Automated backup system with compression:
+```bash
+# Full backup
+php database/backup.php
+
+# Schema only (for version control)
+php database/backup.php --schema-only
+
+# Before major changes
+php database/backup.php --data-only
+```
+
+Backups are saved to `database/backups/` with timestamps and auto-compressed.
+
+See `VERIFICATION_AND_BACKUP.md` for complete backup guide.
+
 ## Best Practices
 
 1. **Always backup before hard reset:**
    ```bash
+   php database/backup.php
+   # Or manually:
    mysqldump -u user -p dbname > backup_$(date +%Y%m%d_%H%M%S).sql
    ```
 
-2. **Test schema changes in development first:**
+2. **Verify schema after changes:**
+   ```bash
+   php database/verify-schema.php
+   ```
+
+3. **Test schema changes in development first:**
    - Apply schema.sql to dev database
+   - Run verification script
    - Run seed script
    - Verify all endpoints work
    - Then deploy to production
 
-3. **Keep seed-data.php in version control:**
+4. **Keep seed-data.php in version control:**
    - All changes tracked
    - Easy to rollback
    - Documentation of default state
 
-4. **Change RESET_TOKEN in production:**
+5. **Change security tokens in production:**
    ```php
    // In api/init-database.php line 21:
    define('RESET_TOKEN', 'your-secure-random-string-here');
+   
+   // In database/backup.php line 36:
+   define('BACKUP_TOKEN', 'your-secure-random-string-here');
    ```
 
-5. **Monitor seed script results:**
+6. **Monitor seed script results:**
    - Check `production_ready` flag
    - Verify record counts match expectations
    - Test API endpoints after seeding
 
+7. **Regular backups:**
+   - Daily automated backups via cron
+   - Before each deployment
+   - Before schema changes
+   - Keep at least 7 days of backups
+
 ## Version History
 
-### v2.0 (January 2025) - Current
+### v2.1 (January 2025) - Current
+- ✅ Schema verification script (verify-schema.php)
+- ✅ Automated backup system (backup.php)
+- ✅ CLI and HTTP support for tools
+- ✅ Timestamped backups with compression
+- ✅ Enhanced documentation (3 guides)
+- ✅ Production-ready deployment workflow
+
+### v2.0 (January 2025)
 - ✅ Idempotent schema and seed scripts
 - ✅ Centralized seed-data.php
 - ✅ Hard reset mode with token protection
@@ -312,10 +429,18 @@ If you encounter duplicates:
 
 ## Related Documentation
 
+### In This Directory
+- `VERIFICATION_AND_BACKUP.md` - Complete verification and backup guide
+- `QUICK_REFERENCE.md` - Quick command reference
+- `schema.sql` - Database schema
+- `seed-data.php` - Seed data
+
+### In Parent Directory
 - `../DATABASE_ARCHITECTURE.md` - Complete database and API documentation
 - `../DATABASE_FIX_INSTRUCTIONS.md` - Step-by-step restoration guide
 - `../api/init-database.php` - Seed script implementation
 - `../api/db.php` - Database class with CRUD methods
+- `../api/test.php` - API diagnostic endpoint
 
 ## Support
 

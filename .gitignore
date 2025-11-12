@@ -119,7 +119,9 @@ logs/api.log
 # Temporary exports and data
 exports/
 backups/
+database/backups/
 *.export.*
+*.sql.gz
 
 # API configuration (contains sensitive database credentials)
 api/config.php
