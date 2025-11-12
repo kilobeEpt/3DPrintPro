@@ -10,6 +10,13 @@ class DashboardModule {
     
     async init() {
         console.log('📊 Loading dashboard...');
+        
+        if (!window.adminApi) {
+            console.warn('⚠️ adminApi not ready yet, retrying...');
+            setTimeout(() => this.init(), 100);
+            return;
+        }
+        
         await this.loadStats();
         await this.loadRecentOrders();
         await this.loadChart();
@@ -18,7 +25,7 @@ class DashboardModule {
     
     async loadStats() {
         try {
-            const orders = await adminApi.getOrders();
+            const orders = await window.adminApi.getOrders();
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
@@ -65,7 +72,7 @@ class DashboardModule {
         try {
             AdminMain.prototype.showLoading(container);
             
-            const orders = await adminApi.getOrders();
+            const orders = await window.adminApi.getOrders();
             const recent = orders
                 .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                 .slice(0, 5);
@@ -101,7 +108,7 @@ class DashboardModule {
         if (!canvas) return;
         
         try {
-            const orders = await adminApi.getOrders();
+            const orders = await window.adminApi.getOrders();
             const last7Days = this.getLast7Days();
             
             const data = last7Days.map(date => {

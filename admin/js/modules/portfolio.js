@@ -1,14 +1,23 @@
 // Portfolio Module - Portfolio Management & CRUD
 class PortfolioModule {
     constructor() { this.items = []; this.editingId = null; }
-    async init() { console.log('🖼️ Loading portfolio...'); this.initButtons(); await this.loadPortfolio(); }
+    async init() { 
+        console.log('🖼️ Loading portfolio...'); 
+        if (!window.adminApi) { 
+            console.warn('⚠️ adminApi not ready yet, retrying...'); 
+            setTimeout(() => this.init(), 100); 
+            return; 
+        } 
+        this.initButtons(); 
+        await this.loadPortfolio(); 
+    }
     initButtons() { const btn = document.getElementById('addPortfolioBtn'); if (btn) btn.addEventListener('click', () => this.showModal()); }
     async loadPortfolio() {
         const container = document.getElementById('portfolioContainer');
         if (!container) return;
         try {
             AdminMain.prototype.showLoading(container);
-            this.items = await adminApi.getPortfolio();
+            this.items = await window.adminApi.getPortfolio();
             this.renderPortfolio();
             console.log(`✅ Loaded ${this.items.length} portfolio items`);
         } catch (error) { console.error('❌ Failed to load portfolio:', error); AdminMain.prototype.showError(container); }
@@ -36,7 +45,7 @@ class PortfolioModule {
     async deleteItem(id) {
         if (!AdminMain.prototype.showConfirm('Удалить эту работу из портфолио?')) return;
         try {
-            await adminApi.deletePortfolioItem(id);
+            await window.adminApi.deletePortfolioItem(id);
             AdminMain.prototype.showToast('Работа удалена', 'success');
             await this.loadPortfolio();
         } catch (error) { console.error('❌ Failed to delete item:', error); AdminMain.prototype.showToast('Ошибка удаления', 'error'); }

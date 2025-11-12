@@ -31,7 +31,13 @@ class SettingsModule {
     
     async loadSettings() {
         try {
-            this.settings = await adminApi.getSettings();
+            if (!window.adminApi) {
+                console.warn('⚠️ adminApi not ready yet');
+                setTimeout(() => this.loadSettings(), 100);
+                return;
+            }
+            
+            this.settings = await window.adminApi.getSettings();
             this.populateForm();
             console.log('✅ Settings loaded');
         } catch (error) {
@@ -137,7 +143,11 @@ class SettingsModule {
         });
         
         try {
-            await adminApi.updateSettings(settings);
+            if (!window.adminApi) {
+                throw new Error('adminApi not ready');
+            }
+            
+            await window.adminApi.updateSettings(settings);
             if (!silent) {
                 AdminMain.prototype.showToast('Настройки сохранены', 'success');
             }

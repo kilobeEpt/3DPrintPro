@@ -179,7 +179,12 @@ class AdminMain {
     
     async checkOrdersBadge() {
         try {
-            const orders = await adminApi.getOrders();
+            if (!window.adminApi) {
+                console.warn('⚠️ adminApi not ready yet');
+                return;
+            }
+            
+            const orders = await window.adminApi.getOrders();
             const newOrders = orders.filter(o => o.status === 'new').length;
             
             const badge = document.getElementById('ordersBadge');
