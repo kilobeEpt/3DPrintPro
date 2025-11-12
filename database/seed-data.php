@@ -277,10 +277,24 @@ return [
         'company_phone' => '+7 (383) 000-00-00',
         'company_email' => 'info@3dprintpro.ru',
         'company_hours' => 'Пн-Пт: 10:00-18:00, Сб-Вс: 10:00-16:00',
-        'telegram_token' => '',
+        
+        // Telegram Settings (managed via admin panel)
+        'telegram_bot_token' => '',
         'telegram_chat_id' => '',
+        'telegram_contact_url' => 'https://t.me/PrintPro_Omsk',
+        'telegram_notify_new_order' => '1',
+        'telegram_notify_status_change' => '1',
+        
+        // Email Settings
+        'admin_email' => 'info@3dprintpro.ru',
+        'email_notifications_enabled' => '0',
+        
+        // Calculator Settings
         'calculator_base_price' => '50',
         'calculator_currency' => '₽',
-        'calculator_weight_unit' => 'г'
+        'calculator_weight_unit' => 'г',
+        
+        // Legacy settings (deprecated, kept for backward compatibility)
+        'telegram_token' => '',
     ]
 ];

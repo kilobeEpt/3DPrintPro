@@ -218,23 +218,79 @@ try {
                 ApiResponse::notFound('Order not found');
             }
             
+            // Check if status is changing
+            $statusChanged = false;
+            $oldStatus = null;
+            $newStatus = null;
+            if (isset($data['status']) && $data['status'] !== $existingOrder['status']) {
+                $statusChanged = true;
+                $oldStatus = $existingOrder['status'];
+                $newStatus = $data['status'];
+            }
+            
             unset($data['id']);
             
             try {
                 $db->updateRecord('orders', $id, $data);
                 ApiLogger::info("Order updated successfully", [
                     'order_id' => $id,
-                    'updated_fields' => array_keys($data)
+                    'updated_fields' => array_keys($data),
+                    'status_changed' => $statusChanged
                 ]);
             } catch (PDOException $e) {
                 ApiLogger::dbError('UPDATE', 'orders', $e, ['order_id' => $id]);
                 ApiResponse::serverError('Failed to update order. Please try again.');
             }
             
-            ApiResponse::success([
+            // Send Telegram notification if status changed
+            $telegramSent = false;
+            $telegramError = null;
+            if ($statusChanged) {
+                try {
+                    $telegramResult = TelegramHelper::sendStatusChangeNotification(
+                        $id,
+                        $existingOrder['order_number'],
+                        $oldStatus,
+                        $newStatus,
+                        $db
+                    );
+                    $telegramSent = $telegramResult['success'];
+                    if (!$telegramSent) {
+                        $telegramError = $telegramResult['error'];
+                        ApiLogger::warning("Telegram status change notification failed", [
+                            'order_id' => $id,
+                            'error' => $telegramError
+                        ]);
+                    } else {
+                        ApiLogger::info("Telegram status change notification sent", [
+                            'order_id' => $id,
+                            'old_status' => $oldStatus,
+                            'new_status' => $newStatus
+                        ]);
+                    }
+                } catch (Exception $e) {
+                    $telegramError = $e->getMessage();
+                    ApiLogger::error("Telegram status change notification exception", [
+                        'order_id' => $id,
+                        'exception' => $e
+                    ]);
+                }
+            }
+            
+            $response = [
                 'message' => 'Order updated successfully',
                 'order_id' => $id
-            ]);
+            ];
+            
+            if ($statusChanged) {
+                $response['status_changed'] = true;
+                $response['telegram_sent'] = $telegramSent;
+                if ($telegramError) {
+                    $response['telegram_error'] = $telegramError;
+                }
+            }
+            
+            ApiResponse::success($response);
             break;
             
         case 'DELETE':

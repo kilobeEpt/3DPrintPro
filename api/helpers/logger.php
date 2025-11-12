@@ -146,7 +146,7 @@ class ApiLogger {
      * Sanitize sensitive data from logs (passwords, tokens, etc.)
      */
     private static function sanitizeSensitiveData($data) {
-        $sensitiveKeys = ['password', 'token', 'secret', 'api_key', 'apikey', 'authorization'];
+        $sensitiveKeys = ['password', 'token', 'secret', 'api_key', 'apikey', 'authorization', 'bot_token', 'bottoken', 'telegram_bot_token'];
         
         if (is_array($data)) {
             foreach ($data as $key => $value) {
