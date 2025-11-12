@@ -106,5 +106,20 @@ dist/
 # Test files
 test_*.html
 
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Runtime logs and generated files
+logs/*.log
+logs/*.json
+logs/api.log
+
+# Temporary exports and data
+exports/
+backups/
+*.export.*
+
 # API configuration (contains sensitive database credentials)
 api/config.php
