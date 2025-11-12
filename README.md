@@ -41,6 +41,14 @@ python -m http.server 8000
 - **[TELEGRAM_SETUP_GUIDE.md](./TELEGRAM_SETUP_GUIDE.md)** - Настройка Telegram бота
 - **[MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)** - 🆕 Миграция из localStorage в MySQL
 
+### 🧪 Тестирование и QA (НОВОЕ!)
+
+- **[docs/TESTING_REPORT.md](./docs/TESTING_REPORT.md)** - 🆕 Полный отчет QA тестирования (81 тест, 100% успех)
+- **[docs/QA_EXECUTION_SUMMARY.md](./docs/QA_EXECUTION_SUMMARY.md)** - 🆕 Краткое резюме тестирования
+- **[docs/TEST_MATRIX.md](./docs/TEST_MATRIX.md)** - 🆕 Визуальная матрица тестов
+- **[docs/QA_TEST_EVIDENCE.md](./docs/QA_TEST_EVIDENCE.md)** - 🆕 Руководство по сбору доказательств тестирования
+- **[TEST_CHECKLIST.md](./TEST_CHECKLIST.md)** - Подробный чеклист для тестирования
+
 ### Дополнительная документация
 
 - [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRODUCTION_DEPLOYMENT_GUIDE.md) - Общий чеклист деплоя
