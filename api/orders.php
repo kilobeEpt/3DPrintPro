@@ -3,23 +3,19 @@
 // Orders API Endpoint - Full CRUD
 // ========================================
 
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-// Handle preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit(0);
-}
-
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers/security_headers.php';
+require_once __DIR__ . '/helpers/rate_limiter.php';
 require_once __DIR__ . '/helpers/response.php';
 require_once __DIR__ . '/helpers/logger.php';
+require_once __DIR__ . '/helpers/telegram.php';
+require_once __DIR__ . '/db.php';
+
+SecurityHeaders::apply();
+SecurityHeaders::handlePreflight();
 
 $db = new Database();
 $method = $_SERVER['REQUEST_METHOD'];
+$rateLimiter = new RateLimiter();
 
 try {
     switch ($method) {
@@ -71,6 +67,9 @@ try {
             break;
             
         case 'POST':
+            // Apply rate limiting for write operations
+            $rateLimiter->apply('orders_create');
+            
             // Create new order (from form submission)
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
@@ -143,7 +142,7 @@ try {
             $telegramError = null;
             
             try {
-                $telegramResult = sendToTelegram($data, $data['order_number'], $id, $db);
+                $telegramResult = TelegramHelper::sendOrderNotification($data, $data['order_number'], $id, $db);
                 $telegramSent = $telegramResult['success'];
                 if (!$telegramSent) {
                     $telegramError = $telegramResult['error'];
@@ -184,6 +183,9 @@ try {
             break;
             
         case 'PUT':
+            // Apply rate limiting for write operations
+            $rateLimiter->apply('orders_update');
+            
             // Update order
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
@@ -229,6 +231,9 @@ try {
             break;
             
         case 'DELETE':
+            // Apply rate limiting for write operations
+            $rateLimiter->apply('orders_delete');
+            
             // Delete order
             if (empty($_GET['id'])) {
                 ApiResponse::validationError('Order ID is required');
@@ -276,137 +281,3 @@ try {
 }
 
 $db->close();
-
-// ========================================
-// Helper Functions
-// ========================================
-
-function sendToTelegram($data, $orderNumber, $orderId, $db) {
-    // Get chat ID from database settings or config
-    $chatId = defined('TELEGRAM_CHAT_ID') ? TELEGRAM_CHAT_ID : '';
-    
-    // Try to get from database
-    $dbChatId = $db->getSetting('telegram_chat_id');
-    if ($dbChatId && !empty($dbChatId)) {
-        $chatId = $dbChatId;
-    }
-    
-    // Check if chat ID is configured
-    if (empty($chatId)) {
-        return [
-            'success' => false,
-            'error' => 'Chat ID not configured'
-        ];
-    }
-    
-    // Check if bot token is configured
-    if (!defined('TELEGRAM_BOT_TOKEN') || empty(TELEGRAM_BOT_TOKEN)) {
-        return [
-            'success' => false,
-            'error' => 'Bot token not configured'
-        ];
-    }
-    
-    // Build message
-    $message = "🆕 <b>НОВАЯ ЗАЯВКА #{$orderNumber}</b>\n\n";
-    $message .= "🆔 <b>ID:</b> {$orderId}\n";
-    $message .= "👤 <b>Имя:</b> " . htmlspecialchars($data['name']) . "\n";
-    $message .= "📱 <b>Телефон:</b> " . htmlspecialchars($data['phone']) . "\n";
-    
-    if (!empty($data['email'])) {
-        $message .= "📧 <b>Email:</b> " . htmlspecialchars($data['email']) . "\n";
-    }
-    
-    if (!empty($data['telegram'])) {
-        $message .= "💬 <b>Telegram:</b> " . htmlspecialchars($data['telegram']) . "\n";
-    }
-    
-    $message .= "\n🛠 <b>Услуга:</b> " . htmlspecialchars($data['service'] ?? 'Обращение') . "\n";
-    
-    if (!empty($data['amount']) && $data['amount'] > 0) {
-        $message .= "💰 <b>Сумма:</b> " . number_format($data['amount'], 0, ',', ' ') . " ₽\n";
-    }
-    
-    // Add calculator data if present
-    if (!empty($data['calculator_data'])) {
-        $calc = is_array($data['calculator_data']) ? $data['calculator_data'] : json_decode($data['calculator_data'], true);
-        if ($calc) {
-            $message .= "\n📊 <b>Детали расчета:</b>\n";
-            
-            if (!empty($calc['technology'])) {
-                $message .= "• Технология: " . strtoupper($calc['technology']) . "\n";
-            }
-            if (!empty($calc['material'])) {
-                $message .= "• Материал: " . htmlspecialchars($calc['material']) . "\n";
-            }
-            if (!empty($calc['weight'])) {
-                $message .= "• Вес: " . $calc['weight'] . " г\n";
-            }
-            if (!empty($calc['quantity'])) {
-                $message .= "• Количество: " . $calc['quantity'] . " шт\n";
-            }
-            if (isset($calc['infill'])) {
-                $message .= "• Заполнение: " . $calc['infill'] . "%\n";
-            }
-            if (!empty($calc['quality'])) {
-                $message .= "• Качество: " . htmlspecialchars($calc['quality']) . "\n";
-            }
-            if (!empty($calc['timeEstimate'])) {
-                $message .= "• Срок: " . htmlspecialchars($calc['timeEstimate']) . "\n";
-            }
-        }
-    }
-    
-    // Add message/details
-    if (!empty($data['message'])) {
-        $message .= "\n💬 <b>Сообщение:</b>\n" . htmlspecialchars($data['message']) . "\n";
-    } elseif (!empty($data['details'])) {
-        $message .= "\n💬 <b>Сообщение:</b>\n" . htmlspecialchars($data['details']) . "\n";
-    }
-    
-    $message .= "\n⏰ <b>Дата:</b> " . date('d.m.Y H:i') . "\n";
-    if (defined('SITE_URL')) {
-        $message .= "🌐 <b>Сайт:</b> " . SITE_URL;
-    }
-    
-    // Send to Telegram API
-    $url = "https://api.telegram.org/bot" . TELEGRAM_BOT_TOKEN . "/sendMessage";
-    
-    $postData = [
-        'chat_id' => $chatId,
-        'text' => $message,
-        'parse_mode' => 'HTML',
-        'disable_web_page_preview' => true
-    ];
-    
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curlError = curl_error($ch);
-    curl_close($ch);
-    
-    if ($curlError) {
-        return [
-            'success' => false,
-            'error' => 'CURL error: ' . $curlError
-        ];
-    }
-    
-    $result = json_decode($response, true);
-    
-    if ($httpCode === 200 && isset($result['ok']) && $result['ok'] === true) {
-        return ['success' => true];
-    } else {
-        $errorMsg = isset($result['description']) ? $result['description'] : 'Unknown error';
-        return [
-            'success' => false,
-            'error' => 'Telegram API error: ' . $errorMsg
-        ];
-    }
-}
