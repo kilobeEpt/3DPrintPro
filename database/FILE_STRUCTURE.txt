@@ -1,0 +1,36 @@
+database/
+│
+├── Core Schema Files
+│   ├── schema.sql                      ✅ Complete 7-table schema (MySQL 8.0, idempotent)
+│   └── seed-data.php                   ✅ Centralized seed data (source of truth)
+│
+├── Verification and Backup Tools (NEW v2.1)
+│   ├── verify-schema.php               ✅ Schema verification (CLI/HTTP)
+│   └── backup.php                      ✅ Automated backups (CLI/HTTP, compressed)
+│
+├── Documentation
+│   ├── README.md                       ✅ Complete guide (v2.1, updated)
+│   ├── VERIFICATION_AND_BACKUP.md      ✅ NEW: Verification & backup guide
+│   ├── QUICK_REFERENCE.md              ✅ NEW: Quick command reference
+│   └── FILE_STRUCTURE.txt              ✅ NEW: This file structure overview
+│
+└── backups/                            ✅ Backup storage (git-ignored)
+    ├── *.sql                           Timestamped database dumps
+    └── *.sql.gz                        Compressed backups
+
+Total: 7 files + 1 directory
+New in v2.1: 4 files (verify-schema.php, backup.php, 2 guides)
+Updated in v2.1: 2 files (schema.sql, README.md)
+
+Production Target:
+- Host: localhost / ch167436.tw1.ru
+- Database: ch167436_3dprint
+- User: ch167436_3dprint
+- MySQL: 8.0+
+
+Quick Commands:
+$ php database/verify-schema.php         # Verify schema
+$ php database/backup.php                # Create backup
+$ mysql -u user -p db < database/schema.sql  # Apply schema
+
+Status: ✅ Production Ready v2.1
