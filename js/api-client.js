@@ -17,8 +17,28 @@ class APIClient {
             online: [],
             offline: []
         };
+        this._cachedCsrfToken = null;
         
         this.checkConnectivity();
+    }
+    
+    getCsrfToken() {
+        if (this._cachedCsrfToken) {
+            return this._cachedCsrfToken;
+        }
+        
+        if (window.ADMIN_SESSION && window.ADMIN_SESSION.csrfToken) {
+            this._cachedCsrfToken = window.ADMIN_SESSION.csrfToken;
+            return this._cachedCsrfToken;
+        }
+        
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag) {
+            this._cachedCsrfToken = metaTag.getAttribute('content');
+            return this._cachedCsrfToken;
+        }
+        
+        return null;
     }
     
     on(event, callback) {
@@ -42,6 +62,7 @@ class APIClient {
             
             const response = await fetch(`${this.baseUrl}/test.php`, {
                 method: 'HEAD',
+                credentials: 'include',
                 signal: controller.signal
             });
             
@@ -74,20 +95,42 @@ class APIClient {
     
     async request(endpoint, method = 'GET', data = null, options = {}) {
         const url = `${this.baseUrl}/${endpoint}`;
-        const fetchOptions = {
-            method,
-            headers: {
-                'Content-Type': 'application/json'
-            }
+        
+        const defaultHeaders = {
+            'Accept': 'application/json'
         };
         
-        // Add CSRF token for admin requests (if available)
-        if (window.ADMIN_SESSION && window.ADMIN_SESSION.csrfToken) {
-            fetchOptions.headers['X-CSRF-Token'] = window.ADMIN_SESSION.csrfToken;
+        const csrfToken = this.getCsrfToken();
+        if (csrfToken) {
+            defaultHeaders['X-CSRF-Token'] = csrfToken;
         }
         
-        if (data && (method === 'POST' || method === 'PUT')) {
-            fetchOptions.body = JSON.stringify(data);
+        const isFormData = data instanceof FormData;
+        
+        if (!isFormData && data && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+            defaultHeaders['Content-Type'] = 'application/json';
+        }
+        
+        const mergedHeaders = {
+            ...defaultHeaders,
+            ...(options.headers || {})
+        };
+        
+        const fetchOptions = {
+            method,
+            headers: mergedHeaders,
+            credentials: 'include',
+            ...options
+        };
+        
+        delete fetchOptions.skipRetry;
+        
+        if (data) {
+            if (isFormData) {
+                fetchOptions.body = data;
+            } else if (method === 'POST' || method === 'PUT' || method === 'DELETE') {
+                fetchOptions.body = JSON.stringify(data);
+            }
         }
         
         const maxRetries = options.skipRetry ? 0 : this.retryConfig.maxRetries;
@@ -194,8 +237,8 @@ class APIClient {
         return this.request(endpoint, 'PUT', data);
     }
     
-    async delete(endpoint) {
-        return this.request(endpoint, 'DELETE');
+    async delete(endpoint, data = null) {
+        return this.request(endpoint, 'DELETE', data);
     }
     
     // ========================================

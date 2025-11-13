@@ -44,23 +44,15 @@ class AdminApiClient {
     }
     
     async createService(data) {
-        return this.client.request('/api/services.php', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
+        return this.client.createService(data);
     }
     
     async updateService(id, data) {
-        return this.client.request(`/api/services.php?id=${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
+        return this.client.updateService(id, data);
     }
     
     async deleteService(id) {
-        return this.client.request(`/api/services.php?id=${id}`, {
-            method: 'DELETE'
-        });
+        return this.client.deleteService(id);
     }
     
     // Portfolio API
@@ -73,23 +65,15 @@ class AdminApiClient {
     }
     
     async createPortfolioItem(data) {
-        return this.client.request('/api/portfolio.php', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
+        return this.client.createPortfolioItem(data);
     }
     
     async updatePortfolioItem(id, data) {
-        return this.client.request(`/api/portfolio.php?id=${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
+        return this.client.updatePortfolioItem(id, data);
     }
     
     async deletePortfolioItem(id) {
-        return this.client.request(`/api/portfolio.php?id=${id}`, {
-            method: 'DELETE'
-        });
+        return this.client.deletePortfolioItem(id);
     }
     
     // Testimonials API
@@ -102,23 +86,15 @@ class AdminApiClient {
     }
     
     async createTestimonial(data) {
-        return this.client.request('/api/testimonials.php', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
+        return this.client.createTestimonial(data);
     }
     
     async updateTestimonial(id, data) {
-        return this.client.request(`/api/testimonials.php?id=${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
+        return this.client.updateTestimonial(id, data);
     }
     
     async deleteTestimonial(id) {
-        return this.client.request(`/api/testimonials.php?id=${id}`, {
-            method: 'DELETE'
-        });
+        return this.client.deleteTestimonial(id);
     }
     
     // FAQ API
@@ -131,23 +107,15 @@ class AdminApiClient {
     }
     
     async createFAQItem(data) {
-        return this.client.request('/api/faq.php', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
+        return this.client.createFAQItem(data);
     }
     
     async updateFAQItem(id, data) {
-        return this.client.request(`/api/faq.php?id=${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
+        return this.client.updateFAQItem(id, data);
     }
     
     async deleteFAQItem(id) {
-        return this.client.request(`/api/faq.php?id=${id}`, {
-            method: 'DELETE'
-        });
+        return this.client.deleteFAQItem(id);
     }
     
     // Content API
@@ -160,28 +128,20 @@ class AdminApiClient {
     }
     
     async createContentBlock(data) {
-        return this.client.request('/api/content.php', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
+        return this.client.createContentBlock(data);
     }
     
     async updateContentBlock(id, data) {
-        return this.client.request(`/api/content.php?id=${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data)
-        });
+        return this.client.updateContentBlock(id, data);
     }
     
     async deleteContentBlock(id) {
-        return this.client.request(`/api/content.php?id=${id}`, {
-            method: 'DELETE'
-        });
+        return this.client.deleteContentBlock(id);
     }
     
     // Settings API
     async getSettings() {
-        return this.client.getSettings();
+        return this.client.getAllSettings();
     }
     
     async getSetting(key) {
@@ -189,14 +149,11 @@ class AdminApiClient {
     }
     
     async updateSetting(key, value) {
-        return this.client.updateSetting(key, value);
+        return this.client.saveSetting(key, value);
     }
     
     async updateSettings(settings) {
-        return this.client.request('/api/settings.php', {
-            method: 'POST',
-            body: JSON.stringify(settings)
-        });
+        return this.client.saveSettings(settings);
     }
 }
 
