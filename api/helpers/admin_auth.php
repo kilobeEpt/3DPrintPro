@@ -7,6 +7,9 @@
 // This file should be included in API endpoints that require admin authentication
 // It checks if the user is authenticated via PHP session
 
+// Require shared session bootstrap to use same session name as admin pages
+require_once __DIR__ . '/../../includes/admin-session.php';
+
 /**
  * Require admin authentication for API endpoint
  * Dies with 401 if not authenticated
@@ -14,9 +17,23 @@
  * @return void
  */
 function requireAdminAuth() {
-    // Start session if not already started
+    // Start session if not already started (bootstrap already configured session settings)
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
+    }
+    
+    // Check session timeout (30 minutes of inactivity)
+    $timeout = 1800; // 30 minutes in seconds
+    if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $timeout)) {
+        // Session expired due to inactivity
+        session_unset();
+        session_destroy();
+        http_response_code(401);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Session expired due to inactivity. Please log in again.'
+        ]);
+        exit;
     }
     
     // Check if user is authenticated
@@ -45,7 +62,7 @@ function requireAdminAuth() {
  * @return void
  */
 function verifyCsrfToken($headerName = 'X-CSRF-Token') {
-    // Start session if not already started
+    // Start session if not already started (bootstrap already configured session settings)
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
