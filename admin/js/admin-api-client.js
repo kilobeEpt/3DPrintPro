@@ -1,6 +1,6 @@
 // ========================================
-// Admin API Client - Thin wrapper around public apiClient
-// Adds automatic CSRF token handling and admin-specific error handling
+// Admin API Client - Wrapper around public apiClient
+// Normalizes paths, extracts data, and ensures CSRF token presence
 // ========================================
 
 class AdminApiClient {
@@ -17,143 +17,277 @@ class AdminApiClient {
         console.log('✅ AdminApiClient initialized with CSRF token');
     }
     
-    // Orders API
-    async getOrders() {
-        return this.client.getOrders();
+    // ========================================
+    // Helper Methods - Wrap base client methods with CSRF refresh
+    // ========================================
+    
+    /**
+     * Refresh CSRF token from current session before requests
+     * Accommodates token regeneration after login/logout
+     */
+    refreshCsrfToken() {
+        if (window.ADMIN_SESSION && window.ADMIN_SESSION.csrfToken) {
+            this.client._cachedCsrfToken = window.ADMIN_SESSION.csrfToken;
+        } else {
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            if (metaTag) {
+                this.client._cachedCsrfToken = metaTag.getAttribute('content');
+            }
+        }
+    }
+    
+    /**
+     * Generic request wrapper that ensures CSRF token is current
+     */
+    async request(endpoint, method = 'GET', data = null, options = {}) {
+        this.refreshCsrfToken();
+        return this.client.request(endpoint, method, data, options);
+    }
+    
+    async get(endpoint) {
+        this.refreshCsrfToken();
+        return this.client.get(endpoint);
+    }
+    
+    async post(endpoint, data) {
+        this.refreshCsrfToken();
+        return this.client.post(endpoint, data);
+    }
+    
+    async put(endpoint, data) {
+        this.refreshCsrfToken();
+        return this.client.put(endpoint, data);
+    }
+    
+    async delete(endpoint, data = null) {
+        this.refreshCsrfToken();
+        return this.client.delete(endpoint, data);
+    }
+    
+    // ========================================
+    // Orders API - Returns arrays/objects expected by modules
+    // ========================================
+    
+    async getOrders(params = {}) {
+        const result = await this.client.getOrders(params);
+        // Return just the orders array (modules expect array, not {orders, total})
+        return result.orders || [];
     }
     
     async getOrder(id) {
-        return this.client.getOrder(id);
+        const result = await this.client.getOrder(id);
+        // Return the order object
+        return result;
     }
     
     async updateOrder(id, data) {
-        return this.client.updateOrder(id, data);
+        const result = await this.client.updateOrder(id, data);
+        // Return full response for status checking
+        return result;
     }
     
     async deleteOrder(id) {
-        return this.client.deleteOrder(id);
+        const result = await this.client.deleteOrder(id);
+        // Return full response for status checking
+        return result;
     }
     
-    // Services API
-    async getServices() {
-        return this.client.getServices();
+    // ========================================
+    // Services API - Returns arrays/objects expected by modules
+    // ========================================
+    
+    async getServices(params = {}) {
+        const result = await this.client.getServices(params);
+        // Return just the services array
+        return result.services || [];
     }
     
     async getService(id) {
-        return this.client.getService(id);
+        const result = await this.client.getService(id);
+        // Return the service object
+        return result;
     }
     
     async createService(data) {
-        return this.client.createService(data);
+        const result = await this.client.createService(data);
+        // Return full response for status checking
+        return result;
     }
     
     async updateService(id, data) {
-        return this.client.updateService(id, data);
+        const result = await this.client.updateService(id, data);
+        // Return full response for status checking
+        return result;
     }
     
     async deleteService(id) {
-        return this.client.deleteService(id);
+        const result = await this.client.deleteService(id);
+        // Return full response for status checking
+        return result;
     }
     
-    // Portfolio API
-    async getPortfolio() {
-        return this.client.getPortfolio();
+    // ========================================
+    // Portfolio API - Returns arrays/objects expected by modules
+    // ========================================
+    
+    async getPortfolio(params = {}) {
+        const result = await this.client.getPortfolio(params);
+        // Return just the items array
+        return result.items || [];
     }
     
     async getPortfolioItem(id) {
-        return this.client.getPortfolioItem(id);
+        const result = await this.client.getPortfolioItem(id);
+        // Return the item object
+        return result;
     }
     
     async createPortfolioItem(data) {
-        return this.client.createPortfolioItem(data);
+        const result = await this.client.createPortfolioItem(data);
+        // Return full response for status checking
+        return result;
     }
     
     async updatePortfolioItem(id, data) {
-        return this.client.updatePortfolioItem(id, data);
+        const result = await this.client.updatePortfolioItem(id, data);
+        // Return full response for status checking
+        return result;
     }
     
     async deletePortfolioItem(id) {
-        return this.client.deletePortfolioItem(id);
+        const result = await this.client.deletePortfolioItem(id);
+        // Return full response for status checking
+        return result;
     }
     
-    // Testimonials API
-    async getTestimonials() {
-        return this.client.getTestimonials();
+    // ========================================
+    // Testimonials API - Returns arrays/objects expected by modules
+    // ========================================
+    
+    async getTestimonials(params = {}) {
+        const result = await this.client.getTestimonials(params);
+        // Return just the testimonials array
+        return result.testimonials || [];
     }
     
     async getTestimonial(id) {
-        return this.client.getTestimonial(id);
+        const result = await this.client.getTestimonial(id);
+        // Return the testimonial object
+        return result;
     }
     
     async createTestimonial(data) {
-        return this.client.createTestimonial(data);
+        const result = await this.client.createTestimonial(data);
+        // Return full response for status checking
+        return result;
     }
     
     async updateTestimonial(id, data) {
-        return this.client.updateTestimonial(id, data);
+        const result = await this.client.updateTestimonial(id, data);
+        // Return full response for status checking
+        return result;
     }
     
     async deleteTestimonial(id) {
-        return this.client.deleteTestimonial(id);
+        const result = await this.client.deleteTestimonial(id);
+        // Return full response for status checking
+        return result;
     }
     
-    // FAQ API
-    async getFAQ() {
-        return this.client.getFAQ();
+    // ========================================
+    // FAQ API - Returns arrays/objects expected by modules
+    // ========================================
+    
+    async getFAQ(params = {}) {
+        const result = await this.client.getFAQ(params);
+        // Return just the items array
+        return result.items || [];
     }
     
     async getFAQItem(id) {
-        return this.client.getFAQItem(id);
+        const result = await this.client.getFAQItem(id);
+        // Return the item object
+        return result;
     }
     
     async createFAQItem(data) {
-        return this.client.createFAQItem(data);
+        const result = await this.client.createFAQItem(data);
+        // Return full response for status checking
+        return result;
     }
     
     async updateFAQItem(id, data) {
-        return this.client.updateFAQItem(id, data);
+        const result = await this.client.updateFAQItem(id, data);
+        // Return full response for status checking
+        return result;
     }
     
     async deleteFAQItem(id) {
-        return this.client.deleteFAQItem(id);
+        const result = await this.client.deleteFAQItem(id);
+        // Return full response for status checking
+        return result;
     }
     
-    // Content API
-    async getContentBlocks() {
-        return this.client.getContentBlocks();
+    // ========================================
+    // Content Blocks API - Returns arrays/objects expected by modules
+    // ========================================
+    
+    async getContentBlocks(params = {}) {
+        const result = await this.client.getContentBlocks(params);
+        // Return just the blocks array
+        return result.blocks || [];
     }
     
     async getContentBlock(id) {
-        return this.client.getContentBlock(id);
+        const result = await this.client.getContentBlock(id);
+        // Return the block object
+        return result;
     }
     
     async createContentBlock(data) {
-        return this.client.createContentBlock(data);
+        const result = await this.client.createContentBlock(data);
+        // Return full response for status checking
+        return result;
     }
     
     async updateContentBlock(id, data) {
-        return this.client.updateContentBlock(id, data);
+        const result = await this.client.updateContentBlock(id, data);
+        // Return full response for status checking
+        return result;
     }
     
     async deleteContentBlock(id) {
-        return this.client.deleteContentBlock(id);
+        const result = await this.client.deleteContentBlock(id);
+        // Return full response for status checking
+        return result;
     }
     
-    // Settings API
+    // ========================================
+    // Settings API - Returns object expected by modules
+    // ========================================
+    
     async getSettings() {
-        return this.client.getAllSettings();
+        const result = await this.client.getAllSettings();
+        // Return the settings object
+        return result;
     }
     
     async getSetting(key) {
-        return this.client.getSetting(key);
+        const result = await this.client.getSetting(key);
+        // Return the value
+        return result;
     }
     
     async updateSetting(key, value) {
-        return this.client.saveSetting(key, value);
+        const result = await this.client.saveSetting(key, value);
+        // Return full response for status checking
+        return result;
     }
     
     async updateSettings(settings) {
-        return this.client.saveSettings(settings);
+        const result = await this.client.saveSettings(settings);
+        // Return full response for status checking
+        return result;
     }
 }
 
