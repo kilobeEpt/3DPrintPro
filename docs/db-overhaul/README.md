@@ -36,45 +36,86 @@ This directory contains comprehensive analysis and planning documents for the 3D
 - **22+ tables/diagrams** visualizing current state
 - **25 gap items** catalogued with severity ratings
 
+---
+
+### [`schema-design.md`](./schema-design.md)
+**Target database schema (3NF normalized)**
+
+**Contents:**
+- ✅ Fully normalized relational model (≥3NF)
+- ✅ 19 authoritative tables with complete definitions
+- ✅ 34 foreign key relationships with explicit CASCADE rules
+- ✅ 72 indexes including 15 composite indexes for query patterns
+- ✅ Comprehensive Mermaid ERD (295 lines)
+- ✅ Audit trail approach (per-table + centralized log)
+- ✅ Soft delete strategy with cascading rules
+- ✅ Caching strategy with Redis integration
+- ✅ Complete legacy→target field mapping for all 7 tables
+- ✅ 6-phase migration plan with rollback procedures
+- ✅ 10 open questions for stakeholder decision
+- ✅ Performance optimization guidelines
+
+**Key Improvements:**
+- **Full referential integrity** - 32 FK relationships prevent orphaned data
+- **Separated concerns** - Dedicated users, customers, settings tables
+- **Normalized data** - Categories, statuses, features, tags in lookup tables
+- **Extensibility** - No schema changes needed for new statuses/types
+- **Audit trail** - Complete change history with user tracking
+- **Soft deletes** - Recoverable deletions for content entities
+
+**Statistics:**
+- **2,960 lines** of comprehensive design documentation
+- **92 KB** of specification
+- **19 tables** (vs. 7 in legacy schema)
+- **34 foreign keys** (vs. 0 in legacy schema)
+- **65+ indexes** (vs. 38 in legacy schema)
+- **100% 3NF compliance** with strategic denormalization
+
 ## Usage
 
 ### For Database Redesign Team
-1. **Start with:** Current State Executive Summary
-2. **Review:** Gap Analysis section for prioritized issues
-3. **Reference:** Table inventory for schema details
-4. **Consult:** Risk Assessment for critical-path items
+1. **Start with:** `current-state.md` Executive Summary - understand current issues
+2. **Review:** `schema-design.md` Entity Definitions - understand target structure
+3. **Reference:** `schema-design.md` ERD - visualize relationships
+4. **Implement:** `schema-design.md` Migration Strategy - execute transformation
 
 ### For Development Team
-1. **Understand:** Database access patterns from "Database Access Points" section
-2. **Identify:** Code changes needed from per-endpoint analysis
-3. **Plan:** Migration strategy from remediation roadmap
+1. **Understand:** `current-state.md` Database Access Points - current code patterns
+2. **Identify:** `schema-design.md` Legacy Field Mapping - data migration paths
+3. **Update:** Application code per `schema-design.md` Phase 4
+4. **Test:** Follow validation queries in migration strategy
 
 ### For Project Management
-1. **Extract:** Timeline estimates from 4-phase recommendations
-2. **Assess:** Risk matrix for project prioritization
-3. **Track:** 25 gap items as deliverable checklist
+1. **Review:** `schema-design.md` Executive Summary - scope and improvements
+2. **Plan:** `schema-design.md` Migration Strategy - 6-phase timeline
+3. **Track:** Open Questions section - stakeholder decisions needed
+4. **Monitor:** Acceptance criteria as deliverable checklist
 
 ## Next Steps
 
-### Immediate Actions (Week 1)
-- [ ] Add composite indexes (orders, services, content_blocks)
-- [ ] Fix testimonials.approved default to FALSE
-- [ ] Add CHECK constraints on numeric fields
+### Phase 1: Stakeholder Review (Week 1)
+- [ ] Review `schema-design.md` with database team
+- [ ] Answer open questions (business logic decisions)
+- [ ] Approve target schema and migration approach
+- [ ] Finalize timeline and resource allocation
 
-### Short-term (Month 1)
-- [ ] Implement transaction support in Database class
-- [ ] Create lookup tables (categories, order_statuses)
-- [ ] Add foreign key constraints
+### Phase 2: Migration Preparation (Week 2)
+- [ ] Create 11 migration SQL scripts per `schema-design.md`
+- [ ] Setup staging environment with production data clone
+- [ ] Execute dry-run migration and validation
+- [ ] Document rollback procedures
 
-### Medium-term (Quarter 1)
-- [ ] Normalize customers table
-- [ ] Extract admin credentials to dedicated table
-- [ ] Replace ENUMs with lookup tables
+### Phase 3: Implementation (Weeks 3-6)
+- [ ] Schema creation (2 hours downtime)
+- [ ] Data migration (4 hours)
+- [ ] Application code updates (2 weeks)
+- [ ] Testing and validation (1 week)
 
-### Long-term (Year 1)
-- [ ] Implement audit logging
-- [ ] Add content versioning
-- [ ] Deploy fulltext search indexes
+### Phase 4: Deployment (Week 7)
+- [ ] Production migration in maintenance window
+- [ ] Monitor for errors and performance issues
+- [ ] Optimize indexes based on real traffic
+- [ ] Archive legacy schema for reference
 
 ## Related Documents
 
@@ -138,14 +179,21 @@ When updating this documentation:
 ## Version History
 
 - **v1.0** (January 2025) - Initial comprehensive audit
-  - Complete schema inventory
+  - Complete schema inventory (current-state.md)
   - 13 access points documented
   - 25 gaps identified across 5 categories
   - 4-phase remediation roadmap
 
+- **v2.0** (January 2025) - Target schema design
+  - 3NF normalized target schema (schema-design.md)
+  - 19 tables with 34 foreign key relationships
+  - Complete legacy field mapping
+  - 6-phase migration strategy
+  - 10 open questions for stakeholder input
+
 ---
 
 **Last Updated:** January 2025  
-**Audit Version:** 1.0  
-**Schema Version:** 2.0  
-**Next Review:** Post Phase 1 implementation
+**Current Phase:** Schema Design Complete  
+**Schema Version:** 2.0 (current) → 3.0 (target)  
+**Next Review:** Stakeholder approval of target schema
