@@ -12,9 +12,11 @@
 
 ### For New Installations
 
-1. **Setup Database & Backend** → See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md)
-2. **Deploy to Production** → See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
-3. **Configure Admin Panel** → See [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)
+1. **Install Dependencies** → Run `composer install` in project root
+2. **Setup Database & Backend** → See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md)
+3. **Deploy to Production** → See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+4. **Configure Admin Panel** → See [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)
+5. *(Optional)* **Use Eloquent ORM** → See [docs/ELOQUENT_SETUP.md](docs/ELOQUENT_SETUP.md)
 
 ### For Existing Installations
 
@@ -41,6 +43,8 @@
 
 ### Additional Documentation
 
+- **[ELOQUENT_SETUP.md](docs/ELOQUENT_SETUP.md)** - Eloquent ORM integration and usage guide
+- **[MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md)** - Guide for migrating from legacy DB class to Eloquent
 - **[TELEGRAM_INTEGRATION.md](docs/TELEGRAM_INTEGRATION.md)** - Telegram bot setup and configuration
 - **[ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md)** - Security and authentication details
 - **[TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md)** - Testing procedures and checklist
@@ -81,9 +85,10 @@
 - Chart.js for statistics
 
 **Backend:**
-- PHP 7.4+ with PDO
+- PHP 7.4+ with PDO and Eloquent ORM
 - MySQL 8.0+ database
 - RESTful API architecture
+- Composer for dependency management
 - Rate limiting (60 req/min)
 
 **Security:**

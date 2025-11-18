@@ -126,3 +126,15 @@ database/backups/
 
 # API configuration (contains sensitive database credentials)
 api/config.php
+
+# Composer dependencies and artifacts
+vendor/
+composer.phar
+
+# PHP cache and session files
+*.cache
+sessions/
+
+# Test databases (SQLite)
+database/test.sqlite
+database/*.sqlite
