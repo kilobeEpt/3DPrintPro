@@ -1,0 +1,128 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Database Seeder Runner
+ * 
+ * Usage:
+ *   php scripts/seed                    # Run all seeders
+ *   php scripts/seed ClassName          # Run specific seeder
+ *   php scripts/seed --class=ClassName  # Run specific seeder (alternative syntax)
+ */
+
+// Bootstrap
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap/eloquent.php';
+require_once __DIR__ . '/../database/Seeder.php';
+
+use Illuminate\Database\Capsule\Manager as Capsule;
+
+class SeederRunner
+{
+    private $seedersPath;
+
+    public function __construct()
+    {
+        $this->seedersPath = __DIR__ . '/../database/seeders';
+    }
+
+    /**
+     * Run specified seeder or all seeders
+     */
+    public function run($seederClass = null)
+    {
+        if ($seederClass) {
+            return $this->runSeeder($seederClass);
+        } else {
+            return $this->runDatabaseSeeder();
+        }
+    }
+
+    /**
+     * Run the main DatabaseSeeder
+     */
+    private function runDatabaseSeeder()
+    {
+        $file = $this->seedersPath . '/DatabaseSeeder.php';
+        
+        if (!file_exists($file)) {
+            $this->error("DatabaseSeeder not found at: $file");
+            return 1;
+        }
+
+        return $this->runSeeder('DatabaseSeeder');
+    }
+
+    /**
+     * Run a specific seeder
+     */
+    private function runSeeder($className)
+    {
+        $file = $this->seedersPath . '/' . $className . '.php';
+        
+        if (!file_exists($file)) {
+            $this->error("Seeder not found: $className");
+            $this->info("Looking for: $file");
+            return 1;
+        }
+
+        $this->info("Seeding: $className");
+
+        try {
+            require_once $file;
+            $seeder = new $className();
+            
+            $startTime = microtime(true);
+            $seeder->run();
+            $duration = round((microtime(true) - $startTime) * 1000, 2);
+
+            $this->success("✓ Seeded: $className ({$duration}ms)");
+            return 0;
+        } catch (Exception $e) {
+            $this->error("✗ Failed: $className");
+            $this->error("  " . $e->getMessage());
+            if (getenv('APP_DEBUG') === 'true') {
+                $this->error($e->getTraceAsString());
+            }
+            return 1;
+        }
+    }
+
+    /**
+     * Output helpers
+     */
+    private function info($message) {
+        echo "\033[36m$message\033[0m\n";
+    }
+
+    private function success($message) {
+        echo "\033[32m$message\033[0m\n";
+    }
+
+    private function error($message) {
+        echo "\033[31m$message\033[0m\n";
+    }
+}
+
+// Parse arguments
+$seederClass = null;
+
+if (isset($argv[1])) {
+    if (strpos($argv[1], '--class=') === 0) {
+        $seederClass = substr($argv[1], 8);
+    } else {
+        $seederClass = $argv[1];
+    }
+}
+
+$runner = new SeederRunner();
+
+try {
+    $exitCode = $runner->run($seederClass);
+    exit($exitCode);
+} catch (Exception $e) {
+    echo "\033[31mError: " . $e->getMessage() . "\033[0m\n";
+    if (getenv('APP_DEBUG') === 'true') {
+        echo $e->getTraceAsString() . "\n";
+    }
+    exit(1);
+}

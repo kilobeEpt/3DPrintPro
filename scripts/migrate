@@ -1,0 +1,438 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Database Migration Runner
+ * 
+ * Usage:
+ *   php scripts/migrate           # Show status
+ *   php scripts/migrate up        # Run pending migrations
+ *   php scripts/migrate down      # Rollback last batch
+ *   php scripts/migrate fresh     # Drop all tables and re-run migrations
+ *   php scripts/migrate refresh   # Rollback all and re-run
+ *   php scripts/migrate reset     # Rollback all migrations
+ *   php scripts/migrate status    # Show migration status
+ */
+
+// Bootstrap
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap/eloquent.php';
+require_once __DIR__ . '/../database/Migration.php';
+
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Schema\Blueprint;
+
+class MigrationRunner
+{
+    private $migrationsPath;
+    private $db;
+
+    public function __construct()
+    {
+        $this->migrationsPath = __DIR__ . '/../database/migrations';
+        $this->db = Capsule::connection();
+        $this->ensureMigrationsTable();
+    }
+
+    /**
+     * Create migrations tracking table if it doesn't exist
+     */
+    private function ensureMigrationsTable()
+    {
+        if (!Capsule::schema()->hasTable('migrations')) {
+            Capsule::schema()->create('migrations', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('migration', 255);
+                $table->integer('batch');
+                $table->timestamp('migrated_at')->useCurrent();
+                $table->index('migration');
+            });
+            $this->info("Created migrations tracking table");
+        }
+    }
+
+    /**
+     * Run pending migrations
+     */
+    public function up()
+    {
+        $pending = $this->getPendingMigrations();
+        
+        if (empty($pending)) {
+            $this->info("No pending migrations");
+            return 0;
+        }
+
+        $batch = $this->getNextBatchNumber();
+        $this->info("Running " . count($pending) . " migration(s) in batch $batch...\n");
+
+        foreach ($pending as $file) {
+            $this->runMigration($file, $batch, 'up');
+        }
+
+        $this->success("\n✓ All migrations completed successfully!");
+        return 0;
+    }
+
+    /**
+     * Rollback last batch of migrations
+     */
+    public function down()
+    {
+        $lastBatch = $this->getLastBatchNumber();
+        
+        if ($lastBatch === 0) {
+            $this->info("Nothing to rollback");
+            return 0;
+        }
+
+        $migrations = $this->getMigrationsInBatch($lastBatch);
+        $this->info("Rolling back batch $lastBatch (" . count($migrations) . " migration(s))...\n");
+
+        // Rollback in reverse order
+        foreach (array_reverse($migrations) as $migration) {
+            $this->rollbackMigration($migration);
+        }
+
+        $this->success("\n✓ Rollback completed successfully!");
+        return 0;
+    }
+
+    /**
+     * Rollback all migrations
+     */
+    public function reset()
+    {
+        while ($this->getLastBatchNumber() > 0) {
+            $this->down();
+        }
+        return 0;
+    }
+
+    /**
+     * Rollback all and re-run migrations
+     */
+    public function refresh()
+    {
+        $this->info("Resetting database...\n");
+        $this->reset();
+        $this->info("\nRe-running migrations...\n");
+        $this->up();
+        return 0;
+    }
+
+    /**
+     * Drop all tables and re-run migrations
+     */
+    public function fresh()
+    {
+        $this->warning("⚠ This will DROP ALL TABLES in the database!");
+        $this->info("Dropping all tables...\n");
+
+        // Get all tables
+        $tables = $this->db->select("SHOW TABLES");
+        $dbName = $this->db->getDatabaseName();
+        
+        // Disable foreign key checks
+        $this->db->statement('SET FOREIGN_KEY_CHECKS=0');
+        
+        foreach ($tables as $table) {
+            $tableName = $table->{"Tables_in_$dbName"};
+            $this->db->statement("DROP TABLE IF EXISTS `$tableName`");
+            $this->info("  Dropped: $tableName");
+        }
+        
+        // Re-enable foreign key checks
+        $this->db->statement('SET FOREIGN_KEY_CHECKS=1');
+        
+        // Recreate migrations table
+        $this->ensureMigrationsTable();
+        
+        $this->info("\nRunning fresh migrations...\n");
+        $this->up();
+        return 0;
+    }
+
+    /**
+     * Show migration status
+     */
+    public function status()
+    {
+        $all = $this->getAllMigrationFiles();
+        $ran = $this->getRanMigrations();
+
+        $this->info("Migration Status:\n");
+        $this->info(sprintf("%-8s  %-50s  %s", "Status", "Migration", "Batch"));
+        $this->info(str_repeat("-", 80));
+
+        foreach ($all as $file) {
+            $name = $this->getMigrationName($file);
+            $record = $ran[$name] ?? null;
+            
+            if ($record) {
+                echo sprintf("\033[32m%-8s\033[0m  %-50s  %s\n", 
+                    "Ran", 
+                    $name, 
+                    $record->batch
+                );
+            } else {
+                echo sprintf("\033[33m%-8s\033[0m  %-50s  %s\n", 
+                    "Pending", 
+                    $name, 
+                    "-"
+                );
+            }
+        }
+
+        $pendingCount = count($all) - count($ran);
+        $this->info("\nTotal: " . count($all) . " migrations (" . count($ran) . " ran, $pendingCount pending)");
+        
+        return 0;
+    }
+
+    /**
+     * Run a single migration
+     */
+    private function runMigration($file, $batch, $direction)
+    {
+        $name = $this->getMigrationName($file);
+        $this->info("  Migrating: $name");
+
+        try {
+            require_once $file;
+            $className = $this->getClassName($file);
+            $migration = new $className();
+            
+            $startTime = microtime(true);
+            $migration->$direction();
+            $duration = round((microtime(true) - $startTime) * 1000, 2);
+
+            // Record migration
+            $this->db->table('migrations')->insert([
+                'migration' => $name,
+                'batch' => $batch
+            ]);
+
+            $this->success("  ✓ Migrated: $name ({$duration}ms)");
+        } catch (Exception $e) {
+            $this->error("  ✗ Failed: $name");
+            $this->error("    " . $e->getMessage());
+            exit(1);
+        }
+    }
+
+    /**
+     * Rollback a single migration
+     */
+    private function rollbackMigration($migrationName)
+    {
+        $file = $this->findMigrationFile($migrationName);
+        
+        if (!$file) {
+            $this->warning("  ⚠ Migration file not found: $migrationName (skipping)");
+            return;
+        }
+
+        $this->info("  Rolling back: $migrationName");
+
+        try {
+            require_once $file;
+            $className = $this->getClassName($file);
+            $migration = new $className();
+            
+            $startTime = microtime(true);
+            $migration->down();
+            $duration = round((microtime(true) - $startTime) * 1000, 2);
+
+            // Remove from migrations table
+            $this->db->table('migrations')
+                ->where('migration', $migrationName)
+                ->delete();
+
+            $this->success("  ✓ Rolled back: $migrationName ({$duration}ms)");
+        } catch (Exception $e) {
+            $this->error("  ✗ Failed to rollback: $migrationName");
+            $this->error("    " . $e->getMessage());
+            exit(1);
+        }
+    }
+
+    /**
+     * Get all migration files
+     */
+    private function getAllMigrationFiles()
+    {
+        if (!is_dir($this->migrationsPath)) {
+            return [];
+        }
+
+        $files = glob($this->migrationsPath . '/*.php');
+        sort($files);
+        return $files;
+    }
+
+    /**
+     * Get pending migrations
+     */
+    private function getPendingMigrations()
+    {
+        $all = $this->getAllMigrationFiles();
+        $ran = $this->getRanMigrations();
+
+        return array_filter($all, function($file) use ($ran) {
+            $name = $this->getMigrationName($file);
+            return !isset($ran[$name]);
+        });
+    }
+
+    /**
+     * Get migrations that have been run
+     */
+    private function getRanMigrations()
+    {
+        $records = $this->db->table('migrations')
+            ->orderBy('batch')
+            ->orderBy('migration')
+            ->get();
+
+        $ran = [];
+        foreach ($records as $record) {
+            $ran[$record->migration] = $record;
+        }
+        return $ran;
+    }
+
+    /**
+     * Get migrations in specific batch
+     */
+    private function getMigrationsInBatch($batch)
+    {
+        return $this->db->table('migrations')
+            ->where('batch', $batch)
+            ->pluck('migration')
+            ->toArray();
+    }
+
+    /**
+     * Get next batch number
+     */
+    private function getNextBatchNumber()
+    {
+        $last = $this->getLastBatchNumber();
+        return $last + 1;
+    }
+
+    /**
+     * Get last batch number
+     */
+    private function getLastBatchNumber()
+    {
+        $max = $this->db->table('migrations')->max('batch');
+        return $max ?? 0;
+    }
+
+    /**
+     * Find migration file by name
+     */
+    private function findMigrationFile($name)
+    {
+        $files = $this->getAllMigrationFiles();
+        foreach ($files as $file) {
+            if ($this->getMigrationName($file) === $name) {
+                return $file;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get migration name from file path
+     */
+    private function getMigrationName($file)
+    {
+        return basename($file, '.php');
+    }
+
+    /**
+     * Get class name from file
+     */
+    private function getClassName($file)
+    {
+        $name = $this->getMigrationName($file);
+        // Convert 2025_01_01_000000_create_users_table to CreateUsersTable
+        $parts = explode('_', $name);
+        // Remove timestamp parts (first 4 parts: YYYY_MM_DD_HHMMSS)
+        $parts = array_slice($parts, 4);
+        return implode('', array_map('ucfirst', $parts));
+    }
+
+    /**
+     * Output helpers
+     */
+    private function info($message) {
+        echo "\033[36m$message\033[0m\n";
+    }
+
+    private function success($message) {
+        echo "\033[32m$message\033[0m\n";
+    }
+
+    private function warning($message) {
+        echo "\033[33m$message\033[0m\n";
+    }
+
+    private function error($message) {
+        echo "\033[31m$message\033[0m\n";
+    }
+}
+
+// Parse command
+$command = $argv[1] ?? 'status';
+
+$runner = new MigrationRunner();
+
+try {
+    $exitCode = 0;
+    
+    switch($command) {
+        case 'up':
+        case 'migrate':
+            $exitCode = $runner->up();
+            break;
+        case 'down':
+        case 'rollback':
+            $exitCode = $runner->down();
+            break;
+        case 'fresh':
+            $exitCode = $runner->fresh();
+            break;
+        case 'refresh':
+            $exitCode = $runner->refresh();
+            break;
+        case 'reset':
+            $exitCode = $runner->reset();
+            break;
+        case 'status':
+            $exitCode = $runner->status();
+            break;
+        default:
+            echo "\033[31mUnknown command: $command\033[0m\n\n";
+            echo "Usage:\n";
+            echo "  php scripts/migrate [command]\n\n";
+            echo "Commands:\n";
+            echo "  up, migrate   Run pending migrations\n";
+            echo "  down, rollback Roll back last batch\n";
+            echo "  fresh         Drop all tables and re-run migrations\n";
+            echo "  refresh       Rollback all and re-run migrations\n";
+            echo "  reset         Rollback all migrations\n";
+            echo "  status        Show migration status (default)\n";
+            $exitCode = 1;
+    }
+    
+    exit($exitCode);
+} catch (Exception $e) {
+    echo "\033[31mError: " . $e->getMessage() . "\033[0m\n";
+    if (getenv('APP_DEBUG') === 'true') {
+        echo $e->getTraceAsString() . "\n";
+    }
+    exit(1);
+}
