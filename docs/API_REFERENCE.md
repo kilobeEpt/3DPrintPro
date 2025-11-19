@@ -1,111 +1,436 @@
 # API Reference
 
-Complete reference for the 3D Print Pro REST API.
-
 ## Overview
 
-The API follows RESTful conventions with standardized response structures, comprehensive error handling, rate limiting, and security headers.
+The 3D Print Pro API provides RESTful endpoints for managing content, orders, and other resources. All endpoints return standardized JSON responses and support CORS for cross-origin requests.
 
-**Base URL:** `/api/`  
-**Format:** JSON  
-**Authentication:** PHP sessions for admin operations  
-**Rate Limit:** 60 requests/minute per IP (configurable)
+### Base URL
+```
+/api/
+```
 
-## HTTP Status Codes
+### Authentication
 
-| Code | Meaning | Description |
-|------|---------|-------------|
-| 200 | OK | Successful GET/PUT/DELETE request |
-| 201 | Created | Successful POST request |
-| 400 | Bad Request | Invalid input or malformed request |
-| 401 | Unauthorized | Authentication required |
-| 403 | Forbidden | CSRF token invalid or permission denied |
-| 404 | Not Found | Resource not found |
-| 405 | Method Not Allowed | Invalid HTTP method |
-| 422 | Unprocessable Entity | Validation failed |
-| 429 | Too Many Requests | Rate limit exceeded |
-| 500 | Internal Server Error | Server error |
+Most read operations are public. Write operations (POST, PUT, DELETE) require admin authentication via session cookies and CSRF tokens.
 
-## Response Structure
+### Response Format
 
-### Success Response
+All API responses follow a standardized format:
 
+#### Success Response
 ```json
 {
   "success": true,
   "data": {
-    "order": {...}
+    // Response data
   },
   "meta": {
-    "total": 100,
-    "limit": 10,
-    "offset": 0,
-    "has_more": true
+    // Optional metadata (pagination, counts, etc.)
   }
 }
 ```
 
-### Error Response
-
+#### Error Response
 ```json
 {
   "success": false,
-  "error": "Error message",
+  "error": "Human-readable error message",
   "errors": {
-    "field_name": "Validation error details"
+    // Optional field-specific validation errors
+    "field_name": "Validation error message"
   }
 }
 ```
 
-## Rate Limiting
+### HTTP Status Codes
 
-All write operations (POST/PUT/DELETE) are rate limited.
+- `200 OK` - Successful GET, PUT, DELETE request
+- `201 Created` - Successful POST request
+- `400 Bad Request` - Invalid request data
+- `401 Unauthorized` - Authentication required
+- `403 Forbidden` - Insufficient permissions
+- `404 Not Found` - Resource not found
+- `422 Unprocessable Entity` - Validation failed
+- `429 Too Many Requests` - Rate limit exceeded
+- `500 Internal Server Error` - Server error
 
-**Headers:**
+### Pagination
+
+Endpoints that return multiple records support pagination via query parameters:
+
+- `limit` - Maximum number of records to return (default: varies by endpoint, max: 100)
+- `offset` - Number of records to skip (default: 0)
+- `page` - Page number (alternative to offset, 1-based)
+
+Paginated responses include metadata:
+
+```json
+{
+  "success": true,
+  "data": { ... },
+  "meta": {
+    "total": 100,
+    "limit": 20,
+    "offset": 0,
+    "page": 1,
+    "pages": 5
+  }
+}
 ```
-X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 59
-X-RateLimit-Reset: 1699999999
-```
 
-**When Exceeded (429):**
-```
-Retry-After: 45
-```
+### Filtering
 
-## Security Headers
+Most GET endpoints support filtering via query parameters:
 
-All responses include:
-- `X-Content-Type-Options: nosniff` - Prevents MIME sniffing
-- `X-Frame-Options: DENY` - Prevents clickjacking
-- `Referrer-Policy: strict-origin-when-cross-origin` - Controls referrer info
-- `X-XSS-Protection: 1; mode=block` - XSS protection
+- `active` - Filter by active status (`true` or `false`)
+- `category` - Filter by category
+- `status` - Filter by status
 
-## API Endpoints
+---
 
-### Orders
+## Services API
 
-#### GET /api/orders.php
+**Endpoint:** `/api/services.php`
 
-Retrieve orders with optional filtering and pagination.
+### GET - List Services
 
-**Authentication:** Required (admin session)
+Retrieve all services or a single service.
 
 **Query Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `id` | int | - | Get specific order by ID |
-| `status` | string | - | Filter by: `new`, `processing`, `completed`, `cancelled` |
-| `type` | string | - | Filter by: `order`, `contact` |
-| `limit` | int | 100 | Results per page |
-| `offset` | int | 0 | Pagination offset |
+- `id` (optional) - Get specific service by ID
+- `active` (optional) - Filter by active status (`true`/`false`)
+- `featured` (optional) - Filter by featured status (`true`/`false`)
+- `category` (optional) - Filter by category
+- `limit` (optional) - Pagination limit
+- `offset` (optional) - Pagination offset
 
-**Example:**
-```bash
-curl https://your-domain.com/api/orders.php?status=new&limit=50
+**Example Request:**
+```
+GET /api/services.php?active=true&limit=10
 ```
 
-**Response:**
+**Example Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "services": [
+      {
+        "id": 1,
+        "name": "3D Printing",
+        "slug": "3d-printing",
+        "icon": "print",
+        "description": "High-quality 3D printing services",
+        "features": ["Fast turnaround", "Multiple materials"],
+        "price": "From $50",
+        "category": "printing",
+        "sort_order": 1,
+        "active": true,
+        "featured": true,
+        "created_at": "2024-01-01T00:00:00.000000Z",
+        "updated_at": "2024-01-01T00:00:00.000000Z"
+      }
+    ]
+  },
+  "meta": {
+    "total": 1
+  }
+}
+```
+
+### POST - Create Service
+
+Create a new service. Requires admin authentication and CSRF token.
+
+**Request Body:**
+```json
+{
+  "name": "Service Name",
+  "slug": "service-name",
+  "icon": "icon-name",
+  "description": "Service description",
+  "features": ["Feature 1", "Feature 2"],
+  "price": "From $100",
+  "category": "category-name",
+  "sort_order": 10,
+  "active": true,
+  "featured": false
+}
+```
+
+**Required Fields:** `name`
+
+### PUT - Update Service
+
+Update an existing service. Requires admin authentication and CSRF token.
+
+**Request Body:**
+```json
+{
+  "id": 1,
+  "name": "Updated Name",
+  "active": false
+}
+```
+
+**Required Fields:** `id`
+
+### DELETE - Delete Service
+
+Delete a service. Requires admin authentication and CSRF token.
+
+**Query Parameters:**
+- `id` (required) - Service ID to delete
+
+---
+
+## Portfolio API
+
+**Endpoint:** `/api/portfolio.php`
+
+### GET - List Portfolio Items
+
+Retrieve all portfolio items or a single item.
+
+**Query Parameters:**
+- `id` (optional) - Get specific item by ID
+- `active` (optional) - Filter by active status
+- `category` (optional) - Filter by category
+- `limit` (optional) - Pagination limit
+- `offset` (optional) - Pagination offset
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "title": "Project Title",
+        "description": "Project description",
+        "image": "/uploads/project.jpg",
+        "category": "commercial",
+        "tags": ["tag1", "tag2"],
+        "sort_order": 1,
+        "active": true,
+        "created_at": "2024-01-01T00:00:00.000000Z",
+        "updated_at": "2024-01-01T00:00:00.000000Z"
+      }
+    ]
+  },
+  "meta": {
+    "total": 1
+  }
+}
+```
+
+### POST - Create Portfolio Item
+
+Create a new portfolio item. Requires admin authentication and CSRF token.
+
+**Required Fields:** `title`
+
+### PUT - Update Portfolio Item
+
+Update an existing portfolio item. Requires admin authentication and CSRF token.
+
+**Required Fields:** `id`
+
+### DELETE - Delete Portfolio Item
+
+Delete a portfolio item. Requires admin authentication and CSRF token.
+
+---
+
+## FAQ API
+
+**Endpoint:** `/api/faq.php`
+
+### GET - List FAQ Items
+
+Retrieve all FAQ items or a single item.
+
+**Query Parameters:**
+- `id` (optional) - Get specific item by ID
+- `active` (optional) - Filter by active status
+- `limit` (optional) - Pagination limit
+- `offset` (optional) - Pagination offset
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "question": "What is 3D printing?",
+        "answer": "3D printing is...",
+        "sort_order": 1,
+        "active": true,
+        "created_at": "2024-01-01T00:00:00.000000Z",
+        "updated_at": "2024-01-01T00:00:00.000000Z"
+      }
+    ]
+  },
+  "meta": {
+    "total": 1
+  }
+}
+```
+
+### POST - Create FAQ Item
+
+Create a new FAQ item. Requires admin authentication and CSRF token.
+
+**Required Fields:** `question`, `answer`
+
+### PUT - Update FAQ Item
+
+Update an existing FAQ item. Requires admin authentication and CSRF token.
+
+**Required Fields:** `id`
+
+### DELETE - Delete FAQ Item
+
+Delete an FAQ item. Requires admin authentication and CSRF token.
+
+---
+
+## Testimonials API
+
+**Endpoint:** `/api/testimonials.php`
+
+### GET - List Testimonials
+
+Retrieve all testimonials or a single testimonial.
+
+**Query Parameters:**
+- `id` (optional) - Get specific testimonial by ID
+- `active` (optional) - Filter by active status
+- `approved` (optional) - Filter by approved status
+- `limit` (optional) - Pagination limit
+- `offset` (optional) - Pagination offset
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "testimonials": [
+      {
+        "id": 1,
+        "client_name": "John Doe",
+        "company": "ACME Corp",
+        "content": "Great service!",
+        "rating": 5,
+        "sort_order": 1,
+        "active": true,
+        "approved": true,
+        "created_at": "2024-01-01T00:00:00.000000Z",
+        "updated_at": "2024-01-01T00:00:00.000000Z"
+      }
+    ]
+  },
+  "meta": {
+    "total": 1
+  }
+}
+```
+
+### POST - Create Testimonial
+
+Create a new testimonial. Requires admin authentication and CSRF token.
+
+**Required Fields:** `client_name`, `content`
+
+### PUT - Update Testimonial
+
+Update an existing testimonial. Requires admin authentication and CSRF token.
+
+**Required Fields:** `id`
+
+### DELETE - Delete Testimonial
+
+Delete a testimonial. Requires admin authentication and CSRF token.
+
+---
+
+## Content Blocks API
+
+**Endpoint:** `/api/content.php`
+
+### GET - List Content Blocks
+
+Retrieve all content blocks or a single block.
+
+**Query Parameters:**
+- `id` (optional) - Get specific block by ID
+- `name` (optional) - Get block by name
+- `active` (optional) - Filter by active status
+- `page` (optional) - Filter by page
+- `limit` (optional) - Pagination limit
+- `offset` (optional) - Pagination offset
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "blocks": [
+      {
+        "id": 1,
+        "block_name": "hero_title",
+        "content": "Welcome to 3D Print Pro",
+        "page": "home",
+        "sort_order": 1,
+        "active": true,
+        "created_at": "2024-01-01T00:00:00.000000Z",
+        "updated_at": "2024-01-01T00:00:00.000000Z"
+      }
+    ]
+  },
+  "meta": {
+    "total": 1
+  }
+}
+```
+
+### POST - Create Content Block
+
+Create a new content block. Requires admin authentication and CSRF token.
+
+**Required Fields:** `block_name`, `content`
+
+### PUT - Update Content Block
+
+Update an existing content block. Requires admin authentication and CSRF token.
+
+**Required Fields:** `id`
+
+### DELETE - Delete Content Block
+
+Delete a content block. Requires admin authentication and CSRF token.
+
+---
+
+## Orders API
+
+**Endpoint:** `/api/orders.php`
+
+### GET - List Orders
+
+Retrieve all orders or a single order. Requires admin authentication.
+
+**Query Parameters:**
+- `id` (optional) - Get specific order by ID
+- `status` (optional) - Filter by status
+- `type` (optional) - Filter by type
+- `limit` (optional) - Pagination limit (default: 100)
+- `offset` (optional) - Pagination offset
+
+**Example Response:**
 ```json
 {
   "success": true,
@@ -113,65 +438,56 @@ curl https://your-domain.com/api/orders.php?status=new&limit=50
     "orders": [
       {
         "id": 1,
-        "order_number": "ORD-20250119-ABC123",
+        "order_number": "ORD-20240101-001",
+        "customer_name": "John Doe",
+        "customer_email": "john@example.com",
+        "customer_phone": "+1234567890",
         "type": "order",
-        "name": "John Doe",
-        "email": "john@example.com",
-        "phone": "+7 (999) 123-45-67",
-        "telegram": "@johndoe",
-        "service": "FDM печать",
-        "message": "Order details",
-        "amount": "1500.00",
-        "calculator_data": {...},
-        "status": "new",
-        "telegram_sent": 1,
-        "created_at": "2025-01-19 14:30:00",
-        "updated_at": "2025-01-19 14:30:00"
+        "status": "pending",
+        "calculator_data": {},
+        "telegram_sent": true,
+        "telegram_error": null,
+        "form_submission_id": 1,
+        "form_slug": "order",
+        "created_at": "2024-01-01T00:00:00.000000Z",
+        "updated_at": "2024-01-01T00:00:00.000000Z"
       }
     ]
   },
   "meta": {
-    "total": 150,
+    "total": 1,
     "limit": 100,
     "offset": 0,
-    "has_more": true
+    "has_more": false
   }
 }
 ```
 
-#### POST /api/orders.php
+### POST - Create Order
 
-Create a new order or contact form submission.
-
-**Authentication:** Public (no auth required)  
-**Rate Limited:** Yes (60/min)
+Create a new order via form submission.
 
 **Request Body:**
 ```json
 {
   "name": "John Doe",
-  "phone": "+7 (999) 123-45-67",
   "email": "john@example.com",
-  "telegram": "@johndoe",
-  "service": "3D Printing",
+  "phone": "+1234567890",
   "message": "Order details",
-  "amount": 1500,
   "calculatorData": {
-    "technology": "fdm",
-    "material": "PLA",
-    "weight": 50,
-    "quantity": 2
+    // Optional calculator data for quote
   }
 }
 ```
 
-**Response (201):**
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "order_id": 123,
-    "order_number": "ORD-20250119-ABC123",
+    "order_id": 1,
+    "order_number": "ORD-20240101-001",
+    "submission_id": 1,
     "message": "Order submitted successfully"
   },
   "meta": {
@@ -181,611 +497,195 @@ Create a new order or contact form submission.
 }
 ```
 
-#### PUT /api/orders.php
+### PUT - Update Order
 
-Update an existing order.
+Update an existing order. Requires admin authentication and CSRF token.
 
-**Authentication:** Required + CSRF token  
-**Rate Limited:** Yes (60/min)
+**Required Fields:** `id`
 
-**Request Body:**
-```json
-{
-  "id": 123,
-  "status": "processing",
-  "message": "Updated details"
-}
-```
+**Note:** Updating the `status` field will trigger a Telegram notification if configured.
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "message": "Order updated successfully",
-    "status_changed": true,
-    "telegram_notification_sent": true
-  }
-}
-```
+### DELETE - Delete Order
 
-#### DELETE /api/orders.php
-
-Delete an order.
-
-**Authentication:** Required + CSRF token  
-**Rate Limited:** Yes (60/min)
-
-**Query Parameters:**
-- `id` (required) - Order ID to delete
-
-**Example:**
-```bash
-curl -X DELETE https://your-domain.com/api/orders.php?id=123 \
-  -H "Cookie: PHPSESSID=..." \
-  -H "X-CSRF-Token: ..."
-```
+Delete an order. Requires admin authentication and CSRF token.
 
 ---
 
-### Services
+## Rate Limiting
 
-#### GET /api/services.php
+API endpoints implement rate limiting to prevent abuse:
 
-Retrieve services with optional filtering.
+- **Read operations (GET):** 60 requests per minute
+- **Write operations (POST/PUT/DELETE):** 10 requests per minute
 
-**Authentication:** Public  
-**Rate Limited:** No
-
-**Query Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `id` | int | - | Get specific service |
-| `active` | bool | - | Filter by active status |
-| `featured` | bool | - | Filter featured services |
-| `category` | string | - | Filter by category |
-| `limit` | int | 100 | Results per page |
-| `offset` | int | 0 | Pagination offset |
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "services": [
-      {
-        "id": 1,
-        "name": "FDM печать",
-        "slug": "fdm-printing",
-        "icon": "fa-print",
-        "description": "High-quality FDM 3D printing",
-        "features": ["Fast", "Affordable", "Quality"],
-        "price": "от 50₽/г",
-        "category": "printing",
-        "sort_order": 1,
-        "active": 1,
-        "featured": 1,
-        "created_at": "2025-01-01 00:00:00"
-      }
-    ]
-  }
-}
-```
-
-#### POST /api/services.php
-
-Create a new service.
-
-**Authentication:** Required + CSRF token  
-**Rate Limited:** Yes (60/min)
-
-**Request Body:**
-```json
-{
-  "name": "SLA печать",
-  "slug": "sla-printing",
-  "icon": "fa-cube",
-  "description": "Precision SLA printing",
-  "features": ["High detail", "Smooth surface"],
-  "price": "от 100₽/г",
-  "category": "printing",
-  "sort_order": 2,
-  "active": true,
-  "featured": false
-}
-```
-
-#### PUT /api/services.php
-
-Update a service.
-
-**Authentication:** Required + CSRF token  
-**Rate Limited:** Yes (60/min)
-
-**Request Body:**
-```json
-{
-  "id": 1,
-  "price": "от 60₽/г",
-  "featured": true
-}
-```
-
-#### DELETE /api/services.php
-
-Delete a service.
-
-**Authentication:** Required + CSRF token  
-**Rate Limited:** Yes (60/min)
-
-**Query Parameters:**
-- `id` (required) - Service ID
-
----
-
-### Portfolio
-
-#### GET /api/portfolio.php
-
-Retrieve portfolio items.
-
-**Authentication:** Public  
-**Rate Limited:** No
-
-**Query Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `id` | int | - | Get specific item |
-| `active` | bool | - | Filter by active status |
-| `category` | string | - | Filter by category |
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "portfolio": [
-      {
-        "id": 1,
-        "title": "Architectural Model",
-        "description": "Detailed architectural prototype",
-        "image_url": "/images/portfolio1.jpg",
-        "category": "architecture",
-        "tags": ["prototype", "architecture", "detailed"],
-        "sort_order": 1,
-        "active": 1
-      }
-    ]
-  }
-}
-```
-
-#### POST /api/portfolio.php
-
-Create portfolio item.
-
-**Authentication:** Required + CSRF token
-
-#### PUT /api/portfolio.php
-
-Update portfolio item.
-
-**Authentication:** Required + CSRF token
-
-#### DELETE /api/portfolio.php
-
-Delete portfolio item.
-
-**Authentication:** Required + CSRF token
-
----
-
-### Testimonials
-
-#### GET /api/testimonials.php
-
-Retrieve testimonials.
-
-**Query Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `id` | int | - | Get specific testimonial |
-| `active` | bool | - | Filter by active status |
-| `approved` | bool | - | Filter by approval status |
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "testimonials": [
-      {
-        "id": 1,
-        "name": "Иван Петров",
-        "position": "Директор, ООО \"Компания\"",
-        "avatar": "/images/avatar1.jpg",
-        "text": "Отличное качество печати!",
-        "rating": 5,
-        "sort_order": 1,
-        "approved": 1,
-        "active": 1
-      }
-    ]
-  }
-}
-```
-
-#### POST /api/testimonials.php
-
-Create testimonial (admin only).
-
-#### PUT /api/testimonials.php
-
-Update testimonial (admin only).
-
-#### DELETE /api/testimonials.php
-
-Delete testimonial (admin only).
-
----
-
-### FAQ
-
-#### GET /api/faq.php
-
-Retrieve FAQ items.
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "faq": [
-      {
-        "id": 1,
-        "question": "Сколько стоит 3D печать?",
-        "answer": "Стоимость зависит от материала и веса...",
-        "sort_order": 1,
-        "active": 1
-      }
-    ]
-  }
-}
-```
-
-#### POST /api/faq.php
-
-Create FAQ item (admin only).
-
-#### PUT /api/faq.php
-
-Update FAQ item (admin only).
-
-#### DELETE /api/faq.php
-
-Delete FAQ item (admin only).
-
----
-
-### Content Blocks
-
-#### GET /api/content.php
-
-Retrieve content blocks.
-
-**Query Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `id` | int | - | Get specific block |
-| `block_name` | string | - | Get by unique name |
-| `page` | string | - | Filter by page |
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "content_blocks": [
-      {
-        "id": 1,
-        "block_name": "home_hero",
-        "title": "3D Печать в Омске",
-        "content": "Профессиональная 3D печать...",
-        "data": {...},
-        "page": "home",
-        "sort_order": 1,
-        "active": 1
-      }
-    ]
-  }
-}
-```
-
-#### POST /api/content.php
-
-Create content block (admin only).
-
-#### PUT /api/content.php
-
-Update content block (admin only).
-
-#### DELETE /api/content.php
-
-Delete content block (admin only).
-
----
-
-### Settings
-
-#### GET /api/settings.php
-
-Retrieve settings.
-
-**Authentication:** Required (admin only)
-
-**Query Parameters:**
-- `key` (optional) - Get specific setting
-
-**Response (all settings):**
-```json
-{
-  "success": true,
-  "data": {
-    "settings": {
-      "site_name": "3D Print Pro",
-      "telegram_chat_id": "-1001234567890",
-      "telegram_bot_token": "123456:ABC-DEF...",
-      "telegram_notify_new_order": "1",
-      "telegram_notify_status_change": "1"
-    }
-  }
-}
-```
-
-#### POST /api/settings.php (or PUT)
-
-Save settings.
-
-**Authentication:** Required + CSRF token  
-**Rate Limited:** Yes (60/min)
-
-**Single Setting:**
-```json
-{
-  "key": "site_name",
-  "value": "3D Print Pro"
-}
-```
-
-**Multiple Settings:**
-```json
-{
-  "site_name": "3D Print Pro",
-  "telegram_chat_id": "-1001234567890"
-}
-```
-
-#### DELETE /api/settings.php
-
-Delete a setting.
-
-**Authentication:** Required + CSRF token
-
----
-
-### Telegram Test
-
-#### POST /api/telegram-test.php
-
-Send test Telegram message.
-
-**Authentication:** Required  
-**Rate Limited:** Yes (60/min)
-
-**Response (Success):**
-```json
-{
-  "success": true,
-  "data": {
-    "message": "Test message sent successfully"
-  }
-}
-```
-
-**Response (Error):**
-```json
-{
-  "success": false,
-  "error": "Bot token not configured"
-}
-```
-
----
-
-### Diagnostics
-
-#### GET /api/test.php
-
-Quick API health check.
-
-**Query Parameters:**
-- `audit=full` - Run comprehensive database audit
-
-**Response:**
-```json
-{
-  "success": true,
-  "timestamp": "2025-01-19 14:30:00",
-  "database_status": "Connected",
-  "mysql_version": "8.0.32",
-  "php_version": "8.1.0",
-  "tables": {
-    "orders": 42,
-    "services": 6,
-    "portfolio": 4,
-    "testimonials": 4,
-    "faq": 8,
-    "content_blocks": 3,
-    "settings": 15
-  }
-}
-```
+Rate limit headers are included in responses:
+- `X-RateLimit-Limit` - Maximum requests per window
+- `X-RateLimit-Remaining` - Remaining requests in current window
+- `X-RateLimit-Reset` - Time when the rate limit resets
 
 ---
 
 ## Error Handling
 
-### Validation Errors (400/422)
+All errors are returned with appropriate HTTP status codes and a standardized JSON format.
 
+### Validation Errors (422)
 ```json
 {
   "success": false,
   "error": "Validation failed",
   "errors": {
     "name": "Name is required and must be a string",
-    "phone": "Phone is required and must be a string"
+    "email": "Email must be a valid email address"
   }
 }
 ```
 
 ### Not Found (404)
-
 ```json
 {
   "success": false,
-  "error": "Order not found"
-}
-```
-
-### Unauthorized (401)
-
-```json
-{
-  "success": false,
-  "error": "Authentication required"
-}
-```
-
-### Forbidden (403)
-
-```json
-{
-  "success": false,
-  "error": "Invalid CSRF token"
-}
-```
-
-### Rate Limit Exceeded (429)
-
-```json
-{
-  "success": false,
-  "error": "Rate limit exceeded. Please try again later.",
-  "meta": {
-    "retry_after": 45,
-    "reset": 1699999999,
-    "limit": 60,
-    "window": 60
-  }
+  "error": "Resource not found"
 }
 ```
 
 ### Server Error (500)
-
 ```json
 {
   "success": false,
-  "error": "Internal server error. Please try again later."
+  "error": "An unexpected error occurred. Please try again later."
 }
 ```
 
 ---
 
-## JavaScript Client
+## Architecture
 
-### APIClient Class
+The API is built using:
 
-```javascript
-const apiClient = new APIClient('/api');
+- **Eloquent ORM** - Laravel's database ORM for data access
+- **Controller Pattern** - Each resource has a dedicated controller
+- **Base Controller** - Shared functionality via `BaseApiController`
+- **Traits** - Reusable components (pagination, validation)
+- **Standardized Responses** - Consistent JSON structure via `ApiResponse`
+- **Security Headers** - CORS, CSP, XSS protection
+- **Rate Limiting** - Per-endpoint request throttling
+- **Logging** - Comprehensive request/error logging
 
-// Settings
-const settings = await apiClient.getAllSettings();
-const chatId = await apiClient.getSetting('telegram_chat_id');
-await apiClient.saveSettings({ site_name: "New Name" });
+### Bootstrap Process
 
-// Orders
-const orders = await apiClient.getOrders({ status: 'new', limit: 50 });
-const order = await apiClient.createOrder({ name: "John", phone: "+7..." });
-await apiClient.updateOrder(id, { status: 'processing' });
-await apiClient.deleteOrder(id);
+All API endpoints load `/api/bootstrap.php` which:
+1. Loads Composer autoloader
+2. Initializes Eloquent ORM
+3. Loads common helpers
+4. Applies security headers
+5. Sets up global exception handling
 
-// Services
-const services = await apiClient.getServices({ active: true });
-await apiClient.createService({ name: "New Service", ...});
-await apiClient.updateService(id, { price: "100₽" });
-await apiClient.deleteService(id);
+### Controller Architecture
 
-// Portfolio, Testimonials, FAQ, Content - similar CRUD methods
-```
+Controllers extend `BaseApiController` which provides:
+- Request parsing (JSON input, query parameters)
+- Response formatting (success, error, validation)
+- Authentication hooks
+- Rate limiting
+- Pagination
+- Validation helpers
 
 ---
 
-## Configuration
+## Backwards Compatibility
 
-Rate limiting configured in `api/config.php`:
+The legacy `Database` class (`/api/db.php`) is deprecated but maintained for backwards compatibility. New code should use Eloquent models and controllers.
 
-```php
-define('RATE_LIMIT_MAX_REQUESTS', 60); // Requests per window
-define('RATE_LIMIT_TIME_WINDOW', 60);  // Window in seconds
+**Migration Path:**
+1. All standard CRUD endpoints now use Eloquent
+2. FormService integration maintained for order processing
+3. Telegram notifications still use Database for compatibility
+4. Legacy scripts can continue using Database class
+
+---
+
+## Example Usage
+
+### JavaScript (Fetch API)
+
+```javascript
+// Get all active services
+fetch('/api/services.php?active=true')
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log('Services:', data.data.services);
+    }
+  });
+
+// Create a new FAQ (admin only)
+fetch('/api/faq.php', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRF-Token': getCsrfToken()
+  },
+  body: JSON.stringify({
+    question: 'How much does it cost?',
+    answer: 'Prices start at $50.',
+    active: true
+  })
+})
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      console.log('Created:', data.data);
+    }
+  });
+```
+
+### cURL
+
+```bash
+# Get services
+curl -X GET 'https://yoursite.com/api/services.php?active=true'
+
+# Create portfolio item (admin)
+curl -X POST 'https://yoursite.com/api/portfolio.php' \
+  -H 'Content-Type: application/json' \
+  -H 'Cookie: session_id=...' \
+  -H 'X-CSRF-Token: ...' \
+  -d '{
+    "title": "New Project",
+    "category": "commercial",
+    "active": true
+  }'
 ```
 
 ---
 
 ## Testing
 
-### Smoke Test
+### Smoke Tests
 
+Run API smoke tests:
 ```bash
-php scripts/api_smoke_test.php
+php scripts/api_smoke.php
 ```
 
-### Manual Testing
+### Unit Tests
 
+Run PHPUnit tests:
 ```bash
-# Get orders (requires auth)
-curl -b cookies.txt https://your-domain.com/api/orders.php
-
-# Create order
-curl -X POST https://your-domain.com/api/orders.php \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John","phone":"+79991234567","message":"Test"}' \
-  -i
-
-# Check rate limit headers
-curl -I https://your-domain.com/api/orders.php
-
-# Full audit
-curl https://your-domain.com/api/test.php?audit=full
+composer test
 ```
 
----
+### Integration Tests
 
-## Migration from Deprecated Endpoints
-
-### Old: submit-form.php
-**Before:** `POST /api/submit-form.php`  
-**After:** `POST /api/orders.php`
-
-### Old: get-orders.php
-**Before:** `GET /api/get-orders.php?limit=10`  
-**After:** `GET /api/orders.php?limit=10`
+See `/tests/Integration/` for full test coverage of API controllers and endpoints.
 
 ---
 
 ## Support
 
-For issues or questions:
-- Check logs: `logs/api.log`
-- Run diagnostics: `/api/test.php?audit=full`
-- Database audit: `php scripts/db_audit.php`
-- See [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+For issues or questions, please refer to:
+- Main documentation: `/README.md`
+- Testing guide: `/docs/TESTING.md`
+- Settings service: `/docs/SETTINGS_SERVICE.md`
+- Forms system: `/database/FORMS_SYSTEM.md`
