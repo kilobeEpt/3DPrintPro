@@ -9,7 +9,7 @@ This directory contains the source-of-truth schema and seed data for the 3D Prin
 ### Core Schema Files
 
 #### 1. `schema.sql`
-**Purpose:** Creates the complete database structure (7 tables)
+**Purpose:** Creates the complete database structure (12 tables) - **v3.0 with Forms System**
 
 **Features:**
 - ✅ Idempotent - safe to run multiple times (CREATE TABLE IF NOT EXISTS)
@@ -17,15 +17,26 @@ This directory contains the source-of-truth schema and seed data for the 3D Prin
 - ✅ Proper constraints and data types
 - ✅ Detailed comments explaining each table
 - ✅ Optional DROP TABLE statements (commented out) for hard reset
+- ✅ Foreign key constraints with proper cascading
+- ✅ Full-featured dynamic forms system
 
 **Tables Created:**
-1. **orders** - Customer orders and inquiries (NO 'active' column)
+
+**Legacy Tables (7):**
+1. **orders** - Customer orders and inquiries (NO 'active' column) - *Updated with form integration*
 2. **settings** - Application configuration (NO 'active' column)
 3. **services** - Service offerings (HAS 'active' column)
 4. **portfolio** - Project showcase (HAS 'active' column)
 5. **testimonials** - Customer reviews (HAS 'active' column)
 6. **faq** - Frequently asked questions (HAS 'active' column)
 7. **content_blocks** - Dynamic page content (HAS 'active' column)
+
+**Forms System Tables (5 - NEW in v3.0):**
+8. **forms** - Dynamic form definitions (HAS 'active' column)
+9. **form_fields** - Field configurations per form (HAS 'active' column)
+10. **form_submissions** - Form submission records (NO 'active' column)
+11. **form_submission_values** - Normalized field values (NO 'active' column)
+12. **settings_audit** - Settings change audit log (NO 'active' column)
 
 **Usage:**
 ```bash
@@ -37,17 +48,20 @@ mysql -u username -p database_name < schema.sql
 ```
 
 #### 2. `seed-data.php`
-**Purpose:** Centralized default data for all tables
+**Purpose:** Centralized default data for all tables (v3.0 includes forms data)
 
 **Features:**
 - ✅ All seed data in one place (single source of truth)
 - ✅ Easy to edit and customize
 - ✅ PHP array format for flexibility
 - ✅ Comprehensive default content
+- ✅ Forms and form fields definitions
 
 **Data Included:**
 - **6 services** - FDM, SLA, modeling, prototyping, post-processing, consultation
 - **4 portfolio items** - Architecture, prototype, figurine, industrial part
+- **2 forms** - Contact form, Order form (NEW in v3.0)
+- **12 form fields** - 6 fields per form (NEW in v3.0)
 - **4 testimonials** - Customer reviews with 5-star ratings
 - **8 FAQ entries** - Common questions and answers
 - **3 content blocks** - Hero, features, about sections
@@ -407,7 +421,19 @@ See `VERIFICATION_AND_BACKUP.md` for complete backup guide.
 
 ## Version History
 
-### v2.1 (January 2025) - Current
+### v3.0 (January 2025) - Current (Forms System)
+- ✅ Dynamic forms system with 5 new tables
+- ✅ Form submissions with normalized and denormalized storage
+- ✅ Settings audit logging
+- ✅ Orders integration with forms (backward compatible)
+- ✅ Eloquent models with relationships
+- ✅ Migration script for existing orders
+- ✅ Seed script for default forms
+- ✅ Comprehensive forms documentation
+- ✅ SQLite test database with forms tables
+- ✅ Schema verification updated for 12 tables
+
+### v2.1 (January 2025)
 - ✅ Schema verification script (verify-schema.php)
 - ✅ Automated backup system (backup.php)
 - ✅ CLI and HTTP support for tools
@@ -430,10 +456,27 @@ See `VERIFICATION_AND_BACKUP.md` for complete backup guide.
 ## Related Documentation
 
 ### In This Directory
+- `FORMS_SYSTEM.md` - **NEW** Complete forms system documentation (v3.0)
+- `MIGRATION_GUIDE.md` - **NEW** Step-by-step migration to forms system (v3.0)
+- `FORMS_SCHEMA_DIAGRAM.txt` - **NEW** Visual database schema diagram (v3.0)
 - `VERIFICATION_AND_BACKUP.md` - Complete verification and backup guide
 - `QUICK_REFERENCE.md` - Quick command reference
-- `schema.sql` - Database schema
-- `seed-data.php` - Seed data
+- `schema.sql` - Database schema (updated to v3.0)
+- `seed-data.php` - Seed data (updated with forms)
+
+### Scripts Directory
+- `../scripts/seed-forms.php` - **NEW** Seed forms and fields (v3.0)
+- `../scripts/migrate-orders-to-forms.php` - **NEW** Migrate existing orders (v3.0)
+- `../scripts/setup-test-db.php` - SQLite test database (updated with forms)
+- `../scripts/eloquent-smoke.php` - Test Eloquent models
+
+### Models Directory
+- `../app/Models/Form.php` - **NEW** Form model (v3.0)
+- `../app/Models/FormField.php` - **NEW** Form field model (v3.0)
+- `../app/Models/FormSubmission.php` - **NEW** Form submission model (v3.0)
+- `../app/Models/FormSubmissionValue.php` - **NEW** Field value model (v3.0)
+- `../app/Models/SettingsAudit.php` - **NEW** Audit log model (v3.0)
+- `../app/Models/Order.php` - Updated with form relationship (v3.0)
 
 ### In Parent Directory
 - `../DATABASE_ARCHITECTURE.md` - Complete database and API documentation

@@ -42,14 +42,15 @@ require_once $configPath;
 // Expected schema definition
 $expectedSchema = [
     'orders' => [
-        'description' => 'Customer orders and inquiries',
+        'description' => 'Customer orders and inquiries (with forms integration)',
         'has_active' => false,
         'columns' => [
             'id', 'order_number', 'type', 'name', 'email', 'phone', 'telegram',
             'service', 'subject', 'message', 'amount', 'calculator_data',
+            'form_submission_id', 'form_slug',
             'status', 'telegram_sent', 'telegram_error', 'created_at', 'updated_at'
         ],
-        'indexes' => ['order_number', 'phone', 'email', 'status', 'created_at', 'type']
+        'indexes' => ['order_number', 'phone', 'email', 'status', 'created_at', 'type', 'form_slug', 'form_submission_id']
     ],
     'settings' => [
         'description' => 'Application configuration',
@@ -98,6 +99,52 @@ $expectedSchema = [
             'sort_order', 'active', 'created_at', 'updated_at'
         ],
         'indexes' => ['block_name', 'page', 'active']
+    ],
+    'forms' => [
+        'description' => 'Dynamic form definitions',
+        'has_active' => true,
+        'columns' => [
+            'id', 'name', 'slug', 'description', 'settings', 'notification_email',
+            'success_message', 'redirect_url', 'sort_order', 'active', 'created_at', 'updated_at'
+        ],
+        'indexes' => ['slug', 'active', 'sort_order']
+    ],
+    'form_fields' => [
+        'description' => 'Field definitions for forms',
+        'has_active' => true,
+        'columns' => [
+            'id', 'form_id', 'name', 'label', 'type', 'placeholder', 'default_value',
+            'validation_rules', 'options', 'help_text', 'sort_order', 'required', 'active',
+            'created_at', 'updated_at'
+        ],
+        'indexes' => ['form_id', 'active', 'sort_order']
+    ],
+    'form_submissions' => [
+        'description' => 'Form submission records',
+        'has_active' => false,
+        'columns' => [
+            'id', 'form_id', 'form_slug', 'submitted_data', 'status', 'ip_address',
+            'user_agent', 'submitted_at', 'created_at', 'updated_at'
+        ],
+        'indexes' => ['form_id', 'form_slug', 'status', 'submitted_at', 'created_at']
+    ],
+    'form_submission_values' => [
+        'description' => 'Normalized field values for form submissions',
+        'has_active' => false,
+        'columns' => [
+            'id', 'form_submission_id', 'form_field_id', 'field_name', 'field_value',
+            'created_at', 'updated_at'
+        ],
+        'indexes' => ['form_submission_id', 'form_field_id', 'field_name']
+    ],
+    'settings_audit' => [
+        'description' => 'Audit log for settings changes',
+        'has_active' => false,
+        'columns' => [
+            'id', 'setting_key', 'old_value', 'new_value', 'changed_by',
+            'ip_address', 'user_agent', 'created_at'
+        ],
+        'indexes' => ['setting_key', 'changed_by', 'created_at']
     ]
 ];
 

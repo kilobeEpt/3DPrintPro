@@ -51,6 +51,8 @@ class Order extends BaseModel
         'message',
         'amount',
         'calculator_data',
+        'form_submission_id',
+        'form_slug',
         'status',
         'telegram_sent',
         'telegram_error',
@@ -65,6 +67,7 @@ class Order extends BaseModel
         'amount' => 'decimal:2',
         'telegram_sent' => 'boolean',
         'calculator_data' => 'array',
+        'form_submission_id' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -143,5 +146,15 @@ class Order extends BaseModel
     public function isContact()
     {
         return $this->type === self::TYPE_CONTACT;
+    }
+    
+    /**
+     * Get the form submission associated with this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function formSubmission()
+    {
+        return $this->belongsTo(FormSubmission::class, 'form_submission_id', 'id');
     }
 }
