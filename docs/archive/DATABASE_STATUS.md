@@ -19,13 +19,13 @@
 
 ```bash
 # 1. Заполнить БД default данными
-https://ch167436.tw1.ru/api/init-database.php
+https://3dprint-omsk.ru/api/init-database.php
 
 # 2. Активировать все записи
-https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 
 # 3. Проверить статус
-https://ch167436.tw1.ru/api/test.php
+https://3dprint-omsk.ru/api/test.php
 ```
 
 **Время:** 2 минуты  
@@ -139,7 +139,7 @@ https://ch167436.tw1.ru/api/test.php
 ## 🎯 NEXT STEPS
 
 1. ✅ Database initialized
-2. ⏭️ Test website (https://ch167436.tw1.ru)
+2. ⏭️ Test website (https://3dprint-omsk.ru)
 3. ⏭️ Clear browser cache
 4. ⏭️ Test forms
 5. ⏭️ Configure Telegram (optional)

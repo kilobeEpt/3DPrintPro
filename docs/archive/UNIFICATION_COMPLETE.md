@@ -204,19 +204,19 @@ Tests:
 ### Manual Testing
 ```bash
 # Test GET with headers
-curl -i https://ch167436.tw1.ru/api/orders.php
+curl -i https://3dprint-omsk.ru/api/orders.php
 
 # Test POST with rate limiting
-curl -X POST https://ch167436.tw1.ru/api/orders.php \
+curl -X POST https://3dprint-omsk.ru/api/orders.php \
   -H "Content-Type: application/json" \
   -d '{"name":"Test","phone":"+79991234567"}' \
   -i
 
 # Verify rate limit headers
-curl -I https://ch167436.tw1.ru/api/services.php
+curl -I https://3dprint-omsk.ru/api/services.php
 
 # Test deprecated endpoint (should 404)
-curl -I https://ch167436.tw1.ru/api/submit-form.php
+curl -I https://3dprint-omsk.ru/api/submit-form.php
 ```
 
 ## Migration Path

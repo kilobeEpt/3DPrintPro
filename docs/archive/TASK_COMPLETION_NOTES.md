@@ -133,19 +133,19 @@
 
 ### Step 1: Initialize Database (2 minutes)
 ```
-Open: https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+Open: https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 ```
 This activates all database records.
 
 ### Step 2: Verify (3 minutes)
 ```
-Open: https://ch167436.tw1.ru/api/test.php
+Open: https://3dprint-omsk.ru/api/test.php
 Look for: "database_status": "Connected"
 ```
 
 ### Step 3: Test (2 minutes)
 ```
-Open: https://ch167436.tw1.ru/
+Open: https://3dprint-omsk.ru/
 Submit contact form
 Verify order in database
 ```
@@ -213,16 +213,16 @@ Security:           ✅ Hardened
 ## 📞 SUPPORT RESOURCES
 
 ### Diagnostic URLs:
-- Test API: https://ch167436.tw1.ru/api/test.php
-- Check DB: https://ch167436.tw1.ru/api/init-check.php
-- Fix DB: https://ch167436.tw1.ru/api/init-check.php?fix_active=1
-- Populate DB: https://ch167436.tw1.ru/api/init-database.php
+- Test API: https://3dprint-omsk.ru/api/test.php
+- Check DB: https://3dprint-omsk.ru/api/init-check.php
+- Fix DB: https://3dprint-omsk.ru/api/init-check.php?fix_active=1
+- Populate DB: https://3dprint-omsk.ru/api/init-database.php
 
 ### Main Pages:
-- Homepage: https://ch167436.tw1.ru/
-- Admin: https://ch167436.tw1.ru/admin.html
-- Services: https://ch167436.tw1.ru/services.html
-- Contact: https://ch167436.tw1.ru/contact.html
+- Homepage: https://3dprint-omsk.ru/
+- Admin: https://3dprint-omsk.ru/admin.html
+- Services: https://3dprint-omsk.ru/services.html
+- Contact: https://3dprint-omsk.ru/contact.html
 
 ### Documentation:
 - Quick Start: START_HERE.md

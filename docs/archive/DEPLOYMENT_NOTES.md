@@ -8,7 +8,7 @@
 
 **Location:** `/api/config.php`
 
-**Content (for ch167436.tw1.ru):**
+**Content (for 3dprint-omsk.ru):**
 ```php
 <?php
 define('DB_HOST', 'localhost');
@@ -20,7 +20,7 @@ define('DB_CHARSET', 'utf8mb4');
 define('TELEGRAM_BOT_TOKEN', '8241807858:AAE0JXxWO9HumqesNK6x_vvaMrxvRK9qKBI');
 define('TELEGRAM_CHAT_ID', '');
 
-define('SITE_URL', 'https://ch167436.tw1.ru');
+define('SITE_URL', 'https://3dprint-omsk.ru');
 define('SITE_NAME', '3D Print Pro');
 
 header('Access-Control-Allow-Origin: *');
@@ -88,21 +88,21 @@ These files are NEW in this branch:
 
 **A. Test API diagnostics:**
 ```bash
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 ```
 
 Expected: JSON with `"success": true`
 
 **B. Open web checker:**
 ```
-https://ch167436.tw1.ru/api/init-check.php
+https://3dprint-omsk.ru/api/init-check.php
 ```
 
 Expected: Green checkmarks ✅
 
 **C. Test frontend:**
 1. Clear browser cache
-2. Open https://ch167436.tw1.ru/
+2. Open https://3dprint-omsk.ru/
 3. Press F12 → Console
 4. Look for ✅ success logs
 
@@ -229,7 +229,7 @@ Deployment is successful when:
 
 ## 📝 Notes for Production
 
-### Database Credentials (ch167436.tw1.ru):
+### Database Credentials (3dprint-omsk.ru):
 ```
 Host: localhost
 Database: ch167436_3dprint
@@ -239,15 +239,15 @@ Password: 852789456
 
 ### File Paths:
 ```
-Project root: /home/ch167436/domains/ch167436.tw1.ru/public_html/
-Config file: /home/ch167436/domains/ch167436.tw1.ru/public_html/api/config.php
+Project root: /home/ch167436/domains/3dprint-omsk.ru/public_html/
+Config file: /home/ch167436/domains/3dprint-omsk.ru/public_html/api/config.php
 ```
 
 ### URLs:
 ```
-Site: https://ch167436.tw1.ru/
-Test API: https://ch167436.tw1.ru/api/test.php
-Web Checker: https://ch167436.tw1.ru/api/init-check.php
+Site: https://3dprint-omsk.ru/
+Test API: https://3dprint-omsk.ru/api/test.php
+Web Checker: https://3dprint-omsk.ru/api/init-check.php
 ```
 
 ---

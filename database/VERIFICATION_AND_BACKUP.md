@@ -152,12 +152,12 @@ Backups are saved to `database/backups/` with format:
    
    Or via HTTP:
    ```bash
-   curl https://ch167436.tw1.ru/database/verify-schema.php
+   curl https://3dprint-omsk.ru/database/verify-schema.php
    ```
 
 4. **Seed initial data:**
    ```bash
-   curl https://ch167436.tw1.ru/api/init-database.php
+   curl https://3dprint-omsk.ru/api/init-database.php
    ```
 
 5. **Create initial backup:**
@@ -303,7 +303,7 @@ mysql -u ch167436_3dprint -p ch167436_3dprint < database/schema.sql
 nano database/schema.sql  # Re-comment lines 29-35
 
 # 5. Re-seed data
-curl https://ch167436.tw1.ru/api/init-database.php
+curl https://3dprint-omsk.ru/api/init-database.php
 
 # 6. Verify
 php database/verify-schema.php
@@ -328,7 +328,7 @@ php database/verify-schema.php || {
 }
 
 echo "Testing API..."
-curl -f https://ch167436.tw1.ru/api/test.php || {
+curl -f https://3dprint-omsk.ru/api/test.php || {
     echo "API test failed!"
     exit 1
 }
@@ -343,10 +343,10 @@ echo "Deployment checks passed ✅"
 set -e
 
 echo "Verifying deployed schema..."
-curl -f https://ch167436.tw1.ru/database/verify-schema.php | jq -r '.status'
+curl -f https://3dprint-omsk.ru/database/verify-schema.php | jq -r '.status'
 
 echo "Creating post-deployment backup..."
-curl -f "https://ch167436.tw1.ru/database/backup.php?token=YOUR_TOKEN"
+curl -f "https://3dprint-omsk.ru/database/backup.php?token=YOUR_TOKEN"
 
 echo "Post-deployment verification complete ✅"
 ```

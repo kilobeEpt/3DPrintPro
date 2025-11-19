@@ -135,25 +135,25 @@ Settings:
 
 1. **Инициализация БД:**
    ```
-   https://ch167436.tw1.ru/api/init-database.php
+   https://3dprint-omsk.ru/api/init-database.php
    ```
    Заполнит portfolio, content_blocks, settings
 
 2. **Активация записей:**
    ```
-   https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+   https://3dprint-omsk.ru/api/init-check.php?fix_active=1
    ```
    Установит active=1 для всех записей
 
 3. **Проверка статуса:**
    ```
-   https://ch167436.tw1.ru/api/test.php
+   https://3dprint-omsk.ru/api/test.php
    ```
    Должно вернуть JSON без ошибок
 
 4. **Тестирование сайта:**
    - Очистить cache и localStorage (Ctrl+Shift+Del)
-   - Открыть https://ch167436.tw1.ru/
+   - Открыть https://3dprint-omsk.ru/
    - Проверить консоль (F12) - никаких ошибок
    - Проверить отображение услуг, портфолио, отзывов, FAQ
    - Протестировать формы

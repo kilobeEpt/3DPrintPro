@@ -139,7 +139,7 @@ try {
     
     // API Endpoints Test
     echo "<h3>API Endpoints Test:</h3>";
-    $baseUrl = 'https://ch167436.tw1.ru/api';
+    $baseUrl = 'https://3dprint-omsk.ru/api';
     
     echo "<ul>";
     echo "<li><a href='$baseUrl/test.php' target='_blank'>Test API (Diagnostics)</a></li>";

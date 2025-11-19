@@ -3,7 +3,7 @@
 **Project:** 3D Print Pro - Complete Database & API Integration  
 **Date:** January 2025  
 **Status:** ✅ **COMPLETE & READY FOR PRODUCTION**  
-**Site:** https://ch167436.tw1.ru/  
+**Site:** https://3dprint-omsk.ru/  
 **Database:** ch167436_3dprint  
 
 ---
@@ -26,7 +26,7 @@
 - DB_NAME: ch167436_3dprint
 - DB_USER: ch167436_3dprint
 - DB_PASS: 852789456 *(configured, not shown publicly)*
-- SITE_URL: https://ch167436.tw1.ru
+- SITE_URL: https://3dprint-omsk.ru
 
 ---
 
@@ -197,7 +197,7 @@ Legacy (still work):
 
 **Option A: Web Interface (Recommended)**
 ```
-1. Open: https://ch167436.tw1.ru/api/init-check.php
+1. Open: https://3dprint-omsk.ru/api/init-check.php
 2. Review table status
 3. If any tables show 0 active, click "Fix: Set all to active=1"
 4. If tables are empty, click "Initialize Database"
@@ -206,8 +206,8 @@ Legacy (still work):
 
 **Option B: Direct URL**
 ```
-Fix inactive records: https://ch167436.tw1.ru/api/init-check.php?fix_active=1
-Populate empty DB: https://ch167436.tw1.ru/api/init-database.php
+Fix inactive records: https://3dprint-omsk.ru/api/init-check.php?fix_active=1
+Populate empty DB: https://3dprint-omsk.ru/api/init-database.php
 ```
 
 ---
@@ -217,13 +217,13 @@ Populate empty DB: https://ch167436.tw1.ru/api/init-database.php
 Open these URLs and verify they return data:
 
 ```
-✅ Database test:     https://ch167436.tw1.ru/api/test.php
-✅ Services:          https://ch167436.tw1.ru/api/services.php
-✅ FAQ:               https://ch167436.tw1.ru/api/faq.php
-✅ Testimonials:      https://ch167436.tw1.ru/api/testimonials.php
-✅ Portfolio:         https://ch167436.tw1.ru/api/portfolio.php
-✅ Settings:          https://ch167436.tw1.ru/api/settings.php
-✅ Orders:            https://ch167436.tw1.ru/api/orders.php
+✅ Database test:     https://3dprint-omsk.ru/api/test.php
+✅ Services:          https://3dprint-omsk.ru/api/services.php
+✅ FAQ:               https://3dprint-omsk.ru/api/faq.php
+✅ Testimonials:      https://3dprint-omsk.ru/api/testimonials.php
+✅ Portfolio:         https://3dprint-omsk.ru/api/portfolio.php
+✅ Settings:          https://3dprint-omsk.ru/api/settings.php
+✅ Orders:            https://3dprint-omsk.ru/api/orders.php
 ```
 
 All should return JSON with `"success": true`
@@ -233,7 +233,7 @@ All should return JSON with `"success": true`
 ### Step 3: Test Frontend (2 minutes)
 
 ```
-1. Open: https://ch167436.tw1.ru/
+1. Open: https://3dprint-omsk.ru/
 2. Press F12 → Console tab
 3. Look for green checkmarks:
    ✅ APIClient initialized
@@ -276,11 +276,11 @@ All should return JSON with `"success": true`
 ### Step 5: Test Other Pages (2 minutes)
 
 ```
-✅ https://ch167436.tw1.ru/about.html - Loads without errors
-✅ https://ch167436.tw1.ru/services.html - Shows services from DB
-✅ https://ch167436.tw1.ru/portfolio.html - Loads without errors
-✅ https://ch167436.tw1.ru/contact.html - Form works
-✅ https://ch167436.tw1.ru/admin.html - Admin panel loads
+✅ https://3dprint-omsk.ru/about.html - Loads without errors
+✅ https://3dprint-omsk.ru/services.html - Shows services from DB
+✅ https://3dprint-omsk.ru/portfolio.html - Loads without errors
+✅ https://3dprint-omsk.ru/contact.html - Form works
+✅ https://3dprint-omsk.ru/admin.html - Admin panel loads
 ```
 
 ---
@@ -301,7 +301,7 @@ All should return JSON with `"success": true`
 
 ```
 1. Open incognito/private window
-2. Visit: https://ch167436.tw1.ru/
+2. Visit: https://3dprint-omsk.ru/
 3. Data should load from API
 4. Submit a form
 5. Close incognito window
@@ -457,7 +457,7 @@ Security:
 
 ### Current Environment:
 ```
-🌐 Production URL:    https://ch167436.tw1.ru/
+🌐 Production URL:    https://3dprint-omsk.ru/
 💾 Database:          ch167436_3dprint
 🔑 Credentials:       Configured in api/config.php
 📊 Tables:            7 tables ready
@@ -494,10 +494,10 @@ You can now:
 ### Common Issues:
 
 **Issue:** API returns empty arrays
-**Solution:** https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+**Solution:** https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 
 **Issue:** Tables are empty
-**Solution:** https://ch167436.tw1.ru/api/init-database.php
+**Solution:** https://3dprint-omsk.ru/api/init-database.php
 
 **Issue:** Database connection failed
 **Solution:** Check api/config.php credentials
@@ -611,17 +611,17 @@ The only remaining steps are:
 ## 📎 QUICK LINKS
 
 ### Diagnostic Tools:
-- Test API: https://ch167436.tw1.ru/api/test.php
-- Check DB: https://ch167436.tw1.ru/api/init-check.php
-- Fix Tables: https://ch167436.tw1.ru/api/init-check.php?fix_active=1
-- Init DB: https://ch167436.tw1.ru/api/init-database.php
+- Test API: https://3dprint-omsk.ru/api/test.php
+- Check DB: https://3dprint-omsk.ru/api/init-check.php
+- Fix Tables: https://3dprint-omsk.ru/api/init-check.php?fix_active=1
+- Init DB: https://3dprint-omsk.ru/api/init-database.php
 
 ### Main Pages:
-- Homepage: https://ch167436.tw1.ru/
-- Services: https://ch167436.tw1.ru/services.html
-- Portfolio: https://ch167436.tw1.ru/portfolio.html
-- Contact: https://ch167436.tw1.ru/contact.html
-- Admin: https://ch167436.tw1.ru/admin.html
+- Homepage: https://3dprint-omsk.ru/
+- Services: https://3dprint-omsk.ru/services.html
+- Portfolio: https://3dprint-omsk.ru/portfolio.html
+- Contact: https://3dprint-omsk.ru/contact.html
+- Admin: https://3dprint-omsk.ru/admin.html
 
 ### Documentation:
 - Final Audit: FINAL_AUDIT_REPORT.md

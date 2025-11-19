@@ -18,12 +18,12 @@
 // Database Configuration
 // ========================================
 // Production Target:
-//   Host: localhost (or ch167436.tw1.ru for remote access)
+//   Host: localhost (or 3dprint-omsk.ru for remote access)
 //   Database: ch167436_3dprint
 //   User: ch167436_3dprint
 //   Password: [YOUR_PASSWORD_HERE]
 
-define('DB_HOST', 'localhost'); // Use 'localhost' on server, 'ch167436.tw1.ru' for remote
+define('DB_HOST', 'localhost'); // Use 'localhost' on server, '3dprint-omsk.ru' for remote
 define('DB_NAME', 'ch167436_3dprint'); // Production database name
 define('DB_USER', 'ch167436_3dprint'); // Production database user
 define('DB_PASS', 'YOUR_PASSWORD_HERE'); // ⚠️ CHANGE THIS - Use actual password from hosting panel
@@ -41,7 +41,7 @@ define('TELEGRAM_CHAT_ID', ''); // Fill this in from admin panel or Telegram set
 // ========================================
 // Site Configuration
 // ========================================
-define('SITE_URL', 'https://ch167436.tw1.ru'); // Production URL
+define('SITE_URL', 'https://3dprint-omsk.ru'); // Production URL
 define('SITE_NAME', '3D Print Pro');
 
 // ========================================

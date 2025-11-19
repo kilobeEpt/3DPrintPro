@@ -45,7 +45,7 @@ All database setup tasks have been completed successfully. The system now includ
 php database/verify-schema.php
 
 # HTTP
-curl https://ch167436.tw1.ru/database/verify-schema.php
+curl https://3dprint-omsk.ru/database/verify-schema.php
 ```
 
 **Output Format:**
@@ -88,7 +88,7 @@ php database/backup.php --schema-only
 php database/backup.php --tables=orders,settings
 
 # HTTP (with token)
-curl "https://ch167436.tw1.ru/database/backup.php?token=TOKEN"
+curl "https://3dprint-omsk.ru/database/backup.php?token=TOKEN"
 ```
 
 **Security:**
@@ -108,14 +108,14 @@ curl "https://ch167436.tw1.ru/database/backup.php?token=TOKEN"
 - ✅ Detailed setup instructions
 - ✅ Production host/database/user documented
 - ✅ Clear password placeholder with warning
-- ✅ Remote access documentation (ch167436.tw1.ru)
+- ✅ Remote access documentation (3dprint-omsk.ru)
 - ✅ Telegram bot setup instructions
 - ✅ Error reporting for dev vs production
 - ✅ Security notes section
 - ✅ References to other security tokens
 
 **Production Details:**
-- Host: `localhost` (or `ch167436.tw1.ru` for remote)
+- Host: `localhost` (or `3dprint-omsk.ru` for remote)
 - Database: `ch167436_3dprint`
 - User: `ch167436_3dprint`
 - Charset: `utf8mb4`
@@ -219,10 +219,10 @@ php database/verify-schema.php
 # Expected: "status": "OK", "production_ready": true
 
 # 4. Seed data
-curl https://ch167436.tw1.ru/api/init-database.php
+curl https://3dprint-omsk.ru/api/init-database.php
 
 # 5. Test API
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 
 # 6. Create backup
 php database/backup.php
@@ -236,11 +236,11 @@ nano database/backup.php    # Change BACKUP_TOKEN (line 36)
 
 ```bash
 # Verify all tables
-curl https://ch167436.tw1.ru/database/verify-schema.php | jq '.production_ready'
+curl https://3dprint-omsk.ru/database/verify-schema.php | jq '.production_ready'
 # Expected: true
 
 # Check record counts
-curl https://ch167436.tw1.ru/api/test.php | jq '.record_counts'
+curl https://3dprint-omsk.ru/api/test.php | jq '.record_counts'
 # Expected: services=6, portfolio=4, testimonials=4, faq=8, etc.
 
 # Test backup system
@@ -297,12 +297,12 @@ mysql -u ch167436_3dprint -p ch167436_3dprint < database/backups/BACKUP_FILE.sql
 
 ### Check API Status
 ```bash
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 ```
 
 ### Seed Database
 ```bash
-curl https://ch167436.tw1.ru/api/init-database.php
+curl https://3dprint-omsk.ru/api/init-database.php
 ```
 
 ## Documentation Index
@@ -350,7 +350,7 @@ curl https://ch167436.tw1.ru/api/init-database.php
 - Automatic compression to .gz
 
 ✅ **config.example.php accurately documents production**
-- Host: localhost / ch167436.tw1.ru
+- Host: localhost / 3dprint-omsk.ru
 - Database: ch167436_3dprint
 - User: ch167436_3dprint
 - Complete security notes and setup instructions

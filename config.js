@@ -5,7 +5,7 @@
 const CONFIG = {
     // Site settings
     siteName: '3D Print Pro',
-    siteUrl: 'https://3dprintpro.ru',
+    siteUrl: 'https://3dprint-omsk.ru',
     
     // Telegram Bot
     telegram: {

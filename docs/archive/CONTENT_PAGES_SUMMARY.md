@@ -11,7 +11,7 @@ Successfully created 7 dedicated content pages to house detailed SEO copy remove
 - Stats counters
 - Call-to-action section
 - **SEO**: Unique meta tags, LocalBusiness schema with foundingDate, BreadcrumbList
-- **URL**: https://3dprintpro.ru/about.html
+- **URL**: https://3dprint-omsk.ru/about.html
 
 ### 2. **services.html** - Services Page
 - Full services grid (no 4-item limit)
@@ -19,14 +19,14 @@ Successfully created 7 dedicated content pages to house detailed SEO copy remove
 - Detailed sections for all additional services (моделирование, постобработка, срочное изготовление, прототипирование)
 - FAQ section
 - **SEO**: Service schema with full offer catalog, BreadcrumbList
-- **URL**: https://3dprintpro.ru/services.html
+- **URL**: https://3dprint-omsk.ru/services.html
 
 ### 3. **portfolio.html** - Portfolio Page
 - Complete portfolio grid with filter buttons
 - 2 case study cards with stats
 - Testimonials section
 - **SEO**: Portfolio-focused meta tags, BreadcrumbList
-- **URL**: https://3dprintpro.ru/portfolio.html
+- **URL**: https://3dprint-omsk.ru/portfolio.html
 
 ### 4. **contact.html** - Contact Page
 - Full contact information with enhanced descriptions
@@ -36,13 +36,13 @@ Successfully created 7 dedicated content pages to house detailed SEO copy remove
 - Map placeholder section
 - FAQ section
 - **SEO**: LocalBusiness with ContactPoint schema, BreadcrumbList
-- **URL**: https://3dprintpro.ru/contact.html
+- **URL**: https://3dprint-omsk.ru/contact.html
 
 ### 5. **districts.html** - Districts & Delivery Page
 - 6 detailed district cards (Центральный, Советский, Кировский, Ленинский, Октябрьский, Омская область)
 - Delivery options breakdown (курьер, самовывоз, почта/ТК)
 - **SEO**: Delivery and local SEO focused meta tags, BreadcrumbList
-- **URL**: https://3dprintpro.ru/districts.html
+- **URL**: https://3dprint-omsk.ru/districts.html
 
 ### 6. **why-us.html** - Why Choose Us Page
 - 12 USP cards with extended descriptions
@@ -50,7 +50,7 @@ Successfully created 7 dedicated content pages to house detailed SEO copy remove
 - Guarantees section (качество, сроки, цены, возврат)
 - Testimonials section
 - **SEO**: Benefits-focused meta tags, BreadcrumbList
-- **URL**: https://3dprintpro.ru/why-us.html
+- **URL**: https://3dprint-omsk.ru/why-us.html
 
 ### 7. **blog.html** - Blog Placeholder Page
 - Blog introduction
@@ -58,7 +58,7 @@ Successfully created 7 dedicated content pages to house detailed SEO copy remove
 - Newsletter subscription form
 - Placeholder notice for future content
 - **SEO**: Blog-focused meta tags, BreadcrumbList
-- **URL**: https://3dprintpro.ru/blog.html
+- **URL**: https://3dprint-omsk.ru/blog.html
 
 ## Technical Implementation
 

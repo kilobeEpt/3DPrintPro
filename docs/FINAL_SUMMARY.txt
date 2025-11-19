@@ -44,9 +44,9 @@ NEW:
 ================================================================================
 
 1. Deploy files to server
-2. Run: https://ch167436.tw1.ru/api/init-database.php
-3. Verify: https://ch167436.tw1.ru/api/test.php
-4. Test: https://ch167436.tw1.ru/
+2. Run: https://3dprint-omsk.ru/api/init-database.php
+3. Verify: https://3dprint-omsk.ru/api/test.php
+4. Test: https://3dprint-omsk.ru/
 
 ================================================================================
 ✅ РЕЗУЛЬТАТ

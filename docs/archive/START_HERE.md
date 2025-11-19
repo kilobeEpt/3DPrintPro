@@ -10,7 +10,7 @@ Everything is ready. Just follow these 3 simple steps:
 
 ### Option A: One-Click Fix (Recommended)
 ```
-Open in browser: https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+Open in browser: https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 ```
 This will:
 - ✅ Activate all existing records
@@ -20,14 +20,14 @@ This will:
 
 ### Option B: Check First, Then Fix
 ```
-1. Check status: https://ch167436.tw1.ru/api/init-check.php
+1. Check status: https://3dprint-omsk.ru/api/init-check.php
 2. Review what needs fixing
 3. Click the "Fix" button on the page
 ```
 
 ### If Database is Empty:
 ```
-Open: https://ch167436.tw1.ru/api/init-database.php
+Open: https://3dprint-omsk.ru/api/init-database.php
 ```
 This will add:
 - 6 default services
@@ -40,14 +40,14 @@ This will add:
 
 ### Test 1: Check API
 ```
-Open: https://ch167436.tw1.ru/api/test.php
+Open: https://3dprint-omsk.ru/api/test.php
 ```
 **Look for:** `"database_status": "Connected"`  
 **If you see this:** ✅ Database is working!
 
 ### Test 2: Check Frontend
 ```
-Open: https://ch167436.tw1.ru/
+Open: https://3dprint-omsk.ru/
 Press F12 (open Console)
 ```
 **Look for these green checkmarks:**
@@ -134,12 +134,12 @@ If all 3 steps worked:
 
 **Via Browser:**
 ```
-https://ch167436.tw1.ru/api/test.php?audit=full
+https://3dprint-omsk.ru/api/test.php?audit=full
 ```
 
 **Via SSH/CLI:**
 ```bash
-cd /home/ch167436/domains/ch167436.tw1.ru/public_html
+cd /home/ch167436/domains/3dprint-omsk.ru/public_html
 php scripts/db_audit.php
 ```
 
@@ -161,7 +161,7 @@ php scripts/db_audit.php
 ### Problem: API returns empty arrays
 **Solution:**
 ```
-https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 ```
 
 ### Problem: "Database connection failed"
@@ -192,14 +192,14 @@ https://ch167436.tw1.ru/api/init-check.php?fix_active=1
 ## 📱 PAGES YOU CAN VISIT
 
 ### Public Pages:
-- **Homepage:** https://ch167436.tw1.ru/
-- **About:** https://ch167436.tw1.ru/about.html
-- **Services:** https://ch167436.tw1.ru/services.html
-- **Portfolio:** https://ch167436.tw1.ru/portfolio.html
-- **Contact:** https://ch167436.tw1.ru/contact.html
+- **Homepage:** https://3dprint-omsk.ru/
+- **About:** https://3dprint-omsk.ru/about.html
+- **Services:** https://3dprint-omsk.ru/services.html
+- **Portfolio:** https://3dprint-omsk.ru/portfolio.html
+- **Contact:** https://3dprint-omsk.ru/contact.html
 
 ### Admin Panel:
-- **Admin:** https://ch167436.tw1.ru/admin.html
+- **Admin:** https://3dprint-omsk.ru/admin.html
   - Manage orders
   - Manage services
   - Manage testimonials
@@ -207,10 +207,10 @@ https://ch167436.tw1.ru/api/init-check.php?fix_active=1
   - Configure settings
 
 ### Diagnostic Tools:
-- **Test API:** https://ch167436.tw1.ru/api/test.php
-- **Full Database Audit:** https://ch167436.tw1.ru/api/test.php?audit=full
-- **Check DB:** https://ch167436.tw1.ru/api/init-check.php
-- **Fix DB:** https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+- **Test API:** https://3dprint-omsk.ru/api/test.php
+- **Full Database Audit:** https://3dprint-omsk.ru/api/test.php?audit=full
+- **Check DB:** https://3dprint-omsk.ru/api/init-check.php
+- **Fix DB:** https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 - **CLI Audit:** `php scripts/db_audit.php` (SSH access required)
 
 ---
@@ -272,7 +272,7 @@ You don't need to do these - they're already complete:
 ## 💡 TIPS
 
 ### Add Your Own Content:
-1. Go to admin panel: https://ch167436.tw1.ru/admin.html
+1. Go to admin panel: https://3dprint-omsk.ru/admin.html
 2. Edit services, add portfolio items, update testimonials
 3. Changes appear immediately on the site
 

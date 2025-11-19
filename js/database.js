@@ -714,7 +714,7 @@ class Database {
             siteName: '3D Print Pro',
             address: 'г. Омск',
             contactPhone: '+7 (XXX) XXX-XX-XX',
-            contactEmail: 'info@3dprintpro.ru',
+            contactEmail: 'info@3dprint-omsk.ru',
             workingHours: 'Пн-Пт: 10:00-18:00\nСб-Вс: 10:00-16:00',
             socialLinks: {
                 telegram: CONFIG.telegram?.contactUrl || '',

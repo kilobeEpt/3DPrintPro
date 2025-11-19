@@ -43,7 +43,7 @@ Returns JSON with:
 - Sample data from each table
 - Useful for API testing and debugging
 
-**Usage:** `https://ch167436.tw1.ru/api/test.php`
+**Usage:** `https://3dprint-omsk.ru/api/test.php`
 
 #### B. **api/init-check.php** - Web-Based Checker
 
@@ -55,7 +55,7 @@ Interactive web page that shows:
 - Links to test all API endpoints
 - Suggestions for common fixes
 
-**Usage:** `https://ch167436.tw1.ru/api/init-check.php`
+**Usage:** `https://3dprint-omsk.ru/api/init-check.php`
 
 ---
 
@@ -154,7 +154,7 @@ Frontend (JS) → APIClient → PHP API → Database Class → MySQL
 
 ### Quick Test (2 minutes):
 
-1. **Open:** `https://ch167436.tw1.ru/api/init-check.php`
+1. **Open:** `https://3dprint-omsk.ru/api/init-check.php`
    - Should show ✅ green checkmarks
    - All tables should have records
 
@@ -162,7 +162,7 @@ Frontend (JS) → APIClient → PHP API → Database Class → MySQL
    - Click "Fix: Set all to active=1"
    - Refresh page
 
-3. **Open:** `https://ch167436.tw1.ru/`
+3. **Open:** `https://3dprint-omsk.ru/`
    - Press F12 (Console)
    - Should see ✅ green checkmarks
    - Services/FAQ/Testimonials should load
@@ -196,7 +196,7 @@ Frontend (JS) → APIClient → PHP API → Database Class → MySQL
 ## 🚀 Next Steps (For User)
 
 1. **Verify on Production:**
-   - Open https://ch167436.tw1.ru/api/init-check.php
+   - Open https://3dprint-omsk.ru/api/init-check.php
    - Check all green ✅
    - Click "Fix Active" if needed
 

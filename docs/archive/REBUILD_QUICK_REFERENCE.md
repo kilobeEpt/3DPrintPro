@@ -28,7 +28,7 @@ curl https://your-site.com/api/test.php
 ### First Time Setup
 ```bash
 # Production site
-curl https://ch167436.tw1.ru/api/init-database.php
+curl https://3dprint-omsk.ru/api/init-database.php
 
 # Local development
 curl http://localhost/api/init-database.php
