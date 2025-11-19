@@ -2,6 +2,20 @@
 // ========================================
 // Database Class - Generic CRUD Operations
 // ========================================
+// 
+// DEPRECATED: This class is maintained for backwards compatibility only.
+// New code should use Eloquent ORM models and controllers instead.
+// 
+// See:
+// - /app/Models/ for Eloquent models
+// - /app/Http/Controllers/Api/ for API controllers
+// - /docs/API_REFERENCE.md for migration guide
+// 
+// Remaining usage:
+// - FormService integration (for compatibility)
+// - TelegramHelper (for compatibility)
+// - Legacy admin scripts
+// ========================================
 
 require_once __DIR__ . '/config.php';
 
