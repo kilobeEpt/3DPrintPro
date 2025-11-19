@@ -6,6 +6,7 @@ use App\Http\Traits\PaginationTrait;
 use App\Http\Traits\ValidatesRequests;
 use App\Http\Traits\ManagesSlugs;
 use App\Services\ContentCacheService;
+use App\Services\SSEBroadcaster;
 
 /**
  * Base API Controller
@@ -19,6 +20,7 @@ use App\Services\ContentCacheService;
  * - Authentication hooks
  * - Slug management
  * - Cache headers and invalidation
+ * - SSE event broadcasting
  */
 abstract class BaseApiController
 {
@@ -37,6 +39,13 @@ abstract class BaseApiController
      * @var ContentCacheService
      */
     protected $cacheService;
+    
+    /**
+     * SSE broadcaster instance
+     * 
+     * @var SSEBroadcaster
+     */
+    protected $sseBroadcaster;
     
     /**
      * Request method
@@ -66,9 +75,26 @@ abstract class BaseApiController
     {
         $this->rateLimiter = new \RateLimiter();
         $this->cacheService = new ContentCacheService();
+        $this->sseBroadcaster = new SSEBroadcaster();
         $this->method = $_SERVER['REQUEST_METHOD'];
         $this->query = $_GET;
         $this->input = $this->parseInput();
+    }
+    
+    /**
+     * Broadcast SSE event for content changes
+     * 
+     * @param string $action (created, updated, deleted)
+     * @param mixed $entityId
+     * @return void
+     */
+    protected function broadcastContentChange($action, $entityId = null)
+    {
+        $this->sseBroadcaster->broadcastContentUpdate(
+            $this->getResourceName(),
+            $entityId,
+            $action
+        );
     }
     
     /**
