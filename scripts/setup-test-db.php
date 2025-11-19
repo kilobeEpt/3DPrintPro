@@ -60,6 +60,8 @@ try {
             message TEXT,
             amount DECIMAL(10, 2) DEFAULT 0,
             calculator_data TEXT,
+            form_submission_id INTEGER NULL,
+            form_slug VARCHAR(255) NULL,
             status VARCHAR(20) DEFAULT 'new',
             telegram_sent INTEGER DEFAULT 0,
             telegram_error TEXT,
@@ -116,6 +118,92 @@ try {
         ]);
     }
     
+    echo "Creating forms table...\n";
+    $db->statement("
+        CREATE TABLE IF NOT EXISTS forms (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NOT NULL UNIQUE,
+            description TEXT,
+            settings TEXT,
+            notification_email VARCHAR(255),
+            success_message TEXT,
+            redirect_url VARCHAR(500),
+            sort_order INTEGER DEFAULT 0,
+            active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+    
+    echo "Creating form_fields table...\n";
+    $db->statement("
+        CREATE TABLE IF NOT EXISTS form_fields (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            form_id INTEGER NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            label VARCHAR(255) NOT NULL,
+            type VARCHAR(50) DEFAULT 'text',
+            placeholder VARCHAR(255),
+            default_value TEXT,
+            validation_rules TEXT,
+            options TEXT,
+            help_text VARCHAR(500),
+            sort_order INTEGER DEFAULT 0,
+            required INTEGER DEFAULT 0,
+            active INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
+        )
+    ");
+    
+    echo "Creating form_submissions table...\n";
+    $db->statement("
+        CREATE TABLE IF NOT EXISTS form_submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            form_id INTEGER NOT NULL,
+            form_slug VARCHAR(255) NOT NULL,
+            submitted_data TEXT,
+            status VARCHAR(20) DEFAULT 'pending',
+            ip_address VARCHAR(45),
+            user_agent TEXT,
+            submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
+        )
+    ");
+    
+    echo "Creating form_submission_values table...\n";
+    $db->statement("
+        CREATE TABLE IF NOT EXISTS form_submission_values (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            form_submission_id INTEGER NOT NULL,
+            form_field_id INTEGER NULL,
+            field_name VARCHAR(255) NOT NULL,
+            field_value TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (form_submission_id) REFERENCES form_submissions(id) ON DELETE CASCADE,
+            FOREIGN KEY (form_field_id) REFERENCES form_fields(id) ON DELETE SET NULL
+        )
+    ");
+    
+    echo "Creating settings_audit table...\n";
+    $db->statement("
+        CREATE TABLE IF NOT EXISTS settings_audit (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            setting_key VARCHAR(100) NOT NULL,
+            old_value TEXT,
+            new_value TEXT,
+            changed_by VARCHAR(255),
+            ip_address VARCHAR(45),
+            user_agent TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+    
     $settingCount = $db->table('settings')->count();
     if ($settingCount === 0) {
         $db->table('settings')->insert([
@@ -129,7 +217,11 @@ try {
     echo "  Database: {$dbPath}\n";
     echo "  Services: " . $db->table('services')->count() . "\n";
     echo "  Settings: " . $db->table('settings')->count() . "\n";
-    echo "  Orders: " . $db->table('orders')->count() . "\n\n";
+    echo "  Orders: " . $db->table('orders')->count() . "\n";
+    echo "  Forms: " . $db->table('forms')->count() . "\n";
+    echo "  Form Fields: " . $db->table('form_fields')->count() . "\n";
+    echo "  Form Submissions: " . $db->table('form_submissions')->count() . "\n";
+    echo "  Settings Audit: " . $db->table('settings_audit')->count() . "\n\n";
     
 } catch (Exception $e) {
     echo "\n✗ Error: " . $e->getMessage() . "\n\n";

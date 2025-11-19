@@ -296,5 +296,262 @@ return [
         
         // Legacy settings (deprecated, kept for backward compatibility)
         'telegram_token' => '',
+    ],
+
+    // ========================================
+    // FORMS - Dynamic form definitions
+    // ========================================
+    'forms' => [
+        [
+            'name' => 'Контактная форма',
+            'slug' => 'contact',
+            'description' => 'Основная контактная форма для обращений клиентов',
+            'settings' => [
+                'enable_telegram_notification' => true,
+                'enable_email_notification' => false,
+                'rate_limit' => '10/hour',
+            ],
+            'notification_email' => 'info@3dprintpro.ru',
+            'success_message' => 'Спасибо за обращение! Мы свяжемся с вами в ближайшее время.',
+            'redirect_url' => null,
+            'sort_order' => 1,
+            'active' => 1
+        ],
+        [
+            'name' => 'Форма заказа',
+            'slug' => 'order',
+            'description' => 'Форма для оформления заказа на 3D печать',
+            'settings' => [
+                'enable_telegram_notification' => true,
+                'enable_email_notification' => false,
+                'require_calculator_data' => true,
+            ],
+            'notification_email' => 'info@3dprintpro.ru',
+            'success_message' => 'Заказ принят! Номер вашего заказа: {order_number}. Мы свяжемся с вами для уточнения деталей.',
+            'redirect_url' => null,
+            'sort_order' => 2,
+            'active' => 1
+        ]
+    ],
+
+    // ========================================
+    // FORM FIELDS - Field definitions for forms
+    // Note: form_id will be resolved at runtime based on form slug
+    // ========================================
+    'form_fields' => [
+        // Contact Form Fields
+        [
+            'form_slug' => 'contact',
+            'name' => 'name',
+            'label' => 'Имя',
+            'type' => 'text',
+            'placeholder' => 'Введите ваше имя',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => true,
+                'minLength' => 2,
+                'maxLength' => 255,
+            ],
+            'options' => null,
+            'help_text' => null,
+            'sort_order' => 1,
+            'required' => 1,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'contact',
+            'name' => 'phone',
+            'label' => 'Телефон',
+            'type' => 'phone',
+            'placeholder' => '+7 (___) ___-__-__',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => true,
+                'pattern' => '^\\+?[0-9\\s\\-\\(\\)]{10,20}
+,
+            ],
+            'options' => null,
+            'help_text' => 'Укажите номер телефона для связи',
+            'sort_order' => 2,
+            'required' => 1,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'contact',
+            'name' => 'email',
+            'label' => 'Email',
+            'type' => 'email',
+            'placeholder' => 'your@email.com',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => false,
+                'email' => true,
+            ],
+            'options' => null,
+            'help_text' => 'Необязательно',
+            'sort_order' => 3,
+            'required' => 0,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'contact',
+            'name' => 'telegram',
+            'label' => 'Telegram',
+            'type' => 'text',
+            'placeholder' => '@username',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => false,
+                'pattern' => '^@?[a-zA-Z0-9_]{5,32}
+,
+            ],
+            'options' => null,
+            'help_text' => 'Необязательно, для быстрой связи',
+            'sort_order' => 4,
+            'required' => 0,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'contact',
+            'name' => 'subject',
+            'label' => 'Тема обращения',
+            'type' => 'text',
+            'placeholder' => 'О чём вы хотите узнать?',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => false,
+                'maxLength' => 255,
+            ],
+            'options' => null,
+            'help_text' => null,
+            'sort_order' => 5,
+            'required' => 0,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'contact',
+            'name' => 'message',
+            'label' => 'Сообщение',
+            'type' => 'textarea',
+            'placeholder' => 'Опишите ваш вопрос или задачу...',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => true,
+                'minLength' => 10,
+                'maxLength' => 5000,
+            ],
+            'options' => null,
+            'help_text' => 'Минимум 10 символов',
+            'sort_order' => 6,
+            'required' => 1,
+            'active' => 1
+        ],
+        
+        // Order Form Fields (inherits contact fields + adds service and calculator data)
+        [
+            'form_slug' => 'order',
+            'name' => 'name',
+            'label' => 'Имя',
+            'type' => 'text',
+            'placeholder' => 'Введите ваше имя',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => true,
+                'minLength' => 2,
+                'maxLength' => 255,
+            ],
+            'options' => null,
+            'help_text' => null,
+            'sort_order' => 1,
+            'required' => 1,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'order',
+            'name' => 'phone',
+            'label' => 'Телефон',
+            'type' => 'phone',
+            'placeholder' => '+7 (___) ___-__-__',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => true,
+                'pattern' => '^\\+?[0-9\\s\\-\\(\\)]{10,20}
+,
+            ],
+            'options' => null,
+            'help_text' => 'Укажите номер телефона для связи',
+            'sort_order' => 2,
+            'required' => 1,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'order',
+            'name' => 'email',
+            'label' => 'Email',
+            'type' => 'email',
+            'placeholder' => 'your@email.com',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => false,
+                'email' => true,
+            ],
+            'options' => null,
+            'help_text' => 'Необязательно',
+            'sort_order' => 3,
+            'required' => 0,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'order',
+            'name' => 'telegram',
+            'label' => 'Telegram',
+            'type' => 'text',
+            'placeholder' => '@username',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => false,
+                'pattern' => '^@?[a-zA-Z0-9_]{5,32}
+,
+            ],
+            'options' => null,
+            'help_text' => 'Необязательно, для быстрой связи',
+            'sort_order' => 4,
+            'required' => 0,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'order',
+            'name' => 'service',
+            'label' => 'Услуга',
+            'type' => 'text',
+            'placeholder' => 'Тип услуги',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => true,
+                'maxLength' => 255,
+            ],
+            'options' => null,
+            'help_text' => null,
+            'sort_order' => 5,
+            'required' => 1,
+            'active' => 1
+        ],
+        [
+            'form_slug' => 'order',
+            'name' => 'message',
+            'label' => 'Комментарий к заказу',
+            'type' => 'textarea',
+            'placeholder' => 'Дополнительная информация...',
+            'default_value' => null,
+            'validation_rules' => [
+                'required' => false,
+                'maxLength' => 5000,
+            ],
+            'options' => null,
+            'help_text' => null,
+            'sort_order' => 6,
+            'required' => 0,
+            'active' => 1
+        ],
     ]
 ];

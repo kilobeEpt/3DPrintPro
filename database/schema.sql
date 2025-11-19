@@ -1,22 +1,27 @@
 -- ========================================
 -- 3D Print Pro Database Schema
--- Version: 2.0 (Complete)
+-- Version: 3.0 (Forms System)
 -- Last Updated: January 2025
 -- MySQL Version: 8.0+ (tested with MySQL 8.0)
 -- ========================================
 --
--- This schema creates 7 tables for the 3D printing service platform:
--- 1. orders - Customer orders and inquiries
+-- This schema creates 12 tables for the 3D printing service platform:
+-- 1. orders - Customer orders and inquiries (legacy + form integration)
 -- 2. settings - Application configuration (NO 'active' column)
 -- 3. services - Service offerings
 -- 4. portfolio - Project showcase
 -- 5. testimonials - Customer reviews
 -- 6. faq - Frequently asked questions
 -- 7. content_blocks - Dynamic page content
+-- 8. forms - Dynamic form definitions
+-- 9. form_fields - Form field configurations
+-- 10. form_submissions - Form submission records
+-- 11. form_submission_values - Individual field values (normalized)
+-- 12. settings_audit - Settings change audit log
 --
 -- IMPORTANT NOTES:
--- - Tables WITHOUT 'active' column: orders, settings
--- - Tables WITH 'active' column: services, portfolio, testimonials, faq, content_blocks
+-- - Tables WITHOUT 'active' column: orders, settings, form_submissions, form_submission_values, settings_audit
+-- - Tables WITH 'active' column: services, portfolio, testimonials, faq, content_blocks, forms, form_fields
 -- - This file is IDEMPOTENT - safe to run multiple times
 -- - For HARD RESET: uncomment the DROP TABLE statements below
 -- - JSON columns are fully supported in MySQL 8.0
@@ -39,6 +44,11 @@
 -- Uncomment these lines to drop all tables before recreating
 -- WARNING: This will DELETE ALL DATA permanently!
 -- ========================================
+-- DROP TABLE IF EXISTS form_submission_values;
+-- DROP TABLE IF EXISTS form_submissions;
+-- DROP TABLE IF EXISTS form_fields;
+-- DROP TABLE IF EXISTS forms;
+-- DROP TABLE IF EXISTS settings_audit;
 -- DROP TABLE IF EXISTS orders;
 -- DROP TABLE IF EXISTS settings;
 -- DROP TABLE IF EXISTS services;
@@ -51,6 +61,7 @@
 -- TABLE: orders
 -- Stores customer orders and contact form submissions
 -- NO 'active' column - all orders are kept for history
+-- UPDATED: Now supports integration with dynamic forms system
 -- ========================================
 CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -72,6 +83,10 @@ CREATE TABLE IF NOT EXISTS orders (
     -- Calculator data (JSON)
     calculator_data JSON,
     
+    -- Form integration (NEW)
+    form_submission_id INT NULL,
+    form_slug VARCHAR(255) NULL,
+    
     -- Status tracking
     status ENUM('new', 'processing', 'completed', 'cancelled') DEFAULT 'new',
     telegram_sent BOOLEAN DEFAULT FALSE,
@@ -87,7 +102,9 @@ CREATE TABLE IF NOT EXISTS orders (
     INDEX idx_email (email),
     INDEX idx_status (status),
     INDEX idx_created_at (created_at),
-    INDEX idx_type (type)
+    INDEX idx_type (type),
+    INDEX idx_form_slug (form_slug),
+    INDEX idx_form_submission_id (form_submission_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ========================================
@@ -223,6 +240,137 @@ CREATE TABLE IF NOT EXISTS content_blocks (
     INDEX idx_page (page),
     INDEX idx_active (active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: forms
+-- Dynamic form definitions
+-- HAS 'active' column for visibility control
+-- ========================================
+CREATE TABLE IF NOT EXISTS forms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    settings JSON COMMENT 'Form-level settings: validation, notifications, etc.',
+    notification_email VARCHAR(255) COMMENT 'Email to notify on submission',
+    success_message TEXT COMMENT 'Message to show after successful submission',
+    redirect_url VARCHAR(500) COMMENT 'URL to redirect after submission',
+    sort_order INT DEFAULT 0,
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_slug (slug),
+    INDEX idx_active (active),
+    INDEX idx_sort (sort_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: form_fields
+-- Field definitions for forms
+-- HAS 'active' column for visibility control
+-- ========================================
+CREATE TABLE IF NOT EXISTS form_fields (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    form_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL COMMENT 'Field name/key',
+    label VARCHAR(255) NOT NULL COMMENT 'Display label',
+    type ENUM('text', 'email', 'phone', 'textarea', 'number', 'select', 'checkbox', 'radio', 'file', 'hidden') DEFAULT 'text',
+    placeholder VARCHAR(255),
+    default_value TEXT,
+    validation_rules JSON COMMENT 'Validation rules: required, min, max, pattern, etc.',
+    options JSON COMMENT 'Options for select, radio, checkbox fields',
+    help_text VARCHAR(500),
+    sort_order INT DEFAULT 0,
+    required BOOLEAN DEFAULT FALSE,
+    active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_form_id (form_id),
+    INDEX idx_active (active),
+    INDEX idx_sort (sort_order),
+    UNIQUE KEY unique_form_field (form_id, name),
+    
+    FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: form_submissions
+-- Form submission records
+-- NO 'active' column - all submissions are kept for history
+-- ========================================
+CREATE TABLE IF NOT EXISTS form_submissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    form_id INT NOT NULL,
+    form_slug VARCHAR(255) NOT NULL COMMENT 'Denormalized slug for faster queries',
+    submitted_data JSON COMMENT 'Complete submitted data as JSON',
+    status ENUM('pending', 'processed', 'archived') DEFAULT 'pending',
+    ip_address VARCHAR(45) COMMENT 'Submitter IP address',
+    user_agent TEXT COMMENT 'Submitter user agent',
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'When form was submitted',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_form_id (form_id),
+    INDEX idx_form_slug (form_slug),
+    INDEX idx_status (status),
+    INDEX idx_submitted_at (submitted_at),
+    INDEX idx_created_at (created_at),
+    
+    FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: form_submission_values
+-- Normalized field values for form submissions
+-- NO 'active' column - all values are kept for history
+-- Allows efficient querying of individual field values
+-- ========================================
+CREATE TABLE IF NOT EXISTS form_submission_values (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    form_submission_id INT NOT NULL,
+    form_field_id INT NULL COMMENT 'NULL if field was deleted',
+    field_name VARCHAR(255) NOT NULL COMMENT 'Denormalized field name',
+    field_value LONGTEXT COMMENT 'Field value as text',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_submission_id (form_submission_id),
+    INDEX idx_field_id (form_field_id),
+    INDEX idx_field_name (field_name),
+    
+    FOREIGN KEY (form_submission_id) REFERENCES form_submissions(id) ON DELETE CASCADE,
+    FOREIGN KEY (form_field_id) REFERENCES form_fields(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: settings_audit
+-- Audit log for settings changes
+-- NO 'active' column - all audit records are kept
+-- ========================================
+CREATE TABLE IF NOT EXISTS settings_audit (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(100) NOT NULL,
+    old_value TEXT COMMENT 'Previous value',
+    new_value TEXT COMMENT 'New value',
+    changed_by VARCHAR(255) COMMENT 'Admin username or system',
+    ip_address VARCHAR(45) COMMENT 'IP address of change',
+    user_agent TEXT COMMENT 'User agent string',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_setting_key (setting_key),
+    INDEX idx_changed_by (changed_by),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- Add Foreign Key to orders table
+-- Link orders to form submissions
+-- ========================================
+ALTER TABLE orders 
+ADD CONSTRAINT fk_orders_form_submission 
+FOREIGN KEY (form_submission_id) REFERENCES form_submissions(id) ON DELETE SET NULL;
 
 -- ========================================
 -- Schema Creation Complete
