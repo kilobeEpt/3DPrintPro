@@ -15,6 +15,10 @@ class MainApp {
         this.initNavigation();
         this.initThemeToggle();
         this.initPhoneMasks();
+        
+        // Wait for CONFIG to load from database
+        await this.waitForConfigLoad();
+        
         await this.loadContent();
         this.initStats();
         await this.loadServices();
@@ -22,9 +26,35 @@ class MainApp {
         await this.loadTestimonials();
         await this.loadFAQ();
         this.initForms();
+        this.renderDynamicFormFields();
         this.initScrollAnimations();
         this.initCalculator();
         this.dataLoaded = true;
+    }
+    
+    async waitForConfigLoad() {
+        return new Promise((resolve) => {
+            if (window.CONFIG && window.CONFIG._loaded) {
+                resolve();
+                return;
+            }
+            
+            const checkConfig = () => {
+                if (window.CONFIG && window.CONFIG._loaded) {
+                    resolve();
+                } else {
+                    setTimeout(checkConfig, 50);
+                }
+            };
+            
+            window.addEventListener('configLoaded', () => {
+                window.CONFIG._loaded = true;
+                resolve();
+            }, { once: true });
+            
+            // Start checking in case event already fired
+            setTimeout(checkConfig, 100);
+        });
     }
     
     async reloadData() {
@@ -640,12 +670,122 @@ class MainApp {
         }
     }
 
+    renderDynamicFormFields() {
+        const container = document.getElementById('dynamicFormFields');
+        if (!container) return;
+        
+        // Show loading placeholder initially
+        container.innerHTML = '<div class="form-loading"><i class="fas fa-spinner fa-spin"></i> Загрузка формы...</div>';
+        
+        const fields = CONFIG.formFields.contact || [];
+        const activeFields = fields.filter(f => f.enabled !== false);
+        
+        if (activeFields.length === 0) {
+            console.warn('⚠️ No active form fields configured');
+            return;
+        }
+        
+        // Sort by order
+        activeFields.sort((a, b) => (a.order || 0) - (b.order || 0));
+        
+        const html = activeFields.map(field => this.renderFormField(field)).join('');
+        container.innerHTML = html;
+        
+        // Re-init phone masks for dynamically created fields
+        this.initPhoneMasks();
+        
+        console.log('✅ Динамические поля формы отрисованы:', activeFields.length);
+    }
+    
+    renderFormField(field) {
+        const requiredAttr = field.required ? 'required' : '';
+        const requiredStar = field.required ? '<span style="color: var(--danger);">*</span>' : '';
+        
+        let fieldHtml = '';
+        
+        switch (field.type) {
+            case 'text':
+            case 'email':
+            case 'tel':
+                fieldHtml = `
+                    <div class="form-group">
+                        <label for="${field.name}">
+                            ${field.label} ${requiredStar}
+                        </label>
+                        <input 
+                            type="${field.type}" 
+                            id="${field.name}" 
+                            name="${field.name}" 
+                            class="form-control" 
+                            placeholder="${field.placeholder || ''}"
+                            ${requiredAttr}
+                        >
+                        ${field.helpText ? `<small class="form-help">${field.helpText}</small>` : ''}
+                        <div class="field-error"></div>
+                    </div>
+                `;
+                break;
+                
+            case 'textarea':
+                fieldHtml = `
+                    <div class="form-group">
+                        <label for="${field.name}">
+                            ${field.label} ${requiredStar}
+                        </label>
+                        <textarea 
+                            id="${field.name}" 
+                            name="${field.name}" 
+                            class="form-control" 
+                            rows="4"
+                            placeholder="${field.placeholder || ''}"
+                            ${requiredAttr}
+                        ></textarea>
+                        ${field.helpText ? `<small class="form-help">${field.helpText}</small>` : ''}
+                        <div class="field-error"></div>
+                    </div>
+                `;
+                break;
+                
+            case 'select':
+                const options = field.options || [];
+                fieldHtml = `
+                    <div class="form-group">
+                        <label for="${field.name}">
+                            ${field.label} ${requiredStar}
+                        </label>
+                        <select 
+                            id="${field.name}" 
+                            name="${field.name}" 
+                            class="form-control"
+                            ${requiredAttr}
+                        >
+                            <option value="">${field.placeholder || 'Выберите...'}</option>
+                            ${options.map(opt => {
+                                const value = typeof opt === 'string' ? opt : opt.value;
+                                const label = typeof opt === 'string' ? opt : opt.label;
+                                return `<option value="${value}">${label}</option>`;
+                            }).join('')}
+                        </select>
+                        ${field.helpText ? `<small class="form-help">${field.helpText}</small>` : ''}
+                        <div class="field-error"></div>
+                    </div>
+                `;
+                break;
+                
+            default:
+                console.warn('Unknown field type:', field.type);
+                return '';
+        }
+        
+        return fieldHtml;
+    }
+    
     initForms() {
         const contactForm = document.getElementById('contactForm');
         if (contactForm) {
             contactForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                this.handleUniversalForm(e.target);
+                this.handleFormSubmit(e.target, 'contact');
             });
         }
 
@@ -830,82 +970,192 @@ class MainApp {
             }
         }
     }
-
-    renderDynamicFormFields() {
-    const container = document.getElementById('dynamicFormFields');
-    if (!container) return;
     
-    // Фильтруем только активные поля и сортируем по order
-    const fields = CONFIG.formFields.contact
-        .filter(f => f.enabled)
-        .sort((a, b) => (a.order || 0) - (b.order || 0));
-    
-    container.innerHTML = fields.map(field => {
-        let inputHTML = '';
+    async handleFormSubmit(form, formSlug = 'contact') {
+        // Clear previous errors
+        this.clearFormErrors(form);
         
-        switch(field.type) {
-            case 'text':
-            case 'email':
-            case 'tel':
-                inputHTML = `<input 
-                    type="${field.type}" 
-                    name="${field.name}" 
-                    class="form-control" 
-                    placeholder="${field.placeholder || field.label}${field.required ? ' *' : ''}" 
-                    ${field.required ? 'required' : ''}>`;
-                break;
-            
-            case 'textarea':
-                inputHTML = `<textarea 
-                    name="${field.name}" 
-                    class="form-control" 
-                    rows="5" 
-                    placeholder="${field.placeholder || field.label}${field.required ? ' *' : ''}" 
-                    ${field.required ? 'required' : ''}></textarea>`;
-                break;
-            
-            case 'select':
-                const options = field.options || [];
-                inputHTML = `
-                    <select 
-                        name="${field.name}" 
-                        class="form-control" 
-                        ${field.name === 'subject' ? 'id="formSubject"' : ''}
-                        ${field.required ? 'required' : ''}>
-                        <option value="">${field.placeholder || field.label}${field.required ? ' *' : ''}</option>
-                        ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                    </select>
-                `;
-                break;
-            
-            case 'checkbox':
-                inputHTML = `
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="${field.name}" ${field.required ? 'required' : ''}>
-                        <span>${field.placeholder || field.label}</span>
-                    </label>
-                `;
-                break;
-            
-            default:
-                inputHTML = `<input 
-                    type="text" 
-                    name="${field.name}" 
-                    class="form-control" 
-                    placeholder="${field.placeholder || field.label}${field.required ? ' *' : ''}"
-                    ${field.required ? 'required' : ''}>`;
+        const formData = new FormData(form);
+        const activeFields = CONFIG.formFields[formSlug]?.filter(f => f.enabled !== false) || [];
+        
+        // Client-side validation
+        const validation = this.validateFormData(formData, activeFields);
+        if (!validation.valid) {
+            this.displayFormErrors(form, validation.errors);
+            this.showNotification('Пожалуйста, исправьте ошибки в форме', 'error');
+            return;
         }
         
-        return `
-            <div class="form-group">
-                ${inputHTML}
-            </div>
-        `;
-    }).join('');
+        // Disable submit button and show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+        }
+        
+        // Build submission data object
+        const submissionData = {};
+        for (const [key, value] of formData.entries()) {
+            if (key !== 'privacy') {
+                submissionData[key] = value;
+            }
+        }
+        
+        // Add calculator data if available
+        const calculatorData = window.calculator?.calculation;
+        if (calculatorData) {
+            submissionData.calculator_data = calculatorData;
+            submissionData.amount = calculatorData.total;
+        }
+        
+        try {
+            console.log('📤 Отправка формы через новый Forms API...');
+            
+            if (typeof apiClient === 'undefined') {
+                throw {
+                    message: 'API клиент недоступен',
+                    isNetworkError: true
+                };
+            }
+            
+            const result = await apiClient.submitForm(formSlug, submissionData);
+            
+            console.log('✅ Форма успешно отправлена. Submission ID:', result.submissionId);
+            
+            if (result.orderNumber) {
+                console.log('📦 Order Number:', result.orderNumber);
+            }
+            
+            // Show success message
+            const successMessage = result.message || 'Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.';
+            this.showNotification('✅ ' + successMessage, 'success');
+            
+            // Reset form
+            form.reset();
+            
+            // Hide calculator info if present
+            const calcInfo = document.getElementById('calculationInfo');
+            if (calcInfo) calcInfo.style.display = 'none';
+            
+            const formTitle = document.getElementById('formTitle');
+            if (formTitle) {
+                formTitle.innerHTML = '<i class="fas fa-envelope"></i> Свяжитесь с нами';
+            }
+            
+            // Redirect if specified
+            if (result.redirectUrl) {
+                setTimeout(() => {
+                    window.location.href = result.redirectUrl;
+                }, 2000);
+            }
+            
+        } catch (error) {
+            console.error('❌ Ошибка отправки формы:', error);
+            
+            // Handle validation errors from server
+            if (error.errors && Object.keys(error.errors).length > 0) {
+                this.displayFormErrors(form, error.errors);
+                this.showNotification('Пожалуйста, исправьте ошибки в форме', 'error');
+            } else {
+                // Generic error message
+                const errorMessage = error.message || 'Произошла ошибка при отправке формы';
+                this.showNotification('❌ ' + errorMessage + '. Пожалуйста, попробуйте позже или свяжитесь с нами по телефону.', 'error');
+            }
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        }
+    }
     
-    console.log('✅ Динамические поля формы обновлены. Активных полей:', fields.length);
-    console.log('📋 Обязательные поля:', fields.filter(f => f.required).map(f => f.name).join(', '));
-}
+    validateFormData(formData, fields) {
+        const errors = {};
+        let valid = true;
+        
+        fields.forEach(field => {
+            const value = formData.get(field.name);
+            const trimmedValue = value ? value.trim() : '';
+            
+            // Required validation
+            if (field.required && !trimmedValue) {
+                errors[field.name] = `${field.label} обязательно для заполнения`;
+                valid = false;
+                return;
+            }
+            
+            // Skip further validation if field is empty and not required
+            if (!trimmedValue) return;
+            
+            // Type-specific validation
+            switch (field.type) {
+                case 'email':
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(trimmedValue)) {
+                        errors[field.name] = 'Введите корректный email адрес';
+                        valid = false;
+                    }
+                    break;
+                    
+                case 'tel':
+                    const phoneRegex = /^[\+]?[(]?[0-9]{1,3}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
+                    if (!phoneRegex.test(trimmedValue.replace(/[\s\(\)\-]/g, ''))) {
+                        errors[field.name] = 'Введите корректный номер телефона';
+                        valid = false;
+                    }
+                    break;
+            }
+            
+            // Custom validation rules from config
+            if (field.validation) {
+                if (field.validation.minLength && trimmedValue.length < field.validation.minLength) {
+                    errors[field.name] = `Минимальная длина: ${field.validation.minLength} символов`;
+                    valid = false;
+                }
+                if (field.validation.maxLength && trimmedValue.length > field.validation.maxLength) {
+                    errors[field.name] = `Максимальная длина: ${field.validation.maxLength} символов`;
+                    valid = false;
+                }
+                if (field.validation.pattern) {
+                    const regex = new RegExp(field.validation.pattern);
+                    if (!regex.test(trimmedValue)) {
+                        errors[field.name] = field.validation.message || 'Неверный формат';
+                        valid = false;
+                    }
+                }
+            }
+        });
+        
+        return { valid, errors };
+    }
+    
+    clearFormErrors(form) {
+        form.querySelectorAll('.field-error').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        form.querySelectorAll('.form-control').forEach(el => {
+            el.classList.remove('error');
+        });
+    }
+    
+    displayFormErrors(form, errors) {
+        Object.entries(errors).forEach(([fieldName, errorMessage]) => {
+            const field = form.querySelector(`[name="${fieldName}"]`);
+            if (field) {
+                field.classList.add('error');
+                const errorDiv = field.parentElement.querySelector('.field-error');
+                if (errorDiv) {
+                    errorDiv.textContent = errorMessage;
+                    errorDiv.style.display = 'block';
+                    errorDiv.style.color = 'var(--danger, #e74c3c)';
+                    errorDiv.style.fontSize = '0.875rem';
+                    errorDiv.style.marginTop = '0.5rem';
+                }
+            }
+        });
+    }
 
     handleSubscribe(form) {
         const validator = new Validator();
