@@ -289,6 +289,82 @@ class AdminApiClient {
         // Return full response for status checking
         return result;
     }
+    
+    // ========================================
+    // Forms API - Form Builder Support
+    // ========================================
+    
+    async getForms(params = {}) {
+        return this.get('/api/forms.php?' + new URLSearchParams(params).toString());
+    }
+    
+    async getForm(id) {
+        return this.get(`/api/forms.php?id=${id}`);
+    }
+    
+    async createForm(data) {
+        return this.post('/api/forms.php', data);
+    }
+    
+    async updateForm(data) {
+        return this.put('/api/forms.php', data);
+    }
+    
+    async deleteForm(id, force = false) {
+        return this.delete(`/api/forms.php?id=${id}${force ? '&force=1' : ''}`);
+    }
+    
+    // ========================================
+    // Form Fields API
+    // ========================================
+    
+    async getFormFields(formId) {
+        return this.get(`/api/form-fields.php?form_id=${formId}`);
+    }
+    
+    async getFormField(id) {
+        return this.get(`/api/form-fields.php?id=${id}`);
+    }
+    
+    async createFormField(data) {
+        return this.post('/api/form-fields.php', data);
+    }
+    
+    async updateFormField(data) {
+        return this.put('/api/form-fields.php', data);
+    }
+    
+    async deleteFormField(id) {
+        return this.delete(`/api/form-fields.php?id=${id}`);
+    }
+    
+    async reorderFormFields(fields) {
+        return this.request('/api/form-fields.php', 'PATCH', { fields });
+    }
+    
+    // ========================================
+    // Form Submissions API
+    // ========================================
+    
+    async getSubmissions(params = {}) {
+        return this.get('/api/form-submissions.php?' + new URLSearchParams(params).toString());
+    }
+    
+    async getSubmission(id) {
+        return this.get(`/api/form-submissions.php?id=${id}`);
+    }
+    
+    async updateSubmissionStatus(id, status) {
+        return this.request('/api/form-submissions.php', 'PATCH', { id, status });
+    }
+    
+    async deleteSubmission(id) {
+        return this.delete(`/api/form-submissions.php?id=${id}`);
+    }
+    
+    async bulkSubmissionAction(action, ids) {
+        return this.post('/api/form-submissions.php', { action, ids });
+    }
 }
 
 // Initialize global admin API client after apiClient is ready

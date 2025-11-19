@@ -324,6 +324,20 @@ class FormService {
                 $orderData['amount'] = $submittedData['amount'];
             }
             
+            // Apply calculator mapping if configured
+            $settings = $formData['settings'] ?? [];
+            if (!empty($settings['calculator_enabled']) && !empty($settings['calculator_mapping'])) {
+                $mapping = $settings['calculator_mapping'];
+                $calculatorData = $submittedData['calculatorData'] ?? [];
+                
+                foreach ($mapping as $fieldName => $calculatorPath) {
+                    $value = self::getValueByPath($calculatorData, $calculatorPath);
+                    if ($value !== null && isset($submittedData[$fieldName])) {
+                        $submittedData[$fieldName] = $value;
+                    }
+                }
+            }
+            
             $order = Order::create($orderData);
             
             return $order->id;
@@ -349,38 +363,46 @@ class FormService {
      */
     private static function sendTelegramNotification($formData, $submittedData, $submissionId, $orderId, $db) {
         try {
-            // For order/contact forms, use existing TelegramHelper
-            if (in_array($formData['slug'], ['order', 'contact']) && $orderId) {
-                $order = Order::find($orderId);
-                if ($order) {
-                    $orderNumber = $order->order_number;
-                    $telegramResult = TelegramHelper::sendOrderNotification(
-                        array_merge($submittedData, ['order_number' => $orderNumber]),
-                        $orderNumber,
-                        $orderId,
-                        $db
-                    );
-                    
-                    // Update order telegram status
-                    $order->update([
-                        'telegram_sent' => $telegramResult['success'],
-                        'telegram_error' => $telegramResult['error'] ?? null,
-                    ]);
-                    
-                    if (!$telegramResult['success']) {
-                        ApiLogger::warning("Telegram notification failed for order", [
-                            'order_id' => $orderId,
-                            'error' => $telegramResult['error']
+            $settings = $formData['settings'] ?? [];
+            
+            if (!empty($settings['telegram_enabled']) && $settings['telegram_enabled']) {
+                // For order/contact forms, use existing TelegramHelper
+                if (in_array($formData['slug'], ['order', 'contact']) && $orderId) {
+                    $order = Order::find($orderId);
+                    if ($order) {
+                        $orderNumber = $order->order_number;
+                        $telegramResult = TelegramHelper::sendOrderNotification(
+                            array_merge($submittedData, ['order_number' => $orderNumber]),
+                            $orderNumber,
+                            $orderId,
+                            $db
+                        );
+                        
+                        // Update order telegram status
+                        $order->update([
+                            'telegram_sent' => $telegramResult['success'],
+                            'telegram_error' => $telegramResult['error'] ?? null,
                         ]);
+                        
+                        if (!$telegramResult['success']) {
+                            ApiLogger::warning("Telegram notification failed for order", [
+                                'order_id' => $orderId,
+                                'error' => $telegramResult['error']
+                            ]);
+                        }
                     }
+                } else {
+                    // For other forms, send generic notification with per-form settings
+                    self::sendGenericFormNotification($formData, $submittedData, $submissionId, $db);
                 }
-            } else {
-                // For other forms, send generic notification
-                self::sendGenericFormNotification($formData, $submittedData, $submissionId, $db);
+            }
+            
+            if (!empty($settings['email_enabled']) && $settings['email_enabled']) {
+                self::sendEmailNotification($formData, $submittedData, $submissionId);
             }
             
         } catch (Exception $e) {
-            ApiLogger::error("Error sending Telegram notification", [
+            ApiLogger::error("Error sending notifications", [
                 'submission_id' => $submissionId,
                 'exception' => $e
             ]);
@@ -397,8 +419,13 @@ class FormService {
      * @return void
      */
     private static function sendGenericFormNotification($formData, $submittedData, $submissionId, $db) {
-        // Get credentials from TelegramHelper via reflection
+        // Get credentials from TelegramHelper or form settings
+        $settings = $formData['settings'] ?? [];
         $credentials = self::getTelegramCredentials($db);
+        
+        if (!empty($settings['telegram_chat_id'])) {
+            $credentials['chatId'] = $settings['telegram_chat_id'];
+        }
         
         if (empty($credentials['botToken']) || empty($credentials['chatId'])) {
             return;
@@ -465,5 +492,82 @@ class FormService {
         }
         
         return ['botToken' => $botToken, 'chatId' => $chatId];
+    }
+    
+    /**
+     * Get value from nested array/object by dot-notation path
+     * 
+     * @param array $data Data array
+     * @param string $path Dot-notation path (e.g., "calculator.totalCost")
+     * @return mixed|null Value or null if not found
+     */
+    private static function getValueByPath($data, $path) {
+        $keys = explode('.', $path);
+        $value = $data;
+        
+        foreach ($keys as $key) {
+            if (is_array($value) && isset($value[$key])) {
+                $value = $value[$key];
+            } else {
+                return null;
+            }
+        }
+        
+        return $value;
+    }
+    
+    /**
+     * Send email notification for form submission
+     * 
+     * @param array $formData Form definition
+     * @param array $submittedData Submitted data
+     * @param int $submissionId Submission ID
+     * @return void
+     */
+    private static function sendEmailNotification($formData, $submittedData, $submissionId) {
+        $settings = $formData['settings'] ?? [];
+        
+        if (empty($settings['email_recipients'])) {
+            return;
+        }
+        
+        $recipients = $settings['email_recipients'];
+        if (is_string($recipients)) {
+            $recipients = array_map('trim', explode(',', $recipients));
+        }
+        
+        if (empty($recipients)) {
+            return;
+        }
+        
+        $subject = "Новая заявка: " . $formData['name'] . " (#$submissionId)";
+        
+        $body = "Получена новая заявка из формы: " . $formData['name'] . "\n\n";
+        $body .= "ID заявки: $submissionId\n";
+        $body .= "Дата: " . date('d.m.Y H:i:s') . "\n\n";
+        $body .= "Данные:\n";
+        $body .= "----------------------------------------\n";
+        
+        foreach ($formData['fields'] as $field) {
+            $fieldName = $field['name'];
+            $value = $submittedData[$fieldName] ?? null;
+            
+            if ($value !== null && $value !== '') {
+                $displayValue = is_array($value) ? implode(', ', $value) : $value;
+                $body .= $field['label'] . ": " . $displayValue . "\n";
+            }
+        }
+        
+        $headers = "From: noreply@3dprint-omsk.ru\r\n";
+        $headers .= "Content-Type: text/plain; charset=utf-8\r\n";
+        
+        foreach ($recipients as $recipient) {
+            @mail($recipient, $subject, $body, $headers);
+        }
+        
+        ApiLogger::info("Email notifications sent", [
+            'submission_id' => $submissionId,
+            'recipients' => $recipients,
+        ]);
     }
 }
