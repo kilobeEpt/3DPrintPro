@@ -3,12 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Order;
+use App\Models\OrderStatusHistory;
+use App\Models\OrderNote;
+use App\Models\AdminActionLog;
+use App\Services\OrderExportService;
 
 /**
- * Order API Controller
+ * Order API Controller (v2.0)
  * 
- * Handles CRUD operations for orders using Eloquent ORM.
- * Note: Order creation uses FormService for validation and processing.
+ * Enhanced CRUD operations for orders with:
+ * - Advanced filtering (status, type, date range, search, form_slug, archived)
+ * - Status history tracking
+ * - Internal notes management
+ * - CSV/PDF exports with signed URLs
+ * - Archiving support
+ * - RBAC and audit logging
  */
 class OrderController extends BaseApiController
 {
@@ -19,36 +28,87 @@ class OrderController extends BaseApiController
      */
     protected function handleGet()
     {
-        // Require authentication for viewing orders
         $this->requireAuth(false);
         
-        // Get single order by ID
-        if ($this->query('id')) {
-            $id = $this->validateId($this->query('id'), 'order');
-            $order = Order::findOrFail($id);
-            
-            $this->success(['order' => $order->toArray()]);
+        $id = $this->query('id');
+        
+        if ($id) {
+            $this->getOrder($id);
+            return;
         }
         
-        // Get all orders with filters
+        $this->listOrders();
+    }
+    
+    protected function getOrder($id)
+    {
+        $id = $this->validateId($id, 'order');
+        $order = Order::with(['formSubmission', 'statusHistory.changedBy', 'notes.createdBy'])
+            ->findOrFail($id);
+        
+        AdminActionLog::log(
+            $_SESSION['ADMIN_USER_ID'] ?? null,
+            AdminActionLog::ACTION_VIEW,
+            'order',
+            $id
+        );
+        
+        $this->success([
+            'order' => $order->toArray(),
+        ]);
+    }
+    
+    protected function listOrders()
+    {
         $query = Order::query();
         
-        // Apply filters
         if ($this->query('status')) {
             $query->status($this->query('status'));
         }
         
         if ($this->query('type')) {
-            $query->where('type', $this->query('type'));
+            $query->type($this->query('type'));
         }
         
-        // Order by created_at DESC
-        $query->orderBy('created_at', 'desc');
+        if ($this->query('form_slug')) {
+            $query->where('form_slug', $this->query('form_slug'));
+        }
         
-        // Apply pagination with default limit of 100
+        if ($this->query('search')) {
+            $query->search($this->query('search'));
+        }
+        
+        $dateFrom = $this->query('date_from');
+        $dateTo = $this->query('date_to');
+        if ($dateFrom || $dateTo) {
+            $query->dateRange($dateFrom, $dateTo);
+        }
+        
+        $archived = $this->query('archived');
+        if ($archived === 'true' || $archived === '1') {
+            $query->archived();
+        } elseif ($archived === 'false' || $archived === '0') {
+            $query->active();
+        }
+        
+        $sortBy = $this->query('sort_by') ?? 'created_at';
+        $sortOrder = $this->query('sort_order') ?? 'desc';
+        
+        $allowedSorts = ['created_at', 'updated_at', 'amount', 'status', 'order_number'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder === 'asc' ? 'asc' : 'desc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+        
         $params = $this->query;
         if (!isset($params['limit'])) {
             $params['limit'] = 100;
+        }
+        
+        $withRelations = $this->query('with_relations');
+        if ($withRelations === 'true' || $withRelations === '1') {
+            $query->with(['formSubmission', 'statusHistory', 'notes']);
         }
         
         $result = $this->paginate($query, $params);
@@ -71,17 +131,14 @@ class OrderController extends BaseApiController
      */
     protected function handlePost()
     {
-        // Apply rate limiting
         $this->rateLimit('orders_create');
         
-        // Determine form slug based on data
         $formSlug = 'contact';
         if (!empty($this->input['calculatorData']) || 
             (isset($this->input['type']) && $this->input['type'] === 'order')) {
             $formSlug = 'order';
         }
         
-        // Load form definition for validation
         $formData = \FormService::loadForm($formSlug, true);
         
         if (!$formData) {
@@ -89,7 +146,6 @@ class OrderController extends BaseApiController
             $this->error('Form configuration not found. Please contact support.', 500);
         }
         
-        // Validate submission using form service
         $validation = \FormService::validateSubmission($formData, $this->input);
         
         if (!$validation['valid']) {
@@ -97,15 +153,11 @@ class OrderController extends BaseApiController
             $this->validationError('Validation failed', $validation['errors']);
         }
         
-        // Process submission through form service
         $metadata = [
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
             'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
         ];
         
-        // For FormService, we need to pass a Database instance
-        // This is one of the few places where we still need the legacy Database class
-        // for compatibility with existing FormService
         require_once __DIR__ . '/../../../api/db.php';
         $db = new \Database();
         
@@ -119,7 +171,6 @@ class OrderController extends BaseApiController
             $this->error('Failed to create order. Please try again.', 500);
         }
         
-        // Get order details
         $orderId = $result['order_id'];
         $orderNumber = 'Unknown';
         $telegramSent = false;
@@ -132,6 +183,14 @@ class OrderController extends BaseApiController
                     $orderNumber = $order->order_number;
                     $telegramSent = (bool)$order->telegram_sent;
                     $telegramError = $order->telegram_error;
+                    
+                    OrderStatusHistory::logStatusChange(
+                        $orderId,
+                        null,
+                        $order->status,
+                        null,
+                        'Initial status on order creation'
+                    );
                 }
             } catch (\Exception $e) {
                 \ApiLogger::warning("Failed to retrieve order details", [
@@ -168,84 +227,71 @@ class OrderController extends BaseApiController
      */
     protected function handlePut()
     {
-        // Require authentication and CSRF
         $this->requireAuth(true);
-        
-        // Apply rate limiting
         $this->rateLimit('orders_update');
         
-        // Validate ID
         if (empty($this->input['id'])) {
             $this->validationError('Order ID is required');
         }
         
         $id = $this->validateId($this->input['id'], 'order');
-        
-        // Find order
         $order = Order::findOrFail($id);
         
-        // Check if status is changing
         $statusChanged = false;
         $oldStatus = null;
         $newStatus = null;
+        
         if (isset($this->input['status']) && $this->input['status'] !== $order->status) {
             $statusChanged = true;
             $oldStatus = $order->status;
             $newStatus = $this->input['status'];
         }
         
-        // Remove ID from update data
         $data = $this->input;
         unset($data['id']);
         
-        // Update order
         $order->update($data);
+        
+        if ($statusChanged) {
+            $userId = $_SESSION['ADMIN_USER_ID'] ?? null;
+            $comment = $this->input['status_comment'] ?? null;
+            
+            OrderStatusHistory::logStatusChange(
+                $id,
+                $oldStatus,
+                $newStatus,
+                $userId,
+                $comment
+            );
+            
+            AdminActionLog::log(
+                $userId,
+                'status_change',
+                'order',
+                $id,
+                [
+                    'old_status' => $oldStatus,
+                    'new_status' => $newStatus,
+                    'comment' => $comment,
+                ]
+            );
+            
+            $this->sendStatusChangeNotifications($order, $oldStatus, $newStatus);
+        }
+        
+        AdminActionLog::log(
+            $_SESSION['ADMIN_USER_ID'] ?? null,
+            AdminActionLog::ACTION_UPDATE,
+            'order',
+            $id,
+            ['updated_fields' => array_keys($data)]
+        );
         
         \ApiLogger::info("Order updated successfully", [
             'order_id' => $id,
             'updated_fields' => array_keys($data),
             'status_changed' => $statusChanged
         ]);
-        
-        // Send Telegram notification if status changed
-        $telegramSent = false;
-        $telegramError = null;
-        if ($statusChanged) {
-            try {
-                require_once __DIR__ . '/../../../api/db.php';
-                $db = new \Database();
-                
-                $telegramResult = \TelegramHelper::sendStatusChangeNotification(
-                    $id,
-                    $order->order_number,
-                    $oldStatus,
-                    $newStatus,
-                    $db
-                );
-                $telegramSent = $telegramResult['success'];
-                if (!$telegramSent) {
-                    $telegramError = $telegramResult['error'];
-                    \ApiLogger::warning("Telegram status change notification failed", [
-                        'order_id' => $id,
-                        'error' => $telegramError
-                    ]);
-                } else {
-                    \ApiLogger::info("Telegram status change notification sent", [
-                        'order_id' => $id,
-                        'old_status' => $oldStatus,
-                        'new_status' => $newStatus
-                    ]);
-                }
-                
-                $db->close();
-            } catch (\Exception $e) {
-                $telegramError = $e->getMessage();
-                \ApiLogger::error("Telegram status change notification exception", [
-                    'order_id' => $id,
-                    'exception' => $e->getMessage()
-                ]);
-            }
-        }
         
         $response = [
             'message' => 'Order updated successfully',
@@ -254,13 +300,245 @@ class OrderController extends BaseApiController
         
         if ($statusChanged) {
             $response['status_changed'] = true;
-            $response['telegram_sent'] = $telegramSent;
-            if ($telegramError) {
-                $response['telegram_error'] = $telegramError;
-            }
         }
         
         $this->success($response);
+    }
+    
+    /**
+     * Handle PATCH request - partial updates (status, archive, notes)
+     * 
+     * @return void
+     */
+    protected function handlePatch()
+    {
+        $this->requireAuth(true);
+        $this->rateLimit('orders_update');
+        
+        $action = $this->query('action');
+        $id = $this->query('id') ?? $this->input['id'] ?? null;
+        
+        if (!$id) {
+            $this->validationError('Order ID is required');
+        }
+        
+        $id = $this->validateId($id, 'order');
+        
+        switch ($action) {
+            case 'status':
+                $this->updateStatus($id);
+                break;
+            case 'archive':
+                $this->archiveOrder($id);
+                break;
+            case 'unarchive':
+                $this->unarchiveOrder($id);
+                break;
+            case 'add_note':
+                $this->addNote($id);
+                break;
+            case 'update_note':
+                $this->updateNote($id);
+                break;
+            case 'delete_note':
+                $this->deleteNote($id);
+                break;
+            default:
+                $this->error('Invalid action', 400);
+        }
+    }
+    
+    protected function updateStatus($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        
+        if (empty($this->input['status'])) {
+            $this->validationError('Status is required');
+        }
+        
+        $validStatuses = [Order::STATUS_NEW, Order::STATUS_PROCESSING, Order::STATUS_COMPLETED, Order::STATUS_CANCELLED];
+        if (!in_array($this->input['status'], $validStatuses)) {
+            $this->validationError('Invalid status value');
+        }
+        
+        $oldStatus = $order->status;
+        $newStatus = $this->input['status'];
+        $comment = $this->input['comment'] ?? null;
+        
+        if ($oldStatus === $newStatus) {
+            $this->error('Status is already ' . $newStatus, 400);
+        }
+        
+        $order->status = $newStatus;
+        $order->save();
+        
+        $userId = $_SESSION['ADMIN_USER_ID'] ?? null;
+        
+        OrderStatusHistory::logStatusChange(
+            $orderId,
+            $oldStatus,
+            $newStatus,
+            $userId,
+            $comment
+        );
+        
+        AdminActionLog::log(
+            $userId,
+            'status_change',
+            'order',
+            $orderId,
+            [
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'comment' => $comment,
+            ]
+        );
+        
+        $this->sendStatusChangeNotifications($order, $oldStatus, $newStatus);
+        
+        $this->success([
+            'message' => 'Order status updated successfully',
+            'order_id' => $orderId,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+        ]);
+    }
+    
+    protected function archiveOrder($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        
+        if ($order->isArchived()) {
+            $this->error('Order is already archived', 400);
+        }
+        
+        $order->archive();
+        
+        AdminActionLog::log(
+            $_SESSION['ADMIN_USER_ID'] ?? null,
+            'archive',
+            'order',
+            $orderId
+        );
+        
+        $this->success([
+            'message' => 'Order archived successfully',
+            'order_id' => $orderId,
+        ]);
+    }
+    
+    protected function unarchiveOrder($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        
+        if (!$order->isArchived()) {
+            $this->error('Order is not archived', 400);
+        }
+        
+        $order->unarchive();
+        
+        AdminActionLog::log(
+            $_SESSION['ADMIN_USER_ID'] ?? null,
+            'unarchive',
+            'order',
+            $orderId
+        );
+        
+        $this->success([
+            'message' => 'Order unarchived successfully',
+            'order_id' => $orderId,
+        ]);
+    }
+    
+    protected function addNote($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        
+        if (empty($this->input['note'])) {
+            $this->validationError('Note is required');
+        }
+        
+        $note = OrderNote::addNote(
+            $orderId,
+            $this->input['note'],
+            $_SESSION['ADMIN_USER_ID'] ?? null
+        );
+        
+        AdminActionLog::log(
+            $_SESSION['ADMIN_USER_ID'] ?? null,
+            'add_note',
+            'order',
+            $orderId,
+            ['note_id' => $note->id]
+        );
+        
+        $this->success([
+            'message' => 'Note added successfully',
+            'note' => $note->toArray(),
+        ]);
+    }
+    
+    protected function updateNote($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        
+        $noteId = $this->input['note_id'] ?? null;
+        if (!$noteId) {
+            $this->validationError('Note ID is required');
+        }
+        
+        $note = OrderNote::where('order_id', $orderId)
+            ->where('id', $noteId)
+            ->firstOrFail();
+        
+        if (empty($this->input['note'])) {
+            $this->validationError('Note content is required');
+        }
+        
+        $note->note = $this->input['note'];
+        $note->save();
+        
+        AdminActionLog::log(
+            $_SESSION['ADMIN_USER_ID'] ?? null,
+            'update_note',
+            'order',
+            $orderId,
+            ['note_id' => $note->id]
+        );
+        
+        $this->success([
+            'message' => 'Note updated successfully',
+            'note' => $note->toArray(),
+        ]);
+    }
+    
+    protected function deleteNote($orderId)
+    {
+        $order = Order::findOrFail($orderId);
+        
+        $noteId = $this->input['note_id'] ?? $this->query('note_id');
+        if (!$noteId) {
+            $this->validationError('Note ID is required');
+        }
+        
+        $note = OrderNote::where('order_id', $orderId)
+            ->where('id', $noteId)
+            ->firstOrFail();
+        
+        $note->delete();
+        
+        AdminActionLog::log(
+            $_SESSION['ADMIN_USER_ID'] ?? null,
+            'delete_note',
+            'order',
+            $orderId,
+            ['note_id' => $noteId]
+        );
+        
+        $this->success([
+            'message' => 'Note deleted successfully',
+            'note_id' => $noteId,
+        ]);
     }
     
     /**
@@ -270,22 +548,24 @@ class OrderController extends BaseApiController
      */
     protected function handleDelete()
     {
-        // Require authentication and CSRF
         $this->requireAuth(true);
-        
-        // Apply rate limiting
         $this->rateLimit('orders_delete');
         
-        // Validate ID
         if (empty($this->query('id'))) {
             $this->validationError('Order ID is required');
         }
         
         $id = $this->validateId($this->query('id'), 'order');
         
-        // Find and delete order
         $order = Order::findOrFail($id);
         $order->delete();
+        
+        AdminActionLog::log(
+            $_SESSION['ADMIN_USER_ID'] ?? null,
+            AdminActionLog::ACTION_DELETE,
+            'order',
+            $id
+        );
         
         \ApiLogger::info("Order deleted successfully", ['order_id' => $id]);
         
@@ -293,6 +573,59 @@ class OrderController extends BaseApiController
             'message' => 'Order deleted successfully',
             'order_id' => $id
         ]);
+    }
+    
+    protected function sendStatusChangeNotifications($order, $oldStatus, $newStatus)
+    {
+        $settingsService = new \App\Services\SettingsService();
+        
+        $telegramEnabled = $settingsService->get('notifications_telegram_status_change', 'false') === 'true';
+        $emailEnabled = $settingsService->get('notifications_email_status_change', 'false') === 'true';
+        
+        if ($telegramEnabled) {
+            try {
+                require_once __DIR__ . '/../../../api/db.php';
+                $db = new \Database();
+                
+                $result = \TelegramHelper::sendStatusChangeNotification(
+                    $order->id,
+                    $order->order_number,
+                    $oldStatus,
+                    $newStatus,
+                    $db
+                );
+                
+                if (!$result['success']) {
+                    \ApiLogger::warning("Telegram status notification failed", [
+                        'order_id' => $order->id,
+                        'error' => $result['error']
+                    ]);
+                }
+                
+                $db->close();
+            } catch (\Exception $e) {
+                \ApiLogger::error("Telegram status notification exception", [
+                    'order_id' => $order->id,
+                    'exception' => $e->getMessage()
+                ]);
+            }
+        }
+        
+        if ($emailEnabled) {
+            $emailTo = $settingsService->get('notifications_email_address');
+            if ($emailTo) {
+                $subject = "Order Status Changed: {$order->order_number}";
+                $message = "Order #{$order->order_number} status changed from '{$oldStatus}' to '{$newStatus}'.\n\n";
+                $message .= "Customer: {$order->name}\n";
+                $message .= "Email: {$order->email}\n";
+                $message .= "Phone: {$order->phone}\n";
+                
+                $headers = "From: noreply@3dprint-omsk.ru\r\n";
+                $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+                
+                @mail($emailTo, $subject, $message, $headers);
+            }
+        }
     }
     
     /**

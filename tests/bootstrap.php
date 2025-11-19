@@ -141,18 +141,59 @@ function createTestSchema()
     $db->exec("
         CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_number VARCHAR(50) NOT NULL UNIQUE,
+            type VARCHAR(50) DEFAULT 'contact',
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255),
+            phone VARCHAR(20) NOT NULL,
+            telegram VARCHAR(100),
+            service VARCHAR(255),
+            subject VARCHAR(255),
+            message TEXT,
+            amount DECIMAL(10, 2) DEFAULT 0,
+            calculator_data TEXT,
             form_submission_id INTEGER,
             form_slug VARCHAR(255),
-            customer_name VARCHAR(255) NOT NULL,
-            customer_email VARCHAR(255) NOT NULL,
-            customer_phone VARCHAR(50),
-            customer_district VARCHAR(255),
-            message TEXT,
-            calculator_data TEXT,
-            status VARCHAR(50) DEFAULT 'pending',
+            status VARCHAR(50) DEFAULT 'new',
+            archived_at DATETIME NULL,
+            telegram_sent BOOLEAN DEFAULT 0,
+            telegram_error TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (form_submission_id) REFERENCES form_submissions (id) ON DELETE SET NULL
+        )
+    ");
+    
+    // Order status history table
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS order_status_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER NOT NULL,
+            old_status VARCHAR(50) NULL,
+            new_status VARCHAR(50) NOT NULL,
+            changed_by INTEGER NULL,
+            comment TEXT NULL,
+            ip_address VARCHAR(45) NULL,
+            user_agent TEXT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+            FOREIGN KEY (changed_by) REFERENCES admin_users(id) ON DELETE SET NULL
+        )
+    ");
+    
+    // Order notes table
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS order_notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER NOT NULL,
+            note TEXT NOT NULL,
+            created_by INTEGER NULL,
+            ip_address VARCHAR(45) NULL,
+            user_agent TEXT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+            FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL
         )
     ");
     
@@ -229,6 +270,9 @@ function createTestSchema()
     $db->exec("CREATE INDEX IF NOT EXISTS idx_form_submissions_form_id ON form_submissions (form_id)");
     $db->exec("CREATE INDEX IF NOT EXISTS idx_form_submission_values_submission ON form_submission_values (form_submission_id)");
     $db->exec("CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status)");
+    $db->exec("CREATE INDEX IF NOT EXISTS idx_orders_archived ON orders (archived_at)");
+    $db->exec("CREATE INDEX IF NOT EXISTS idx_order_status_history_order ON order_status_history (order_id)");
+    $db->exec("CREATE INDEX IF NOT EXISTS idx_order_notes_order ON order_notes (order_id)");
     $db->exec("CREATE INDEX IF NOT EXISTS idx_admin_users_email ON admin_users (email)");
     $db->exec("CREATE INDEX IF NOT EXISTS idx_admin_sessions_session_id ON admin_sessions (session_id)");
     $db->exec("CREATE INDEX IF NOT EXISTS idx_admin_login_attempts_email ON admin_login_attempts (email)");
@@ -237,15 +281,21 @@ function createTestSchema()
 /**
  * Seed test data
  * 
- * @param array $data Array of table => rows
+ * @param int $count Number of rows to create
+ * @param string $table Table name
+ * @param array $data Data for each row
+ * @return array Array of created rows with IDs
  */
-function seedTestData(array $data)
+function seedTestData($count, $table, $data = [])
 {
-    foreach ($data as $table => $rows) {
-        foreach ($rows as $row) {
-            Capsule::table($table)->insert($row);
-        }
+    $results = [];
+    
+    for ($i = 0; $i < $count; $i++) {
+        $id = Capsule::table($table)->insertGetId($data);
+        $results[] = array_merge(['id' => $id], $data);
     }
+    
+    return $results;
 }
 
 /**
@@ -254,6 +304,8 @@ function seedTestData(array $data)
 function cleanTestData()
 {
     $tables = [
+        'order_notes',
+        'order_status_history',
         'form_submission_values',
         'form_submissions',
         'form_fields',

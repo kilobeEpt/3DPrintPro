@@ -54,6 +54,7 @@ class Order extends BaseModel
         'form_submission_id',
         'form_slug',
         'status',
+        'archived_at',
         'telegram_sent',
         'telegram_error',
     ];
@@ -70,6 +71,7 @@ class Order extends BaseModel
         'form_submission_id' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'archived_at' => 'datetime',
     ];
     
     /**
@@ -156,5 +158,115 @@ class Order extends BaseModel
     public function formSubmission()
     {
         return $this->belongsTo(FormSubmission::class, 'form_submission_id', 'id');
+    }
+    
+    /**
+     * Get the status history for this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function statusHistory()
+    {
+        return $this->hasMany(OrderStatusHistory::class, 'order_id', 'id')->ordered();
+    }
+    
+    /**
+     * Get the notes for this order.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function notes()
+    {
+        return $this->hasMany(OrderNote::class, 'order_id', 'id')->ordered();
+    }
+    
+    /**
+     * Scope a query to only include non-archived orders.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereNull('archived_at');
+    }
+    
+    /**
+     * Scope a query to only include archived orders.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeArchived($query)
+    {
+        return $query->whereNotNull('archived_at');
+    }
+    
+    /**
+     * Scope a query to filter by date range.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $from
+     * @param  string  $to
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeDateRange($query, $from, $to)
+    {
+        if ($from) {
+            $query->where('created_at', '>=', $from);
+        }
+        if ($to) {
+            $query->where('created_at', '<=', $to);
+        }
+        return $query;
+    }
+    
+    /**
+     * Scope a query to search by customer contact info.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $search
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'LIKE', "%{$search}%")
+              ->orWhere('email', 'LIKE', "%{$search}%")
+              ->orWhere('phone', 'LIKE', "%{$search}%")
+              ->orWhere('order_number', 'LIKE', "%{$search}%");
+        });
+    }
+    
+    /**
+     * Check if this order is archived.
+     *
+     * @return bool
+     */
+    public function isArchived()
+    {
+        return !is_null($this->archived_at);
+    }
+    
+    /**
+     * Archive this order.
+     *
+     * @return bool
+     */
+    public function archive()
+    {
+        $this->archived_at = now();
+        return $this->save();
+    }
+    
+    /**
+     * Unarchive this order.
+     *
+     * @return bool
+     */
+    public function unarchive()
+    {
+        $this->archived_at = null;
+        return $this->save();
     }
 }
