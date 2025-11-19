@@ -21,11 +21,24 @@ class Calculator {
         };
         
         this.calculation = null;
+        this.apiConfig = null;
     }
 
-    init() {
+    async init() {
         this.initInputs();
-        this.loadPricesFromConfig(); // ИСПРАВЛЕНО: загрузка из CONFIG
+        await this.loadConfigFromApi();
+        this.loadPricesFromConfig();
+    }
+    
+    async loadConfigFromApi() {
+        try {
+            if (window.calculatorConfigLoader) {
+                this.apiConfig = await window.calculatorConfigLoader.getConfig();
+                console.log('✅ API config loaded:', this.apiConfig);
+            }
+        } catch (error) {
+            console.warn('⚠️ Failed to load API config:', error);
+        }
     }
 
     // ========================================
@@ -180,8 +193,18 @@ class Calculator {
         const materialSelect = document.getElementById('material');
         if (!materialSelect) return;
         
-        const materials = Object.entries(CONFIG.materialPrices)
-            .filter(([key, mat]) => mat.technology === this.data.technology);
+        let materials = [];
+        
+        if (this.apiConfig && this.apiConfig.materials) {
+            // Use API config
+            materials = this.apiConfig.materials
+                .filter(mat => mat.technology === this.data.technology && mat.active)
+                .map(mat => [mat.key, mat]);
+        } else if (typeof CONFIG !== 'undefined') {
+            // Fallback to CONFIG
+            materials = Object.entries(CONFIG.materialPrices)
+                .filter(([key, mat]) => mat.technology === this.data.technology);
+        }
         
         if (materials.length === 0) {
             materialSelect.innerHTML = '<option>Нет доступных материалов</option>';
@@ -197,15 +220,28 @@ class Calculator {
     }
 
     updateServicePrices() {
-    const priceElements = document.querySelectorAll('.service-price');
-    priceElements.forEach(el => {
-        const service = el.getAttribute('data-service');
-        if (CONFIG.servicePrices[service]) {
-            el.textContent = CONFIG.servicePrices[service].price;
-        }
-         });
-    
-        console.log('✅ Цены услуг обновлены:', CONFIG.servicePrices);
+        const priceElements = document.querySelectorAll('.service-price');
+        priceElements.forEach(el => {
+            const serviceKey = el.getAttribute('data-service');
+            let price = null;
+            
+            if (this.apiConfig && this.apiConfig.services) {
+                // Use API config
+                const service = this.apiConfig.services.find(s => s.key === serviceKey);
+                if (service) {
+                    price = service.price;
+                }
+            } else if (typeof CONFIG !== 'undefined' && CONFIG.servicePrices[serviceKey]) {
+                // Fallback to CONFIG
+                price = CONFIG.servicePrices[serviceKey].price;
+            }
+            
+            if (price !== null) {
+                el.textContent = price;
+            }
+        });
+        
+        console.log('✅ Цены услуг обновлены');
     }
     // Метод для обновления цен после изменения в админке
     reloadPrices() {
@@ -237,8 +273,14 @@ class Calculator {
             return null;
         }
         
-        // Get material price from CONFIG
-        const materialInfo = CONFIG.materialPrices[this.data.material];
+        // Get material price from API config or CONFIG
+        let materialInfo = null;
+        if (this.apiConfig && this.apiConfig.materials) {
+            materialInfo = this.apiConfig.materials.find(m => m.key === this.data.material);
+        } else if (typeof CONFIG !== 'undefined') {
+            materialInfo = CONFIG.materialPrices[this.data.material];
+        }
+        
         if (!materialInfo) {
             app.showNotification('Материал не найден', 'error');
             return null;
@@ -255,7 +297,12 @@ class Calculator {
         laborCost += weight * 2; // Additional for larger parts
         
         // Quality multiplier
-        const qualityInfo = CONFIG.qualityMultipliers[quality];
+        let qualityInfo = null;
+        if (this.apiConfig && this.apiConfig.quality_multipliers) {
+            qualityInfo = this.apiConfig.quality_multipliers[quality];
+        } else if (typeof CONFIG !== 'undefined') {
+            qualityInfo = CONFIG.qualityMultipliers[quality];
+        }
         const qualityMultiplier = qualityInfo ? qualityInfo.multiplier : 1;
         laborCost = laborCost * qualityMultiplier;
         
@@ -264,10 +311,19 @@ class Calculator {
         
         // Additional services
         let additionalCost = 0;
-        Object.entries(this.data.additionalServices).forEach(([service, enabled]) => {
-            if (enabled && CONFIG.servicePrices[service]) {
-                const price = CONFIG.servicePrices[service].price;
-                const unit = CONFIG.servicePrices[service].unit;
+        Object.entries(this.data.additionalServices).forEach(([serviceKey, enabled]) => {
+            if (!enabled) return;
+            
+            let serviceInfo = null;
+            if (this.apiConfig && this.apiConfig.services) {
+                serviceInfo = this.apiConfig.services.find(s => s.key === serviceKey);
+            } else if (typeof CONFIG !== 'undefined' && CONFIG.servicePrices[serviceKey]) {
+                serviceInfo = CONFIG.servicePrices[serviceKey];
+            }
+            
+            if (serviceInfo) {
+                const price = serviceInfo.price;
+                const unit = serviceInfo.unit;
                 
                 if (unit === 'шт') {
                     additionalCost += price * quantity;
@@ -326,29 +382,66 @@ class Calculator {
     }
 
     getDiscount(quantity) {
-        const discounts = CONFIG.discounts.sort((a, b) => b.minQuantity - a.minQuantity);
+        let discounts = [];
+        if (this.apiConfig && this.apiConfig.discounts) {
+            discounts = this.apiConfig.discounts.filter(d => d.active !== false);
+        } else if (typeof CONFIG !== 'undefined') {
+            discounts = CONFIG.discounts;
+        }
+        discounts = discounts.sort((a, b) => b.minQuantity - a.minQuantity);
         return discounts.find(d => quantity >= d.minQuantity);
     }
 
     getServiceName() {
         const tech = this.data.technology.toUpperCase();
-        const material = CONFIG.materialPrices[this.data.material]?.name || this.data.material;
-        return `${tech} печать (${material})`;
+        let materialName = this.data.material;
+        
+        if (this.apiConfig && this.apiConfig.materials) {
+            const mat = this.apiConfig.materials.find(m => m.key === this.data.material);
+            materialName = mat?.name || materialName;
+        } else if (typeof CONFIG !== 'undefined') {
+            materialName = CONFIG.materialPrices[this.data.material]?.name || materialName;
+        }
+        
+        return `${tech} печать (${materialName})`;
     }
 
     getCalculationDetails() {
+        let materialName = this.data.material;
+        let qualityName = this.data.quality;
+        
+        if (this.apiConfig) {
+            if (this.apiConfig.materials) {
+                const mat = this.apiConfig.materials.find(m => m.key === this.data.material);
+                materialName = mat?.name || materialName;
+            }
+            if (this.apiConfig.quality_multipliers && this.apiConfig.quality_multipliers[this.data.quality]) {
+                qualityName = this.apiConfig.quality_multipliers[this.data.quality].name;
+            }
+        } else if (typeof CONFIG !== 'undefined') {
+            materialName = CONFIG.materialPrices[this.data.material]?.name || materialName;
+            qualityName = CONFIG.qualityMultipliers[this.data.quality]?.name || qualityName;
+        }
+        
         const details = [
             `Технология: ${this.data.technology.toUpperCase()}`,
-            `Материал: ${CONFIG.materialPrices[this.data.material]?.name}`,
+            `Материал: ${materialName}`,
             `Вес: ${this.data.weight}г`,
             `Количество: ${this.data.quantity} шт`,
             `Заполнение: ${this.data.infill}%`,
-            `Качество: ${CONFIG.qualityMultipliers[this.data.quality]?.name}`
+            `Качество: ${qualityName}`
         ];
         
         const services = [];
         Object.entries(this.data.additionalServices).forEach(([key, enabled]) => {
-            if (enabled && CONFIG.servicePrices[key]) {
+            if (!enabled) return;
+            
+            if (this.apiConfig && this.apiConfig.services) {
+                const service = this.apiConfig.services.find(s => s.key === key);
+                if (service) {
+                    services.push(service.name);
+                }
+            } else if (typeof CONFIG !== 'undefined' && CONFIG.servicePrices[key]) {
                 services.push(CONFIG.servicePrices[key].name);
             }
         });

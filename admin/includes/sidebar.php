@@ -69,6 +69,10 @@ try {
             <span>Заявки</span>
             <span class="badge" id="submissionsBadge" style="display: none;">0</span>
         </a>
+        <a href="/admin/calculator-settings.php" class="nav-item <?php echo $currentPage === 'calculator-settings' ? 'active' : ''; ?>" data-page="calculator-settings">
+            <i class="fas fa-calculator"></i>
+            <span>Калькулятор</span>
+        </a>
         <a href="/admin/settings.php" class="nav-item <?php echo $currentPage === 'settings' ? 'active' : ''; ?>" data-page="settings">
             <i class="fas fa-sliders-h"></i>
             <span>Настройки</span>
