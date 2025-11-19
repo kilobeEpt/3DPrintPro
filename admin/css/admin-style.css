@@ -1903,3 +1903,276 @@ textarea.form-control {resize: vertical; min-height: 100px;}
     .checkbox-group { grid-template-columns: 1fr; }
     .pagination-container { flex-direction: column; align-items: stretch; }
 }
+
+/* ========================================
+   Form Builder Specific Styles
+   ======================================== */
+
+.fields-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 200px;
+}
+
+.field-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    cursor: move;
+    transition: all 0.2s;
+}
+
+.field-item:hover {
+    box-shadow: var(--admin-shadow);
+}
+
+.field-item.dragging {
+    opacity: 0.5;
+}
+
+.field-drag {
+    color: var(--admin-text-secondary);
+    cursor: grab;
+}
+
+.field-drag:active {
+    cursor: grabbing;
+}
+
+.field-content {
+    flex: 1;
+}
+
+.field-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.field-meta {
+    font-size: 12px;
+    color: var(--admin-text-secondary);
+}
+
+.field-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.fields-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.fields-hint {
+    font-size: 12px;
+    color: var(--admin-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.conditions-list,
+.conditions-list > * {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.condition-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+}
+
+.condition-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 14px;
+}
+
+.condition-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.condition-rule {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.notifications-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.notifications-section:last-child {
+    border-bottom: none;
+}
+
+.notifications-section h3 {
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.calculator-mappings {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.mappings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mapping-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mapping-row label {
+    flex: 0 0 200px;
+    font-weight: 500;
+}
+
+.mapping-row input {
+    flex: 1;
+}
+
+.form-preview {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: var(--admin-bg);
+    border-radius: 8px;
+}
+
+.preview-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.preview-form .form-group {
+    margin-bottom: 0;
+}
+
+.modal-xl .modal-content {
+    max-width: 1200px;
+}
+
+.detail-section {
+    margin-bottom: 30px;
+}
+
+.detail-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.detail-list {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 20px;
+}
+
+.detail-list dt {
+    font-weight: 600;
+    color: var(--admin-text-secondary);
+}
+
+.detail-list dd {
+    margin: 0;
+}
+
+.radio-group,
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.radio-label,
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.radio-label input,
+.checkbox-label input {
+    width: auto;
+    margin: 0;
+}
+
+.bulk-actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bulk-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    width: 100%;
+}
+
+.bulk-action-btn:hover {
+    border-color: var(--admin-primary);
+    background: var(--admin-card-bg);
+}
+
+.bulk-action-btn i {
+    font-size: 24px;
+    color: var(--admin-primary);
+}
+
+.bulk-action-btn div {
+    flex: 1;
+}
+
+.bulk-action-btn strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.bulk-action-btn small {
+    color: var(--admin-text-secondary);
+    font-size: 12px;
+}
+

@@ -60,6 +60,15 @@ try {
             <i class="fas fa-file-alt"></i>
             <span>Контент</span>
         </a>
+        <a href="/admin/forms.php" class="nav-item <?php echo $currentPage === 'forms' ? 'active' : ''; ?>" data-page="forms">
+            <i class="fas fa-wpforms"></i>
+            <span>Формы</span>
+        </a>
+        <a href="/admin/submissions.php" class="nav-item <?php echo $currentPage === 'submissions' ? 'active' : ''; ?>" data-page="submissions">
+            <i class="fas fa-inbox"></i>
+            <span>Заявки</span>
+            <span class="badge" id="submissionsBadge" style="display: none;">0</span>
+        </a>
         <a href="/admin/settings.php" class="nav-item <?php echo $currentPage === 'settings' ? 'active' : ''; ?>" data-page="settings">
             <i class="fas fa-sliders-h"></i>
             <span>Настройки</span>
