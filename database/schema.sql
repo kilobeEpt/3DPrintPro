@@ -1,31 +1,34 @@
 -- ========================================
 -- 3D Print Pro Database Schema
--- Version: 4.0 (RBAC Authentication System)
+-- Version: 5.0 (Orders Domain with History & Notes)
 -- Last Updated: January 2025
 -- MySQL Version: 8.0+ (tested with MySQL 8.0)
 -- ========================================
 --
--- This schema creates 16 tables for the 3D printing service platform:
--- 1. orders - Customer orders and inquiries (legacy + form integration)
--- 2. settings - Application configuration (NO 'active' column)
--- 3. services - Service offerings
--- 4. portfolio - Project showcase
--- 5. testimonials - Customer reviews
--- 6. faq - Frequently asked questions
--- 7. content_blocks - Dynamic page content
--- 8. forms - Dynamic form definitions
--- 9. form_fields - Form field configurations
--- 10. form_submissions - Form submission records
--- 11. form_submission_values - Individual field values (normalized)
--- 12. settings_audit - Settings change audit log
--- 13. admin_users - Admin user accounts with RBAC (NEW)
--- 14. admin_sessions - Persistent session storage (NEW)
--- 15. admin_login_attempts - Login attempt tracking (NEW)
--- 16. admin_action_logs - Admin action audit log (NEW)
+-- This schema creates 18 tables for the 3D printing service platform:
+-- 1. orders - Customer orders and inquiries (legacy + form integration + archiving)
+-- 2. order_status_history - Order status change tracking (NEW)
+-- 3. order_notes - Internal order notes (NEW)
+-- 4. settings - Application configuration (NO 'active' column)
+-- 5. services - Service offerings
+-- 6. portfolio - Project showcase
+-- 7. testimonials - Customer reviews
+-- 8. faq - Frequently asked questions
+-- 9. content_blocks - Dynamic page content
+-- 10. forms - Dynamic form definitions
+-- 11. form_fields - Form field configurations
+-- 12. form_submissions - Form submission records
+-- 13. form_submission_values - Individual field values (normalized)
+-- 14. settings_audit - Settings change audit log
+-- 15. admin_users - Admin user accounts with RBAC
+-- 16. admin_sessions - Persistent session storage
+-- 17. admin_login_attempts - Login attempt tracking
+-- 18. admin_action_logs - Admin action audit log
 --
 -- IMPORTANT NOTES:
--- - Tables WITHOUT 'active' column: orders, settings, form_submissions, form_submission_values, 
---   settings_audit, admin_sessions, admin_login_attempts, admin_action_logs
+-- - Tables WITHOUT 'active' column: orders, order_status_history, order_notes, settings, 
+--   form_submissions, form_submission_values, settings_audit, admin_sessions, 
+--   admin_login_attempts, admin_action_logs
 -- - Tables WITH 'active' column: services, portfolio, testimonials, faq, content_blocks, forms, form_fields
 -- - admin_users uses 'status' enum instead of 'active' boolean
 -- - This file is IDEMPOTENT - safe to run multiple times
@@ -95,6 +98,7 @@ CREATE TABLE IF NOT EXISTS orders (
     
     -- Status tracking
     status ENUM('new', 'processing', 'completed', 'cancelled') DEFAULT 'new',
+    archived_at TIMESTAMP NULL COMMENT 'When order was archived',
     telegram_sent BOOLEAN DEFAULT FALSE,
     telegram_error TEXT,
     
@@ -107,10 +111,59 @@ CREATE TABLE IF NOT EXISTS orders (
     INDEX idx_phone (phone),
     INDEX idx_email (email),
     INDEX idx_status (status),
+    INDEX idx_archived_at (archived_at),
     INDEX idx_created_at (created_at),
     INDEX idx_type (type),
     INDEX idx_form_slug (form_slug),
     INDEX idx_form_submission_id (form_submission_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: order_status_history
+-- Tracks status changes for orders
+-- NO 'active' column - all history is kept permanently
+-- ========================================
+CREATE TABLE IF NOT EXISTS order_status_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    old_status VARCHAR(50) NULL COMMENT 'Previous status (NULL for initial status)',
+    new_status VARCHAR(50) NOT NULL COMMENT 'New status',
+    changed_by INT NULL COMMENT 'Admin user ID who made the change',
+    comment TEXT NULL COMMENT 'Optional comment about the status change',
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_order_id (order_id),
+    INDEX idx_new_status (new_status),
+    INDEX idx_changed_by (changed_by),
+    INDEX idx_created_at (created_at),
+    
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (changed_by) REFERENCES admin_users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: order_notes
+-- Internal notes for orders
+-- NO 'active' column - all notes are kept permanently
+-- ========================================
+CREATE TABLE IF NOT EXISTS order_notes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    note TEXT NOT NULL,
+    created_by INT NULL COMMENT 'Admin user ID who created the note',
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_order_id (order_id),
+    INDEX idx_created_by (created_by),
+    INDEX idx_created_at (created_at),
+    
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ========================================
