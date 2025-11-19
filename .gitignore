@@ -134,6 +134,7 @@ composer.phar
 # PHP cache and session files
 *.cache
 sessions/
+storage/cache/
 
 # Test databases (SQLite)
 database/test.sqlite

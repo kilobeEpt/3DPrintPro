@@ -3,6 +3,7 @@ class SettingsModule {
     constructor() { 
         this.settings = {};
         this.tokenVisible = false;
+        this.auditHistory = [];
     }
     
     async init() {
@@ -26,6 +27,12 @@ class SettingsModule {
             testBtn.addEventListener('click', () => this.testTelegram());
         }
         
+        // View Audit History button
+        const auditBtn = document.getElementById('viewAuditBtn');
+        if (auditBtn) {
+            auditBtn.addEventListener('click', () => this.showAuditHistory());
+        }
+        
         await this.loadSettings();
     }
     
@@ -37,12 +44,27 @@ class SettingsModule {
                 return;
             }
             
-            this.settings = await window.adminApi.getSettings();
+            const response = await window.adminApi.get('/api/settings.php');
+            
+            // Handle new response format with cache info
+            if (response.settings) {
+                this.settings = response.settings;
+                
+                // Log cache info if available
+                if (response.cache_info) {
+                    console.log('✅ Settings loaded (cache TTL: ' + response.cache_info.ttl + 's)');
+                }
+            } else {
+                // Fallback to legacy format
+                this.settings = response;
+            }
+            
             this.populateForm();
+            this.showCacheStatus(response.cache_info);
             console.log('✅ Settings loaded');
         } catch (error) {
             console.error('❌ Failed to load settings:', error);
-            AdminMain.prototype.showToast('Ошибка загрузки настроек', 'error');
+            this.showError('Ошибка загрузки настроек: ' + (error.message || 'Неизвестная ошибка'));
         }
     }
     
@@ -57,6 +79,17 @@ class SettingsModule {
                 input.value = value || '';
             }
         });
+    }
+    
+    showCacheStatus(cacheInfo) {
+        const statusEl = document.getElementById('cacheStatus');
+        if (!statusEl || !cacheInfo) return;
+        
+        statusEl.innerHTML = `
+            <small class="text-muted">
+                <i class="fas fa-database"></i> Кэш активен (TTL: ${cacheInfo.ttl}с)
+            </small>
+        `;
     }
     
     toggleTokenVisibility() {
@@ -96,16 +129,16 @@ class SettingsModule {
             
             if (data.success) {
                 resultSpan.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Сообщение отправлено!</span>';
-                AdminMain.prototype.showToast('Тестовое сообщение отправлено', 'success');
+                this.showSuccess('Тестовое сообщение отправлено');
             } else {
                 const errorMsg = data.error || 'Неизвестная ошибка';
                 resultSpan.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle"></i> Ошибка: ${errorMsg}</span>`;
-                AdminMain.prototype.showToast(`Ошибка: ${errorMsg}`, 'error');
+                this.showError(`Ошибка: ${errorMsg}`);
             }
         } catch (error) {
             console.error('❌ Failed to test Telegram:', error);
             resultSpan.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle"></i> Ошибка сети</span>';
-            AdminMain.prototype.showToast('Ошибка при отправке тестового сообщения', 'error');
+            this.showError('Ошибка при отправке тестового сообщения');
         } finally {
             // Re-enable button
             btn.disabled = false;
@@ -147,17 +180,203 @@ class SettingsModule {
                 throw new Error('adminApi not ready');
             }
             
-            await window.adminApi.updateSettings(settings);
-            if (!silent) {
-                AdminMain.prototype.showToast('Настройки сохранены', 'success');
+            const response = await window.adminApi.post('/api/settings.php', settings);
+            
+            // Handle validation errors in response
+            if (response.validation_errors && Object.keys(response.validation_errors).length > 0) {
+                this.showValidationErrors(response.validation_errors);
+                if (!silent) {
+                    this.showWarning('Настройки сохранены с ошибками валидации');
+                }
+            } else if (response.errors && Object.keys(response.errors).length > 0) {
+                this.showValidationErrors(response.errors);
+                if (!silent) {
+                    this.showWarning('Некоторые настройки не удалось сохранить');
+                }
+            } else {
+                if (!silent) {
+                    this.showSuccess('Настройки сохранены');
+                }
             }
-            console.log('✅ Settings saved');
+            
+            // Show cache invalidation status
+            if (response.cache_invalidated && !silent) {
+                console.log('✅ Cache invalidated');
+            }
+            
+            console.log('✅ Settings saved:', response);
         } catch (error) {
             console.error('❌ Failed to save settings:', error);
+            
+            // Extract error message from API response
+            let errorMsg = 'Ошибка сохранения настроек';
+            if (error.response && error.response.error) {
+                errorMsg = error.response.error;
+            } else if (error.message) {
+                errorMsg = error.message;
+            }
+            
             if (!silent) {
-                AdminMain.prototype.showToast('Ошибка сохранения настроек', 'error');
+                this.showError(errorMsg);
             }
             throw error;
+        }
+    }
+    
+    showValidationErrors(errors) {
+        const container = document.getElementById('validationErrors');
+        if (!container) {
+            // If no container, log to console
+            console.warn('Validation errors:', errors);
+            return;
+        }
+        
+        const errorList = Object.entries(errors)
+            .map(([key, error]) => `<li><strong>${key}:</strong> ${error}</li>`)
+            .join('');
+        
+        container.innerHTML = `
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Ошибки валидации:</strong>
+                <ul class="mb-0 mt-2">${errorList}</ul>
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 10000);
+    }
+    
+    async showAuditHistory() {
+        try {
+            if (!window.adminApi) {
+                throw new Error('adminApi not ready');
+            }
+            
+            const response = await window.adminApi.get('/api/settings.php?audit=&limit=50');
+            this.auditHistory = response.audit || [];
+            
+            this.renderAuditModal();
+        } catch (error) {
+            console.error('❌ Failed to load audit history:', error);
+            this.showError('Ошибка загрузки истории изменений');
+        }
+    }
+    
+    renderAuditModal() {
+        const modalHtml = `
+            <div class="modal fade" id="auditModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-history"></i> История изменений настроек
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            ${this.renderAuditTable()}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                Закрыть
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if present
+        const existingModal = document.getElementById('auditModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Append and show modal
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        $('#auditModal').modal('show');
+    }
+    
+    renderAuditTable() {
+        if (!this.auditHistory || this.auditHistory.length === 0) {
+            return '<p class="text-muted text-center py-4">История изменений пуста</p>';
+        }
+        
+        const rows = this.auditHistory.map(entry => {
+            const date = new Date(entry.created_at);
+            const formattedDate = date.toLocaleString('ru-RU');
+            
+            return `
+                <tr>
+                    <td><code>${entry.setting_key}</code></td>
+                    <td><small class="text-muted">${this.formatValue(entry.old_value)}</small></td>
+                    <td><small class="text-success">${this.formatValue(entry.new_value)}</small></td>
+                    <td><span class="badge badge-info">${entry.changed_by || 'system'}</span></td>
+                    <td><small>${formattedDate}</small></td>
+                </tr>
+            `;
+        }).join('');
+        
+        return `
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ключ</th>
+                            <th>Старое значение</th>
+                            <th>Новое значение</th>
+                            <th>Изменил</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+    
+    formatValue(value) {
+        if (value === null || value === undefined || value === '') {
+            return '<em>(пусто)</em>';
+        }
+        
+        if (typeof value === 'string' && value.length > 50) {
+            return value.substring(0, 50) + '...';
+        }
+        
+        return String(value);
+    }
+    
+    showSuccess(message) {
+        if (typeof AdminMain !== 'undefined' && AdminMain.prototype.showToast) {
+            AdminMain.prototype.showToast(message, 'success');
+        } else {
+            alert(message);
+        }
+    }
+    
+    showError(message) {
+        if (typeof AdminMain !== 'undefined' && AdminMain.prototype.showToast) {
+            AdminMain.prototype.showToast(message, 'error');
+        } else {
+            alert(message);
+        }
+    }
+    
+    showWarning(message) {
+        if (typeof AdminMain !== 'undefined' && AdminMain.prototype.showToast) {
+            AdminMain.prototype.showToast(message, 'warning');
+        } else {
+            alert(message);
         }
     }
 }
