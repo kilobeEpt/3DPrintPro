@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Traits\PaginationTrait;
 use App\Http\Traits\ValidatesRequests;
+use App\Http\Traits\ManagesSlugs;
+use App\Services\ContentCacheService;
 
 /**
  * Base API Controller
@@ -15,10 +17,12 @@ use App\Http\Traits\ValidatesRequests;
  * - Request parsing
  * - Validation
  * - Authentication hooks
+ * - Slug management
+ * - Cache headers and invalidation
  */
 abstract class BaseApiController
 {
-    use PaginationTrait, ValidatesRequests;
+    use PaginationTrait, ValidatesRequests, ManagesSlugs;
     
     /**
      * Rate limiter instance
@@ -26,6 +30,13 @@ abstract class BaseApiController
      * @var \RateLimiter
      */
     protected $rateLimiter;
+    
+    /**
+     * Cache service instance
+     * 
+     * @var ContentCacheService
+     */
+    protected $cacheService;
     
     /**
      * Request method
@@ -54,6 +65,7 @@ abstract class BaseApiController
     public function __construct()
     {
         $this->rateLimiter = new \RateLimiter();
+        $this->cacheService = new ContentCacheService();
         $this->method = $_SERVER['REQUEST_METHOD'];
         $this->query = $_GET;
         $this->input = $this->parseInput();

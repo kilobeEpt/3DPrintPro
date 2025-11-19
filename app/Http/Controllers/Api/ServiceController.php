@@ -18,10 +18,22 @@ class ServiceController extends BaseApiController
      */
     protected function handleGet()
     {
-        // Get single service by ID
+        // Get single service by ID or slug
         if ($this->query('id')) {
             $id = $this->validateId($this->query('id'), 'service');
             $service = Service::findOrFail($id);
+            
+            // Set cache headers
+            $this->cacheService->setCacheHeaders($service->updated_at);
+            
+            $this->success(['service' => $service->toArray()]);
+        }
+        
+        if ($this->query('slug')) {
+            $service = Service::where('slug', $this->query('slug'))->firstOrFail();
+            
+            // Set cache headers
+            $this->cacheService->setCacheHeaders($service->updated_at);
             
             $this->success(['service' => $service->toArray()]);
         }
@@ -49,6 +61,15 @@ class ServiceController extends BaseApiController
         
         // Apply pagination
         $result = $this->paginate($query, $this->query);
+        
+        // Set cache headers based on latest updated_at
+        if (!empty($result['data'])) {
+            $collection = collect($result['data']);
+            $latestTimestamp = $this->cacheService->getLatestTimestamp($collection);
+            if ($latestTimestamp) {
+                $this->cacheService->setCacheHeaders($latestTimestamp);
+            }
+        }
         
         $this->success(
             ['services' => $result['data']],
@@ -79,14 +100,20 @@ class ServiceController extends BaseApiController
             $this->validationError('Validation failed', $errors);
         }
         
-        // Generate slug if not provided
+        // Generate unique slug if not provided
         $data = $this->input;
         if (empty($data['slug'])) {
-            $data['slug'] = $this->generateSlug($data['name']);
+            $data['slug'] = $this->generateUniqueSlug($data['name'], Service::class);
+        } else {
+            // Validate provided slug is unique
+            $data['slug'] = $this->generateUniqueSlug($data['slug'], Service::class);
         }
         
         // Create service
         $service = Service::create($data);
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('services');
         
         \ApiLogger::info("Service created successfully", [
             'service_id' => $service->id,
@@ -126,8 +153,16 @@ class ServiceController extends BaseApiController
         $data = $this->input;
         unset($data['id']);
         
+        // Handle slug update if provided
+        if (isset($data['slug']) && $data['slug'] !== $service->slug) {
+            $data['slug'] = $this->generateUniqueSlug($data['slug'], Service::class, $id);
+        }
+        
         // Update service
         $service->update($data);
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('services');
         
         \ApiLogger::info("Service updated successfully", [
             'service_id' => $id,
@@ -164,6 +199,9 @@ class ServiceController extends BaseApiController
         $service = Service::findOrFail($id);
         $service->delete();
         
+        // Invalidate cache
+        $this->cacheService->invalidateCache('services');
+        
         \ApiLogger::info("Service deleted successfully", ['service_id' => $id]);
         
         $this->success([
@@ -180,19 +218,5 @@ class ServiceController extends BaseApiController
     protected function getResourceName()
     {
         return 'services';
-    }
-    
-    /**
-     * Generate a URL-friendly slug from text
-     * 
-     * @param string $text
-     * @return string
-     */
-    private function generateSlug($text)
-    {
-        $text = mb_strtolower($text, 'UTF-8');
-        $text = preg_replace('/[^a-z0-9\s-]/u', '', $text);
-        $text = preg_replace('/[\s-]+/', '-', $text);
-        return trim($text, '-');
     }
 }

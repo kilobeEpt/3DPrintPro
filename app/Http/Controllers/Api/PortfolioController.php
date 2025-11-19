@@ -3,14 +3,32 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Portfolio;
+use App\Services\MediaUploadService;
 
 /**
  * Portfolio API Controller
  * 
  * Handles CRUD operations for portfolio items using Eloquent ORM.
+ * Supports media uploads for portfolio images.
  */
 class PortfolioController extends BaseApiController
 {
+    /**
+     * Media upload service
+     * 
+     * @var MediaUploadService
+     */
+    private $mediaService;
+    
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->mediaService = new MediaUploadService();
+    }
+    
     /**
      * Handle GET request - retrieve portfolio items
      * 
@@ -18,12 +36,24 @@ class PortfolioController extends BaseApiController
      */
     protected function handleGet()
     {
-        // Get single portfolio item by ID
+        // Get single portfolio item by ID or slug
         if ($this->query('id')) {
             $id = $this->validateId($this->query('id'), 'portfolio item');
             $item = Portfolio::findOrFail($id);
             
-            $this->success(['item' => $item->toArray()]);
+            // Set cache headers
+            $this->cacheService->setCacheHeaders($item->updated_at);
+            
+            $this->success(['item' => $this->formatPortfolioItem($item)]);
+        }
+        
+        if ($this->query('slug')) {
+            $item = Portfolio::where('slug', $this->query('slug'))->firstOrFail();
+            
+            // Set cache headers
+            $this->cacheService->setCacheHeaders($item->updated_at);
+            
+            $this->success(['item' => $this->formatPortfolioItem($item)]);
         }
         
         // Get all portfolio items with filters
@@ -33,6 +63,11 @@ class PortfolioController extends BaseApiController
         if ($this->query('active') !== null) {
             $active = $this->query('active') === 'true' || $this->query('active') === '1';
             $query->where('active', $active);
+        }
+        
+        if ($this->query('featured') !== null) {
+            $featured = $this->query('featured') === 'true' || $this->query('featured') === '1';
+            $query->where('featured', $featured);
         }
         
         if ($this->query('category')) {
@@ -45,8 +80,22 @@ class PortfolioController extends BaseApiController
         // Apply pagination
         $result = $this->paginate($query, $this->query);
         
+        // Format items with image URLs
+        $formattedItems = array_map(function($item) {
+            return $this->formatPortfolioItem(Portfolio::make((array)$item));
+        }, $result['data']);
+        
+        // Set cache headers based on latest updated_at
+        if (!empty($result['data'])) {
+            $collection = collect($result['data']);
+            $latestTimestamp = $this->cacheService->getLatestTimestamp($collection);
+            if ($latestTimestamp) {
+                $this->cacheService->setCacheHeaders($latestTimestamp);
+            }
+        }
+        
         $this->success(
-            ['items' => $result['data']],
+            ['items' => $formattedItems],
             $result['meta']
         );
     }
@@ -64,18 +113,68 @@ class PortfolioController extends BaseApiController
         // Apply rate limiting
         $this->rateLimit('portfolio_create');
         
-        // Validate required fields
-        $errors = $this->validate($this->input, [
-            'title' => 'required|string|min:1|max:255'
-        ]);
+        // Check if this is multipart/form-data (file upload)
+        $hasFile = !empty($_FILES['image']);
         
-        if (!empty($errors)) {
-            \ApiLogger::validationError('POST /api/portfolio.php', $errors);
-            $this->validationError('Validation failed', $errors);
+        if ($hasFile) {
+            // Handle multipart form data
+            $data = $_POST;
+            
+            // Validate required fields
+            $errors = $this->validate($data, [
+                'title' => 'required|string|min:1|max:255'
+            ]);
+            
+            if (!empty($errors)) {
+                \ApiLogger::validationError('POST /api/portfolio.php', $errors);
+                $this->validationError('Validation failed', $errors);
+            }
+            
+            // Upload image
+            try {
+                $uploadResult = $this->mediaService->upload($_FILES['image'], MediaUploadService::TYPE_PORTFOLIO);
+                $data['image_path'] = $uploadResult['path'];
+                $data['image_url'] = $uploadResult['url'];
+                $data['image_size'] = $uploadResult['size'];
+                $data['image_mime'] = $uploadResult['mime'];
+            } catch (\Exception $e) {
+                \ApiLogger::error('Portfolio image upload failed', [
+                    'error' => $e->getMessage()
+                ]);
+                $this->validationError('Image upload failed: ' . $e->getMessage());
+            }
+        } else {
+            // Handle JSON data
+            $data = $this->input;
+            
+            // Validate required fields
+            $errors = $this->validate($data, [
+                'title' => 'required|string|min:1|max:255'
+            ]);
+            
+            if (!empty($errors)) {
+                \ApiLogger::validationError('POST /api/portfolio.php', $errors);
+                $this->validationError('Validation failed', $errors);
+            }
+        }
+        
+        // Generate unique slug if not provided
+        if (empty($data['slug'])) {
+            $data['slug'] = $this->generateUniqueSlug($data['title'], Portfolio::class);
+        } else {
+            $data['slug'] = $this->generateUniqueSlug($data['slug'], Portfolio::class);
+        }
+        
+        // Parse JSON fields if they come as strings
+        if (isset($data['tags']) && is_string($data['tags'])) {
+            $data['tags'] = json_decode($data['tags'], true);
         }
         
         // Create portfolio item
-        $item = Portfolio::create($this->input);
+        $item = Portfolio::create($data);
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('portfolio');
         
         \ApiLogger::info("Portfolio item created successfully", [
             'item_id' => $item->id,
@@ -115,8 +214,16 @@ class PortfolioController extends BaseApiController
         $data = $this->input;
         unset($data['id']);
         
+        // Handle slug update if provided
+        if (isset($data['slug']) && $data['slug'] !== $item->slug) {
+            $data['slug'] = $this->generateUniqueSlug($data['slug'], Portfolio::class, $id);
+        }
+        
         // Update portfolio item
         $item->update($data);
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('portfolio');
         
         \ApiLogger::info("Portfolio item updated successfully", [
             'item_id' => $id,
@@ -149,9 +256,19 @@ class PortfolioController extends BaseApiController
         
         $id = $this->validateId($this->query('id'), 'portfolio item');
         
-        // Find and delete portfolio item
+        // Find portfolio item
         $item = Portfolio::findOrFail($id);
+        
+        // Delete associated image file if exists
+        if (!empty($item->image_path)) {
+            $this->mediaService->delete($item->image_path);
+        }
+        
+        // Delete portfolio item
         $item->delete();
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('portfolio');
         
         \ApiLogger::info("Portfolio item deleted successfully", ['item_id' => $id]);
         
@@ -159,6 +276,24 @@ class PortfolioController extends BaseApiController
             'message' => 'Portfolio item deleted successfully',
             'item_id' => $id
         ]);
+    }
+    
+    /**
+     * Format portfolio item with full image URLs
+     * 
+     * @param Portfolio $item
+     * @return array
+     */
+    private function formatPortfolioItem($item)
+    {
+        $data = $item->toArray();
+        
+        // Add full image URL if path exists
+        if (!empty($item->image_path)) {
+            $data['image_url'] = $this->mediaService->getUrl($item->image_path);
+        }
+        
+        return $data;
     }
     
     /**
