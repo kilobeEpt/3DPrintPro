@@ -29,7 +29,10 @@ require_once __DIR__ . '/../api/db.php';
 
 echo "========================================\n";
 echo "  3D Print Pro - Admin Credentials Setup\n";
+echo "  (LEGACY - Consider using create-admin.php)\n";
 echo "========================================\n\n";
+echo "⚠️  NOTE: This script sets credentials in the settings table.\n";
+echo "   For the new RBAC system, use: php scripts/create-admin.php\n\n";
 
 // ========================================
 // Get credentials from arguments or prompt

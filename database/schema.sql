@@ -1,11 +1,11 @@
 -- ========================================
 -- 3D Print Pro Database Schema
--- Version: 3.0 (Forms System)
+-- Version: 4.0 (RBAC Authentication System)
 -- Last Updated: January 2025
 -- MySQL Version: 8.0+ (tested with MySQL 8.0)
 -- ========================================
 --
--- This schema creates 12 tables for the 3D printing service platform:
+-- This schema creates 16 tables for the 3D printing service platform:
 -- 1. orders - Customer orders and inquiries (legacy + form integration)
 -- 2. settings - Application configuration (NO 'active' column)
 -- 3. services - Service offerings
@@ -18,10 +18,16 @@
 -- 10. form_submissions - Form submission records
 -- 11. form_submission_values - Individual field values (normalized)
 -- 12. settings_audit - Settings change audit log
+-- 13. admin_users - Admin user accounts with RBAC (NEW)
+-- 14. admin_sessions - Persistent session storage (NEW)
+-- 15. admin_login_attempts - Login attempt tracking (NEW)
+-- 16. admin_action_logs - Admin action audit log (NEW)
 --
 -- IMPORTANT NOTES:
--- - Tables WITHOUT 'active' column: orders, settings, form_submissions, form_submission_values, settings_audit
+-- - Tables WITHOUT 'active' column: orders, settings, form_submissions, form_submission_values, 
+--   settings_audit, admin_sessions, admin_login_attempts, admin_action_logs
 -- - Tables WITH 'active' column: services, portfolio, testimonials, faq, content_blocks, forms, form_fields
+-- - admin_users uses 'status' enum instead of 'active' boolean
 -- - This file is IDEMPOTENT - safe to run multiple times
 -- - For HARD RESET: uncomment the DROP TABLE statements below
 -- - JSON columns are fully supported in MySQL 8.0
@@ -373,10 +379,107 @@ ADD CONSTRAINT fk_orders_form_submission
 FOREIGN KEY (form_submission_id) REFERENCES form_submissions(id) ON DELETE SET NULL;
 
 -- ========================================
+-- TABLE: admin_users
+-- Admin user accounts with RBAC support
+-- NO 'active' column - uses 'status' enum instead
+-- ========================================
+CREATE TABLE IF NOT EXISTS admin_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL COMMENT 'bcrypt hash',
+    role ENUM('super_admin', 'admin', 'editor') DEFAULT 'admin',
+    status ENUM('active', 'inactive', 'locked') DEFAULT 'active',
+    last_login_at TIMESTAMP NULL,
+    last_login_ip VARCHAR(45) NULL,
+    failed_login_attempts INT DEFAULT 0,
+    locked_until TIMESTAMP NULL COMMENT 'Automatic unlock time after rate limit',
+    remember_token VARCHAR(100) NULL COMMENT 'For remember me functionality',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_email (email),
+    INDEX idx_status (status),
+    INDEX idx_role (role),
+    INDEX idx_remember_token (remember_token)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: admin_sessions
+-- Persistent admin session storage
+-- NO 'active' column - sessions are either valid or deleted
+-- ========================================
+CREATE TABLE IF NOT EXISTS admin_sessions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(128) NOT NULL UNIQUE COMMENT 'PHP session ID',
+    user_id INT NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    user_agent TEXT,
+    csrf_token VARCHAR(64) NULL COMMENT 'Session-bound CSRF token',
+    expires_at TIMESTAMP NOT NULL COMMENT 'Session expiration time',
+    last_activity_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_session_id (session_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_expires_at (expires_at),
+    INDEX idx_last_activity_at (last_activity_at),
+    
+    FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: admin_login_attempts
+-- Login attempt tracking for rate limiting
+-- NO 'active' column - all attempts are logged permanently
+-- ========================================
+CREATE TABLE IF NOT EXISTS admin_login_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    user_agent TEXT,
+    success BOOLEAN NOT NULL DEFAULT FALSE,
+    failure_reason VARCHAR(255) NULL COMMENT 'Why login failed: invalid_credentials, locked_account, etc.',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_email (email),
+    INDEX idx_ip_address (ip_address),
+    INDEX idx_success (success),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
+-- TABLE: admin_action_logs
+-- Audit log for admin actions
+-- NO 'active' column - all actions are logged permanently
+-- ========================================
+CREATE TABLE IF NOT EXISTS admin_action_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    action VARCHAR(100) NOT NULL COMMENT 'Action type: create, update, delete, etc.',
+    entity_type VARCHAR(100) NULL COMMENT 'Entity being acted upon: service, order, settings, etc.',
+    entity_id INT NULL COMMENT 'ID of the entity',
+    payload JSON COMMENT 'Additional action details and context',
+    ip_address VARCHAR(45) NOT NULL,
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_user_id (user_id),
+    INDEX idx_action (action),
+    INDEX idx_entity_type (entity_type),
+    INDEX idx_entity_id (entity_id),
+    INDEX idx_created_at (created_at),
+    
+    FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================
 -- Schema Creation Complete
 -- ========================================
 -- Next Steps:
 -- 1. Verify tables: SHOW TABLES;
 -- 2. Run seed script: Visit /api/init-database.php
--- 3. Verify data: SELECT COUNT(*) FROM [table_name];
+-- 3. Create first admin: php scripts/create-admin.php
+-- 4. Verify data: SELECT COUNT(*) FROM [table_name];
 -- ========================================

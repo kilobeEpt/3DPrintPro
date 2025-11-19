@@ -4,8 +4,9 @@ Complete database schema reference for 3D Print Pro.
 
 ## Overview
 
-The database consists of **7 tables** storing all application data:
+The database consists of **16 tables** storing all application data:
 
+**Content Management:**
 1. **orders** - Customer orders and inquiries
 2. **settings** - Application configuration
 3. **services** - Service offerings
@@ -13,6 +14,19 @@ The database consists of **7 tables** storing all application data:
 5. **testimonials** - Customer reviews
 6. **faq** - Frequently asked questions
 7. **content_blocks** - Dynamic page content
+
+**Forms System (v3.0):**
+8. **forms** - Dynamic form definitions
+9. **form_fields** - Form field configurations
+10. **form_submissions** - Form submission records
+11. **form_submission_values** - Individual field values
+12. **settings_audit** - Settings change audit log
+
+**RBAC Authentication (v4.0):**
+13. **admin_users** - Admin user accounts with roles
+14. **admin_sessions** - Persistent session storage
+15. **admin_login_attempts** - Login attempt tracking
+16. **admin_action_logs** - Admin action audit trail
 
 **Database Engine:** InnoDB  
 **Character Set:** utf8mb4  

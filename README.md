@@ -47,7 +47,9 @@
 - **[SETTINGS_SERVICE.md](docs/SETTINGS_SERVICE.md)** - Settings service with caching and audit logging
 - **[MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md)** - Guide for migrating from legacy DB class to Eloquent
 - **[TELEGRAM_INTEGRATION.md](docs/TELEGRAM_INTEGRATION.md)** - Telegram bot setup and configuration
-- **[ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md)** - Security and authentication details
+- **[ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md)** - Legacy authentication details (v1.0)
+- **[RBAC_AUTHENTICATION.md](docs/RBAC_AUTHENTICATION.md)** - New RBAC auth system (v4.0)
+- **[RBAC_MIGRATION_GUIDE.md](docs/RBAC_MIGRATION_GUIDE.md)** - Migrate from old to new auth system
 - **[TESTING.md](docs/TESTING.md)** - Complete testing guide with PHPUnit and smoke tests
 - **[TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md)** - Testing procedures and checklist
 
@@ -71,7 +73,8 @@
 - ✅ **Settings Service** - Centralized settings with caching and audit logging
 - ✅ **Telegram Notifications** - Instant notifications for new orders
 - ✅ **Database-Driven** - All data stored in MySQL
-- ✅ **Secure Authentication** - PHP sessions with CSRF protection
+- ✅ **RBAC Authentication** - Role-based access with database-backed sessions
+- ✅ **Audit Logging** - Complete trail of admin actions
 - ✅ **Statistics Dashboard** - Orders, revenue, and trends
 - ✅ **CSV Export** - Download orders as spreadsheet
 
@@ -97,10 +100,12 @@
 **Security:**
 - PDO prepared statements (SQL injection protection)
 - XSS protection (htmlspecialchars)
-- CSRF tokens on admin operations
+- CSRF tokens on admin operations (session-bound)
 - Session security (HttpOnly, SameSite, Secure)
 - Login rate limiting (5 attempts, 15-min lockout)
-- Password hashing (bcrypt)
+- Password hashing (bcrypt with PASSWORD_BCRYPT)
+- Role-based access control (super_admin/admin/editor)
+- Audit logging (all admin actions tracked)
 
 ### Project Structure
 
@@ -136,7 +141,8 @@
 │   └── backup.php      # Backup utility
 │
 ├── scripts/            # Utility scripts
-│   ├── setup-admin-credentials.php # Admin setup
+│   ├── create-admin.php # Create admin users (RBAC)
+│   ├── setup-admin-credentials.php # Legacy admin setup
 │   ├── db_audit.php    # Database diagnostics
 │   └── api_smoke_test.php # API testing
 │
@@ -176,17 +182,29 @@
 
 ### Database Schema
 
-7 tables storing all application data:
+16 tables storing all application data:
 
-| Table | Purpose | Records |
-|-------|---------|---------|
-| `orders` | Customer orders and contact forms | Dynamic |
-| `settings` | Application configuration | ~15 |
-| `services` | Service offerings | ~6 |
-| `portfolio` | Project showcase | ~4 |
-| `testimonials` | Customer reviews | ~4 |
-| `faq` | FAQ items | ~8 |
-| `content_blocks` | Dynamic page content | ~3 |
+**Content Management:**
+- `orders` - Customer orders and contact forms
+- `settings` - Application configuration
+- `services` - Service offerings
+- `portfolio` - Project showcase
+- `testimonials` - Customer reviews
+- `faq` - FAQ items
+- `content_blocks` - Dynamic page content
+
+**Forms System (v3.0):**
+- `forms` - Dynamic form definitions
+- `form_fields` - Form field configurations
+- `form_submissions` - Form submission records
+- `form_submission_values` - Individual field values
+- `settings_audit` - Settings change audit log
+
+**RBAC Authentication (v4.0):**
+- `admin_users` - Admin user accounts with roles
+- `admin_sessions` - Persistent session storage
+- `admin_login_attempts` - Login attempt tracking
+- `admin_action_logs` - Admin action audit trail
 
 See [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) for complete schema reference.
 
@@ -240,8 +258,8 @@ mysql -u user -p your_db < database/schema.sql
 cp api/config.example.php api/config.php
 nano api/config.php  # Edit credentials
 
-# 4. Setup admin credentials
-php scripts/setup-admin-credentials.php
+# 4. Setup admin user (RBAC v4.0)
+php scripts/create-admin.php
 
 # 5. Seed initial data
 curl https://your-domain.com/api/init-database.php
@@ -305,6 +323,8 @@ vendor/bin/phpunit tests/Unit/SettingsServiceTest.php
 - ✅ **Settings Service** - Typed casting, caching, audit logging, validation
 - ✅ **Form Validation** - Field types, rules, relationships, scopes
 - ✅ **Form Submission** - End-to-end submission flow, order linking, status updates
+- ✅ **Admin Auth Service** - Authentication, rate limiting, CSRF, session management
+- ✅ **Admin Auth Integration** - Login/logout flow, lockout, audit logging
 
 ### Smoke Tests
 
@@ -364,10 +384,11 @@ See [docs/TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md) for comprehensive testing p
 | Database connection failed | Check credentials in `api/config.php` |
 | Tables not found | Run `mysql -u user -p db < database/schema.sql` |
 | No data showing | Run `https://your-domain.com/api/init-database.php` |
-| Cannot login to admin | Run `php scripts/setup-admin-credentials.php` |
+| Cannot login to admin | Run `php scripts/create-admin.php` to create user |
 | Telegram test fails | Check bot token and chat ID in settings |
 | Forms not submitting | Check browser console for errors |
 | Session expired immediately | Use HTTPS and enable cookies |
+| Account locked out | Wait 15 min or manual unlock in `admin_users` table |
 
 See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for detailed troubleshooting guide.
 
@@ -467,16 +488,17 @@ Proprietary. All rights reserved.
 
 ## 🎉 Credits
 
-**Version:** 2.0 (January 2025)  
+**Version:** 4.0 (January 2025)  
 **Architecture:** Complete rewrite with MySQL + PHP REST API  
 **Status:** Production Ready ✅
 
 **Features:**
-- 7-table database architecture
+- 16-table database architecture (content + forms + RBAC)
 - 8 REST API endpoints with rate limiting
-- Secure PHP session-based authentication
+- Role-based access control with audit logging
 - Admin panel with modular JavaScript
 - Telegram integration with database-driven config
+- PHPUnit test suite with 40+ tests
 - Complete documentation suite
 
 ---

@@ -156,6 +156,71 @@ function createTestSchema()
         )
     ");
     
+    // Admin users table
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email VARCHAR(255) NOT NULL UNIQUE,
+            name VARCHAR(255) NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            role VARCHAR(20) DEFAULT 'admin',
+            status VARCHAR(20) DEFAULT 'active',
+            last_login_at DATETIME NULL,
+            last_login_ip VARCHAR(45) NULL,
+            failed_login_attempts INTEGER DEFAULT 0,
+            locked_until DATETIME NULL,
+            remember_token VARCHAR(100) NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+    
+    // Admin sessions table
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS admin_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id VARCHAR(128) NOT NULL UNIQUE,
+            user_id INTEGER NOT NULL,
+            ip_address VARCHAR(45) NOT NULL,
+            user_agent TEXT,
+            csrf_token VARCHAR(64) NULL,
+            expires_at DATETIME NOT NULL,
+            last_activity_at DATETIME NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+        )
+    ");
+    
+    // Admin login attempts table
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS admin_login_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email VARCHAR(255) NOT NULL,
+            ip_address VARCHAR(45) NOT NULL,
+            user_agent TEXT,
+            success INTEGER NOT NULL DEFAULT 0,
+            failure_reason VARCHAR(255) NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+    
+    // Admin action logs table
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS admin_action_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            action VARCHAR(100) NOT NULL,
+            entity_type VARCHAR(100) NULL,
+            entity_id INTEGER NULL,
+            payload TEXT,
+            ip_address VARCHAR(45) NOT NULL,
+            user_agent TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+        )
+    ");
+    
     // Create indexes
     $db->exec("CREATE INDEX IF NOT EXISTS idx_settings_key ON settings (setting_key)");
     $db->exec("CREATE INDEX IF NOT EXISTS idx_settings_audit_key ON settings_audit (setting_key)");
@@ -164,6 +229,9 @@ function createTestSchema()
     $db->exec("CREATE INDEX IF NOT EXISTS idx_form_submissions_form_id ON form_submissions (form_id)");
     $db->exec("CREATE INDEX IF NOT EXISTS idx_form_submission_values_submission ON form_submission_values (form_submission_id)");
     $db->exec("CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status)");
+    $db->exec("CREATE INDEX IF NOT EXISTS idx_admin_users_email ON admin_users (email)");
+    $db->exec("CREATE INDEX IF NOT EXISTS idx_admin_sessions_session_id ON admin_sessions (session_id)");
+    $db->exec("CREATE INDEX IF NOT EXISTS idx_admin_login_attempts_email ON admin_login_attempts (email)");
 }
 
 /**
@@ -193,6 +261,10 @@ function cleanTestData()
         'settings_audit',
         'settings',
         'orders',
+        'admin_action_logs',
+        'admin_sessions',
+        'admin_login_attempts',
+        'admin_users',
     ];
     
     foreach ($tables as $table) {

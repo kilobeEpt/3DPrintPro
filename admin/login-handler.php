@@ -6,123 +6,70 @@
 
 define('ADMIN_INIT', true);
 
-require_once __DIR__ . '/../api/db.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap/eloquent.php';
 require_once __DIR__ . '/includes/session-config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
 
-// Only allow POST requests
+use App\Services\AdminAuthService;
+use App\Models\AdminUser;
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /admin/login.php');
     exit;
 }
 
-// Verify CSRF token
 CSRF::verifyPostToken();
 
-// Get form data
-$login = trim($_POST['login'] ?? '');
+$email = trim($_POST['email'] ?? $_POST['login'] ?? '');
 $password = $_POST['password'] ?? '';
+$rememberMe = isset($_POST['remember_me']);
 
-// Validate input
-if (empty($login) || empty($password)) {
+if (empty($email) || empty($password)) {
     $_SESSION['LOGIN_ERROR'] = 'Пожалуйста, заполните все поля.';
     header('Location: /admin/login.php');
     exit;
 }
 
-// Rate limiting - prevent brute force attacks
-$maxAttempts = 5;
-$lockoutTime = 900; // 15 minutes
-
-if (!isset($_SESSION['LOGIN_ATTEMPTS'])) {
-    $_SESSION['LOGIN_ATTEMPTS'] = 0;
-    $_SESSION['LAST_ATTEMPT_TIME'] = time();
-}
-
-// Reset attempts if lockout time has passed
-if (isset($_SESSION['LOCKOUT_UNTIL']) && time() > $_SESSION['LOCKOUT_UNTIL']) {
-    $_SESSION['LOGIN_ATTEMPTS'] = 0;
-    unset($_SESSION['LOCKOUT_UNTIL']);
-}
-
-// Check if account is locked
-if (isset($_SESSION['LOCKOUT_UNTIL']) && time() < $_SESSION['LOCKOUT_UNTIL']) {
-    $remainingTime = ceil(($_SESSION['LOCKOUT_UNTIL'] - time()) / 60);
-    $_SESSION['LOGIN_ERROR'] = "Слишком много попыток входа. Попробуйте снова через {$remainingTime} минут.";
-    header('Location: /admin/login.php');
-    exit;
-}
-
 try {
-    // Connect to database
-    $db = new Database();
+    $authService = new AdminAuthService();
     
-    // Get admin credentials from settings
-    $adminLogin = $db->getSetting('admin_login');
-    $adminPasswordHash = $db->getSetting('admin_password_hash');
+    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
     
-    // Check if admin credentials are set
-    if (empty($adminLogin) || empty($adminPasswordHash)) {
-        $_SESSION['LOGIN_ERROR'] = 'Учетные данные администратора не настроены. Обратитесь к системному администратору.';
-        header('Location: /admin/login.php');
-        exit;
-    }
+    $result = $authService->authenticate($email, $password, $ipAddress, $userAgent, $rememberMe);
     
-    // Verify login
-    if ($login !== $adminLogin) {
-        // Increment failed attempts
-        $_SESSION['LOGIN_ATTEMPTS']++;
-        $_SESSION['LAST_ATTEMPT_TIME'] = time();
+    if (!$result['success']) {
+        $_SESSION['LOGIN_ERROR'] = $result['error'];
         
-        // Lock account if too many attempts
-        if ($_SESSION['LOGIN_ATTEMPTS'] >= $maxAttempts) {
-            $_SESSION['LOCKOUT_UNTIL'] = time() + $lockoutTime;
-            $remainingTime = ceil($lockoutTime / 60);
-            $_SESSION['LOGIN_ERROR'] = "Слишком много неудачных попыток входа. Аккаунт заблокирован на {$remainingTime} минут.";
-        } else {
-            $_SESSION['LOGIN_ERROR'] = 'Неверный логин или пароль.';
+        if (isset($result['locked_until'])) {
+            $_SESSION['LOCKOUT_UNTIL'] = $result['locked_until']->timestamp;
         }
         
         header('Location: /admin/login.php');
         exit;
     }
     
-    // Verify password
-    if (!password_verify($password, $adminPasswordHash)) {
-        // Increment failed attempts
-        $_SESSION['LOGIN_ATTEMPTS']++;
-        $_SESSION['LAST_ATTEMPT_TIME'] = time();
-        
-        // Lock account if too many attempts
-        if ($_SESSION['LOGIN_ATTEMPTS'] >= $maxAttempts) {
-            $_SESSION['LOCKOUT_UNTIL'] = time() + $lockoutTime;
-            $remainingTime = ceil($lockoutTime / 60);
-            $_SESSION['LOGIN_ERROR'] = "Слишком много неудачных попыток входа. Аккаунт заблокирован на {$remainingTime} минут.";
-        } else {
-            $_SESSION['LOGIN_ERROR'] = 'Неверный логин или пароль.';
-        }
-        
-        header('Location: /admin/login.php');
-        exit;
-    }
+    $user = $result['user'];
+    $session = $result['session'];
     
-    // ========================================
-    // Login successful
-    // ========================================
-    
-    // Reset login attempts
-    $_SESSION['LOGIN_ATTEMPTS'] = 0;
+    unset($_SESSION['LOGIN_ERROR']);
     unset($_SESSION['LOCKOUT_UNTIL']);
+    unset($_SESSION['LOGIN_ATTEMPTS']);
     unset($_SESSION['LAST_ATTEMPT_TIME']);
     
-    // Log in the user (regenerates session ID)
-    Auth::login($login);
+    $_SESSION['ADMIN_AUTHENTICATED'] = true;
+    $_SESSION['ADMIN_LOGIN'] = $user->email;
+    $_SESSION['ADMIN_USER_ID'] = $user->id;
+    $_SESSION['ADMIN_USER_NAME'] = $user->name;
+    $_SESSION['ADMIN_USER_ROLE'] = $user->role;
+    $_SESSION['LOGIN_TIME'] = time();
+    $_SESSION['LOGIN_IP'] = $ipAddress;
+    $_SESSION['CREATED'] = time();
+    $_SESSION['LAST_ACTIVITY'] = time();
+    $_SESSION['CSRF_TOKEN'] = $result['csrf_token'];
     
-    // Regenerate CSRF token after successful login
-    CSRF::regenerateToken();
-    
-    // Redirect to intended URL or dashboard
     $redirectUrl = $_SESSION['INTENDED_URL'] ?? '/admin/index.php';
     unset($_SESSION['INTENDED_URL']);
     
@@ -130,7 +77,6 @@ try {
     exit;
     
 } catch (Exception $e) {
-    // Log error (in production, this should be logged to a file)
     error_log('Login error: ' . $e->getMessage());
     
     $_SESSION['LOGIN_ERROR'] = 'Ошибка при входе. Пожалуйста, попробуйте позже.';
