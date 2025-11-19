@@ -9,6 +9,7 @@ require_once __DIR__ . '/helpers/response.php';
 require_once __DIR__ . '/helpers/logger.php';
 require_once __DIR__ . '/helpers/telegram.php';
 require_once __DIR__ . '/helpers/admin_auth.php';
+require_once __DIR__ . '/helpers/form_service.php';
 require_once __DIR__ . '/db.php';
 
 SecurityHeaders::apply();
@@ -74,7 +75,7 @@ try {
             // Apply rate limiting for write operations
             $rateLimiter->apply('orders_create');
             
-            // Create new order (from form submission)
+            // Create new order via form service
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
             
@@ -83,106 +84,84 @@ try {
                 ApiResponse::validationError('Invalid JSON data');
             }
             
-            // Validate required fields
-            $validationErrors = [];
-            
-            if (empty($data['name']) || !is_string($data['name'])) {
-                $validationErrors['name'] = 'Name is required and must be a string';
+            // Determine form slug based on data
+            $formSlug = 'contact';
+            if (!empty($data['calculatorData']) || (isset($data['type']) && $data['type'] === 'order')) {
+                $formSlug = 'order';
             }
             
-            if (empty($data['phone']) || !is_string($data['phone'])) {
-                $validationErrors['phone'] = 'Phone is required and must be a string';
+            // Load form definition for validation
+            $formData = FormService::loadForm($formSlug, true);
+            
+            if (!$formData) {
+                ApiLogger::error("Form not found for order submission", ['slug' => $formSlug]);
+                ApiResponse::serverError('Form configuration not found. Please contact support.');
             }
             
-            if (!empty($validationErrors)) {
-                ApiLogger::validationError('POST /api/orders.php', $validationErrors);
-                ApiResponse::validationError('Validation failed', $validationErrors);
+            // Normalize data for validation
+            $submittedData = $data;
+            
+            // Validate submission using form service
+            $validation = FormService::validateSubmission($formData, $submittedData);
+            
+            if (!$validation['valid']) {
+                ApiLogger::validationError('POST /api/orders.php', $validation['errors']);
+                ApiResponse::unprocessableEntity('Validation failed', $validation['errors']);
             }
             
-            // Generate order number if not provided
-            if (empty($data['orderNumber'])) {
-                $data['order_number'] = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
-            } else {
-                $data['order_number'] = $data['orderNumber'];
-                unset($data['orderNumber']);
-            }
+            // Process submission through form service
+            $metadata = [
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+            ];
             
-            // Determine order type
-            $data['type'] = isset($data['type']) ? $data['type'] : 'contact';
-            if (!empty($data['calculatorData'])) {
-                $data['type'] = 'order';
-                $data['calculator_data'] = $data['calculatorData'];
-                unset($data['calculatorData']);
-            }
+            $result = FormService::processSubmission($formData, $submittedData, $metadata, $db);
             
-            // Set defaults
-            if (!isset($data['status'])) {
-                $data['status'] = 'new';
-            }
-            if (!isset($data['telegram_sent'])) {
-                $data['telegram_sent'] = 0;
-            }
-            
-            // Map fields
-            if (!isset($data['service']) && !isset($data['subject'])) {
-                $data['service'] = 'Обращение';
-            }
-            
-            // Insert order
-            try {
-                $id = $db->insertRecord('orders', $data);
-                ApiLogger::info("Order created successfully", [
-                    'order_id' => $id,
-                    'order_number' => $data['order_number'],
-                    'type' => $data['type']
+            if (!$result['success']) {
+                ApiLogger::error("Failed to process order submission", [
+                    'form_slug' => $formSlug,
+                    'error' => $result['error']
                 ]);
-            } catch (PDOException $e) {
-                ApiLogger::dbError('INSERT', 'orders', $e, ['data_keys' => array_keys($data)]);
                 ApiResponse::serverError('Failed to create order. Please try again.');
             }
             
-            // Send to Telegram
-            $telegramSent = false;
-            $telegramError = null;
+            // Get order details
+            $orderId = $result['order_id'];
+            $orderNumber = 'Unknown';
             
-            try {
-                $telegramResult = TelegramHelper::sendOrderNotification($data, $data['order_number'], $id, $db);
-                $telegramSent = $telegramResult['success'];
-                if (!$telegramSent) {
-                    $telegramError = $telegramResult['error'];
-                    ApiLogger::warning("Telegram notification failed", [
-                        'order_id' => $id,
-                        'error' => $telegramError
+            if ($orderId) {
+                try {
+                    $order = $db->getRecordById('orders', $orderId);
+                    if ($order) {
+                        $orderNumber = $order['order_number'];
+                        $telegramSent = (bool)$order['telegram_sent'];
+                        $telegramError = $order['telegram_error'] ?? null;
+                    }
+                } catch (Exception $e) {
+                    ApiLogger::warning("Failed to retrieve order details", [
+                        'order_id' => $orderId,
+                        'exception' => $e
                     ]);
+                    $telegramSent = false;
+                    $telegramError = null;
                 }
-            } catch (Exception $e) {
-                $telegramError = $e->getMessage();
-                ApiLogger::error("Telegram notification exception", [
-                    'order_id' => $id,
-                    'exception' => $e
-                ]);
             }
             
-            // Update telegram status
-            try {
-                $db->updateRecord('orders', $id, [
-                    'telegram_sent' => $telegramSent ? 1 : 0,
-                    'telegram_error' => $telegramError
-                ]);
-            } catch (PDOException $e) {
-                ApiLogger::error("Failed to update telegram status", [
-                    'order_id' => $id,
-                    'exception' => $e
-                ]);
-            }
+            ApiLogger::info("Order created via form service", [
+                'order_id' => $orderId,
+                'order_number' => $orderNumber,
+                'submission_id' => $result['submission_id'],
+                'form_slug' => $formSlug
+            ]);
             
             ApiResponse::created([
-                'order_id' => $id,
-                'order_number' => $data['order_number'],
+                'order_id' => $orderId,
+                'order_number' => $orderNumber,
+                'submission_id' => $result['submission_id'],
                 'message' => 'Order submitted successfully'
             ], [
-                'telegram_sent' => $telegramSent,
-                'telegram_error' => $telegramError
+                'telegram_sent' => $telegramSent ?? false,
+                'telegram_error' => $telegramError ?? null
             ]);
             break;
             

@@ -73,7 +73,7 @@ class Database {
     
     public function getRecords($table, $where = [], $orderBy = 'sort_order', $limit = null, $offset = 0) {
         // Tables that don't have 'active' column
-        $tables_without_active = ['settings', 'orders'];
+        $tables_without_active = ['settings', 'orders', 'form_submissions', 'form_submission_values', 'settings_audit'];
         
         // Remove 'active' filter for tables that don't have this column
         if (in_array($table, $tables_without_active) && isset($where['active'])) {
@@ -188,7 +188,7 @@ class Database {
     
     public function getCount($table, $where = []) {
         // Tables that don't have 'active' column
-        $tables_without_active = ['settings', 'orders'];
+        $tables_without_active = ['settings', 'orders', 'form_submissions', 'form_submission_values', 'settings_audit'];
         
         // Remove 'active' filter for tables that don't have this column
         if (in_array($table, $tables_without_active) && isset($where['active'])) {
