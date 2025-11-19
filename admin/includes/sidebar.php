@@ -4,6 +4,25 @@ if (!defined('ADMIN_INIT')) {
 }
 
 $currentPage = basename($_SERVER['PHP_SELF'], '.php');
+
+// Check if user is super admin
+$isSuperAdmin = false;
+try {
+    if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        require_once __DIR__ . '/../../bootstrap/eloquent.php';
+        
+        $authService = new \App\Services\AdminAuthService();
+        $sessionId = session_id();
+        $validation = $authService->validateSession($sessionId);
+        
+        if ($validation['valid'] && $validation['user']->isSuperAdmin()) {
+            $isSuperAdmin = true;
+        }
+    }
+} catch (Exception $e) {
+    // Silently fail - user just won't see super admin features
+}
 ?>
 <aside class="admin-sidebar" id="adminSidebar">
     <div class="sidebar-header">
@@ -45,6 +64,12 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             <i class="fas fa-sliders-h"></i>
             <span>Настройки</span>
         </a>
+        <?php if ($isSuperAdmin): ?>
+        <a href="/admin/users.php" class="nav-item <?php echo $currentPage === 'users' ? 'active' : ''; ?>" data-page="users">
+            <i class="fas fa-users"></i>
+            <span>Пользователи</span>
+        </a>
+        <?php endif; ?>
     </nav>
     
     <div class="sidebar-footer">

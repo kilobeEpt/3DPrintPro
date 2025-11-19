@@ -88,6 +88,32 @@ Most GET endpoints support filtering via query parameters:
 
 ---
 
+## Admin-Only Endpoints
+
+Some endpoints require elevated permissions and are located under `/api/admin/`:
+
+### Admin Users API
+
+**Endpoint:** `/api/admin/users.php`
+
+**Access:** Super Administrator only (except initial onboarding)
+
+Manages admin user accounts including creation, modification, deletion, and role assignment.
+
+**Features:**
+- RBAC enforcement (super_admin required)
+- Password complexity validation
+- Email uniqueness checks
+- Audit trail integration
+- Session management
+- First-time onboarding support
+
+**See:** [Admin Guide - User Management](ADMIN_GUIDE.md#user-management) for complete documentation
+
+**Documentation:** See `/api/admin/README.md` for detailed API usage
+
+---
+
 ## Services API
 
 **Endpoint:** `/api/services.php`
