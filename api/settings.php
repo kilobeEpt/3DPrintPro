@@ -8,7 +8,10 @@ require_once __DIR__ . '/helpers/rate_limiter.php';
 require_once __DIR__ . '/helpers/response.php';
 require_once __DIR__ . '/helpers/logger.php';
 require_once __DIR__ . '/helpers/admin_auth.php';
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../bootstrap/eloquent.php';
+
+use App\Services\SettingsService;
 
 SecurityHeaders::apply();
 SecurityHeaders::handlePreflight();
@@ -16,15 +19,16 @@ SecurityHeaders::handlePreflight();
 // Settings are admin-only - require authentication for all operations
 requireAdminAuth();
 
-$db = new Database();
+$settingsService = new SettingsService();
 $method = $_SERVER['REQUEST_METHOD'];
 $rateLimiter = new RateLimiter();
 
 try {
     switch ($method) {
         case 'GET':
-            // Get all settings or specific setting
+            // Get settings with optional grouping or single key lookup
             if (isset($_GET['key'])) {
+                // Single setting lookup
                 $key = $_GET['key'];
                 
                 if (empty($key) || !is_string($key)) {
@@ -32,7 +36,7 @@ try {
                 }
                 
                 try {
-                    $value = $db->getSetting($key);
+                    $value = $settingsService->get($key, null, true);
                     
                     if ($value !== null) {
                         ApiResponse::success([
@@ -43,17 +47,58 @@ try {
                         ApiLogger::warning("Setting not found", ['key' => $key]);
                         ApiResponse::notFound('Setting not found');
                     }
-                } catch (PDOException $e) {
-                    ApiLogger::dbError('SELECT', 'settings', $e, ['key' => $key]);
+                } catch (\Exception $e) {
+                    ApiLogger::error('Failed to retrieve setting', ['key' => $key, 'error' => $e->getMessage()]);
                     ApiResponse::serverError('Failed to retrieve setting. Please try again.');
+                }
+            } elseif (isset($_GET['group'])) {
+                // Grouped settings lookup
+                $group = $_GET['group'];
+                
+                if (empty($group) || !is_string($group)) {
+                    ApiResponse::validationError('Group name must be a non-empty string');
+                }
+                
+                try {
+                    $settings = $settingsService->getGrouped($group, true);
+                    ApiResponse::success([
+                        'group' => $group,
+                        'settings' => $settings,
+                        'count' => count($settings)
+                    ]);
+                } catch (\Exception $e) {
+                    ApiLogger::error('Failed to retrieve grouped settings', ['group' => $group, 'error' => $e->getMessage()]);
+                    ApiResponse::serverError('Failed to retrieve settings. Please try again.');
+                }
+            } elseif (isset($_GET['audit'])) {
+                // Get audit history
+                $key = $_GET['audit'] !== '' ? $_GET['audit'] : null;
+                $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
+                
+                try {
+                    $history = $settingsService->getAuditHistory($key, $limit);
+                    ApiResponse::success([
+                        'audit' => $history,
+                        'count' => count($history)
+                    ]);
+                } catch (\Exception $e) {
+                    ApiLogger::error('Failed to retrieve audit history', ['error' => $e->getMessage()]);
+                    ApiResponse::serverError('Failed to retrieve audit history. Please try again.');
                 }
             } else {
                 // Get all settings
                 try {
-                    $settings = $db->getAllSettings();
-                    ApiResponse::success(['settings' => $settings]);
-                } catch (PDOException $e) {
-                    ApiLogger::dbError('SELECT', 'settings', $e);
+                    $settings = $settingsService->getAll(true);
+                    ApiResponse::success([
+                        'settings' => $settings,
+                        'count' => count($settings),
+                        'cache_info' => [
+                            'enabled' => true,
+                            'ttl' => 300
+                        ]
+                    ]);
+                } catch (\Exception $e) {
+                    ApiLogger::error('Failed to retrieve settings', ['error' => $e->getMessage()]);
                     ApiResponse::serverError('Failed to retrieve settings. Please try again.');
                 }
             }
@@ -66,6 +111,9 @@ try {
             
             // Apply rate limiting for write operations
             $rateLimiter->apply('settings_update');
+            
+            // Get admin username for audit logging
+            $changedBy = $_SESSION['admin_username'] ?? 'admin';
             
             // Save settings (single or multiple)
             $input = file_get_contents('php://input');
@@ -83,55 +131,53 @@ try {
                 }
                 
                 try {
-                    $db->saveSetting($data['key'], $data['value']);
-                    ApiLogger::info("Setting saved successfully", ['key' => $data['key']]);
+                    $settingsService->set($data['key'], $data['value'], $changedBy);
+                    ApiLogger::info("Setting saved successfully", ['key' => $data['key'], 'changed_by' => $changedBy]);
                     
                     ApiResponse::success([
                         'message' => 'Setting saved successfully',
-                        'key' => $data['key']
+                        'key' => $data['key'],
+                        'cache_invalidated' => true
                     ]);
-                } catch (PDOException $e) {
-                    ApiLogger::dbError('UPSERT', 'settings', $e, ['key' => $data['key']]);
+                } catch (\InvalidArgumentException $e) {
+                    ApiLogger::warning('Validation error saving setting', ['key' => $data['key'], 'error' => $e->getMessage()]);
+                    ApiResponse::validationError($e->getMessage());
+                } catch (\Exception $e) {
+                    ApiLogger::error('Failed to save setting', ['key' => $data['key'], 'error' => $e->getMessage()]);
                     ApiResponse::serverError('Failed to save setting. Please try again.');
                 }
             } else {
                 // Save multiple settings
-                $savedCount = 0;
-                $errors = [];
-                
-                foreach ($data as $key => $value) {
-                    if (empty($key) || !is_string($key)) {
-                        $errors[] = "Invalid key: $key";
-                        continue;
+                try {
+                    $result = $settingsService->setMultiple($data, $changedBy);
+                    
+                    if ($result['success'] > 0) {
+                        ApiLogger::info("Multiple settings saved", [
+                            'count' => $result['success'],
+                            'errors_count' => count($result['errors']),
+                            'changed_by' => $changedBy
+                        ]);
+                        
+                        $response = [
+                            'message' => 'Settings saved successfully',
+                            'saved_count' => $result['success'],
+                            'cache_invalidated' => true
+                        ];
+                        
+                        if (!empty($result['errors'])) {
+                            $response['errors'] = $result['errors'];
+                            $response['validation_errors'] = $result['errors'];
+                        }
+                        
+                        ApiResponse::success($response);
+                    } else {
+                        ApiLogger::error("Failed to save any settings", ['errors' => $result['errors']]);
+                        ApiResponse::serverError('Failed to save settings', [
+                            'errors' => $result['errors']
+                        ]);
                     }
-                    
-                    try {
-                        $db->saveSetting($key, $value);
-                        $savedCount++;
-                    } catch (PDOException $e) {
-                        ApiLogger::dbError('UPSERT', 'settings', $e, ['key' => $key]);
-                        $errors[] = "Failed to save: $key";
-                    }
-                }
-                
-                if ($savedCount > 0) {
-                    ApiLogger::info("Multiple settings saved", [
-                        'count' => $savedCount,
-                        'errors_count' => count($errors)
-                    ]);
-                    
-                    $response = [
-                        'message' => 'Settings saved successfully',
-                        'saved_count' => $savedCount
-                    ];
-                    
-                    if (!empty($errors)) {
-                        $response['errors'] = $errors;
-                    }
-                    
-                    ApiResponse::success($response);
-                } else {
-                    ApiLogger::error("Failed to save any settings", ['errors' => $errors]);
+                } catch (\Exception $e) {
+                    ApiLogger::error('Exception during bulk save', ['error' => $e->getMessage()]);
                     ApiResponse::serverError('Failed to save settings. Please try again.');
                 }
             }
@@ -143,6 +189,9 @@ try {
             
             // Apply rate limiting for write operations
             $rateLimiter->apply('settings_delete');
+            
+            // Get admin username for audit logging
+            $changedBy = $_SESSION['admin_username'] ?? 'admin';
             
             // Delete setting
             $input = file_get_contents('php://input');
@@ -158,15 +207,21 @@ try {
             }
             
             try {
-                $db->deleteSetting($data['key']);
-                ApiLogger::info("Setting deleted successfully", ['key' => $data['key']]);
+                $deleted = $settingsService->delete($data['key'], $changedBy);
                 
-                ApiResponse::success([
-                    'message' => 'Setting deleted successfully',
-                    'key' => $data['key']
-                ]);
-            } catch (PDOException $e) {
-                ApiLogger::dbError('DELETE', 'settings', $e, ['key' => $data['key']]);
+                if ($deleted) {
+                    ApiLogger::info("Setting deleted successfully", ['key' => $data['key'], 'changed_by' => $changedBy]);
+                    
+                    ApiResponse::success([
+                        'message' => 'Setting deleted successfully',
+                        'key' => $data['key'],
+                        'cache_invalidated' => true
+                    ]);
+                } else {
+                    ApiResponse::notFound('Setting not found');
+                }
+            } catch (\Exception $e) {
+                ApiLogger::error('Failed to delete setting', ['key' => $data['key'], 'error' => $e->getMessage()]);
                 ApiResponse::serverError('Failed to delete setting. Please try again.');
             }
             break;
@@ -177,13 +232,7 @@ try {
             break;
     }
     
-} catch (PDOException $e) {
-    ApiLogger::dbError('QUERY', 'settings', $e);
-    ApiResponse::serverError('Database error occurred. Please try again later.');
-    
-} catch (Exception $e) {
-    ApiLogger::error("Unexpected error in settings endpoint", ['exception' => $e]);
+} catch (\Exception $e) {
+    ApiLogger::error("Unexpected error in settings endpoint", ['exception' => $e->getMessage()]);
     ApiResponse::serverError('An unexpected error occurred. Please try again later.');
 }
-
-$db->close();

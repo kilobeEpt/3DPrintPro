@@ -13,10 +13,21 @@ require_once __DIR__ . '/includes/header.php';
 <div class="card">
     <div class="card-header">
         <h2>Настройки системы</h2>
-        <button class="btn btn-primary" id="saveSettingsBtn">
-            <i class="fas fa-save"></i>
-            Сохранить изменения
-        </button>
+        <div>
+            <button class="btn btn-primary" id="saveSettingsBtn">
+                <i class="fas fa-save"></i>
+                Сохранить изменения
+            </button>
+            <button class="btn btn-secondary ml-2" id="viewAuditBtn">
+                <i class="fas fa-history"></i>
+                История изменений
+            </button>
+            <span id="cacheStatus" class="ml-3"></span>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <div id="validationErrors"></div>
     </div>
     
     <form id="settingsForm">

@@ -44,6 +44,7 @@
 ### Additional Documentation
 
 - **[ELOQUENT_SETUP.md](docs/ELOQUENT_SETUP.md)** - Eloquent ORM integration and usage guide
+- **[SETTINGS_SERVICE.md](docs/SETTINGS_SERVICE.md)** - Settings service with caching and audit logging
 - **[MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md)** - Guide for migrating from legacy DB class to Eloquent
 - **[TELEGRAM_INTEGRATION.md](docs/TELEGRAM_INTEGRATION.md)** - Telegram bot setup and configuration
 - **[ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md)** - Security and authentication details
@@ -66,6 +67,7 @@
 - ✅ **Admin Panel** - Full-featured dashboard at `/admin`
 - ✅ **Order Management** - View, update, and track orders
 - ✅ **Content Management** - Edit services, portfolio, FAQ, testimonials
+- ✅ **Settings Service** - Centralized settings with caching and audit logging
 - ✅ **Telegram Notifications** - Instant notifications for new orders
 - ✅ **Database-Driven** - All data stored in MySQL
 - ✅ **Secure Authentication** - PHP sessions with CSRF protection
