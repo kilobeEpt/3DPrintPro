@@ -83,7 +83,8 @@ class Database {
         if (this.useAPI) {
             try {
                 const settings = await this.api.getAllSettings();
-                this.cacheToLocalStorage('settings', [settings]);
+                // Normalize response - settings is already the object, not in an array
+                this.cacheToLocalStorage('settings', settings);
                 this.updateSyncTimestamp('settings', 'api');
                 return settings;
             } catch (error) {
@@ -417,10 +418,15 @@ class Database {
     getFromLocalStorage(table) {
         try {
             const data = JSON.parse(localStorage.getItem(this.storageKey)) || {};
-            return data[table] || [];
+            const value = data[table];
+            // Return appropriate default based on what was stored
+            if (value === undefined || value === null) {
+                return table === 'settings' ? {} : [];
+            }
+            return value;
         } catch (error) {
             console.error('❌ LocalStorage read error:', error);
-            return [];
+            return table === 'settings' ? {} : [];
         }
     }
     

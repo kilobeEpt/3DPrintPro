@@ -162,7 +162,8 @@ class APIClient {
                         isClientError: response.status >= 400 && response.status < 500,
                         isNetworkError: false,
                         timestamp: Date.now(),
-                        retryable: response.status >= 500 || response.status === 429
+                        retryable: response.status >= 500 || response.status === 429,
+                        errors: result.errors || {}
                     };
                     
                     console.error(`❌ API Error ${endpoint}:`, errorObj);
@@ -247,12 +248,17 @@ class APIClient {
     
     async getAllSettings() {
         const result = await this.get('settings.php');
-        return result.settings || {};
+        return result.data?.settings || result.settings || {};
+    }
+    
+    async getSettingsGroup(group) {
+        const result = await this.get(`settings.php?group=${encodeURIComponent(group)}`);
+        return result.data?.settings || result.settings || {};
     }
     
     async getSetting(key) {
         const result = await this.get(`settings.php?key=${encodeURIComponent(key)}`);
-        return result.value;
+        return result.data?.value !== undefined ? result.data.value : result.value;
     }
     
     async saveSettings(settings) {
@@ -276,20 +282,24 @@ class APIClient {
         const endpoint = queryString ? `orders.php?${queryString}` : 'orders.php';
         const result = await this.get(endpoint);
         return {
-            orders: result.orders || [],
-            total: result.total || 0,
-            limit: result.limit,
-            offset: result.offset
+            orders: result.data?.orders || result.orders || [],
+            total: result.meta?.total || result.total || 0,
+            limit: result.meta?.limit || result.limit,
+            offset: result.meta?.offset || result.offset
         };
     }
     
     async getOrder(id) {
         const result = await this.get(`orders.php?id=${id}`);
-        return result.order;
+        return result.data?.order || result.order;
     }
     
     async submitOrder(data) {
         return this.post('orders.php', data);
+    }
+    
+    async createOrder(data) {
+        return this.submitOrder(data);
     }
     
     async updateOrder(id, data) {
@@ -309,14 +319,14 @@ class APIClient {
         const endpoint = queryString ? `services.php?${queryString}` : 'services.php';
         const result = await this.get(endpoint);
         return {
-            services: result.services || [],
-            total: result.total || 0
+            services: result.data?.services || result.services || [],
+            total: result.meta?.total || result.total || 0
         };
     }
     
     async getService(id) {
         const result = await this.get(`services.php?id=${id}`);
-        return result.service;
+        return result.data?.service || result.service;
     }
     
     async createService(data) {
@@ -340,14 +350,14 @@ class APIClient {
         const endpoint = queryString ? `portfolio.php?${queryString}` : 'portfolio.php';
         const result = await this.get(endpoint);
         return {
-            items: result.items || [],
-            total: result.total || 0
+            items: result.data?.items || result.items || [],
+            total: result.meta?.total || result.total || 0
         };
     }
     
     async getPortfolioItem(id) {
         const result = await this.get(`portfolio.php?id=${id}`);
-        return result.item;
+        return result.data?.item || result.item;
     }
     
     async createPortfolioItem(data) {
@@ -371,14 +381,14 @@ class APIClient {
         const endpoint = queryString ? `testimonials.php?${queryString}` : 'testimonials.php';
         const result = await this.get(endpoint);
         return {
-            testimonials: result.testimonials || [],
-            total: result.total || 0
+            testimonials: result.data?.testimonials || result.testimonials || [],
+            total: result.meta?.total || result.total || 0
         };
     }
     
     async getTestimonial(id) {
         const result = await this.get(`testimonials.php?id=${id}`);
-        return result.testimonial;
+        return result.data?.testimonial || result.testimonial;
     }
     
     async createTestimonial(data) {
@@ -402,14 +412,14 @@ class APIClient {
         const endpoint = queryString ? `faq.php?${queryString}` : 'faq.php';
         const result = await this.get(endpoint);
         return {
-            items: result.items || [],
-            total: result.total || 0
+            items: result.data?.items || result.items || [],
+            total: result.meta?.total || result.total || 0
         };
     }
     
     async getFAQItem(id) {
         const result = await this.get(`faq.php?id=${id}`);
-        return result.item;
+        return result.data?.item || result.item;
     }
     
     async createFAQItem(data) {
@@ -433,19 +443,19 @@ class APIClient {
         const endpoint = queryString ? `content.php?${queryString}` : 'content.php';
         const result = await this.get(endpoint);
         return {
-            blocks: result.blocks || [],
-            total: result.total || 0
+            blocks: result.data?.blocks || result.blocks || [],
+            total: result.meta?.total || result.total || 0
         };
     }
     
     async getContentBlock(id) {
         const result = await this.get(`content.php?id=${id}`);
-        return result.block;
+        return result.data?.block || result.block;
     }
     
     async getContentBlockByName(name) {
         const result = await this.get(`content.php?name=${encodeURIComponent(name)}`);
-        return result.block;
+        return result.data?.block || result.block;
     }
     
     async createContentBlock(data) {
@@ -458,6 +468,29 @@ class APIClient {
     
     async deleteContentBlock(id) {
         return this.delete(`content.php?id=${id}`);
+    }
+    
+    // ========================================
+    // Forms API
+    // ========================================
+    
+    async getFormConfig(slug) {
+        const result = await this.get(`forms.php?slug=${encodeURIComponent(slug)}`);
+        return result.data?.form || result.form;
+    }
+    
+    async submitForm(formSlug, formData) {
+        const result = await this.post('form-submissions.php', {
+            form_slug: formSlug,
+            data: formData
+        });
+        return {
+            submissionId: result.data?.submission_id,
+            orderId: result.data?.order_id,
+            orderNumber: result.data?.order_number,
+            message: result.data?.message,
+            redirectUrl: result.meta?.redirect_url
+        };
     }
     
     // ========================================
