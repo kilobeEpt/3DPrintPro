@@ -48,6 +48,7 @@
 - **[MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md)** - Guide for migrating from legacy DB class to Eloquent
 - **[TELEGRAM_INTEGRATION.md](docs/TELEGRAM_INTEGRATION.md)** - Telegram bot setup and configuration
 - **[ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md)** - Security and authentication details
+- **[TESTING.md](docs/TESTING.md)** - Complete testing guide with PHPUnit and smoke tests
 - **[TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md)** - Testing procedures and checklist
 
 ---
@@ -283,9 +284,40 @@ See [docs/ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md) for security de
 
 ## 🧪 Testing
 
-### Run Diagnostics
+### Automated Tests (PHPUnit)
 
 ```bash
+# Run all unit and integration tests
+composer test
+
+# Run specific test suites
+vendor/bin/phpunit --testsuite Unit
+vendor/bin/phpunit --testsuite Integration
+
+# Run with coverage (requires xdebug)
+composer test-coverage
+
+# Run specific test file
+vendor/bin/phpunit tests/Unit/SettingsServiceTest.php
+```
+
+**Test Coverage:**
+- ✅ **Settings Service** - Typed casting, caching, audit logging, validation
+- ✅ **Form Validation** - Field types, rules, relationships, scopes
+- ✅ **Form Submission** - End-to-end submission flow, order linking, status updates
+
+### Smoke Tests
+
+```bash
+# Form API smoke test (end-to-end)
+php scripts/form-api-smoke.php
+
+# Settings service smoke test
+php scripts/test-settings-service.php
+
+# Eloquent ORM smoke test
+php scripts/eloquent-smoke.php
+
 # Database health check
 php scripts/db_audit.php
 
@@ -295,6 +327,11 @@ php scripts/api_smoke_test.php
 # Web-based audit
 curl https://your-domain.com/api/test.php?audit=full
 ```
+
+**Smoke Test Coverage:**
+- ✅ **Form API** - Seeds form, submits data, validates persistence, creates linked orders
+- ✅ **Settings Service** - Cache operations, type casting, validation, audit logging
+- ✅ **Eloquent ORM** - Database connection, model CRUD operations, relationships
 
 ### Manual Testing
 

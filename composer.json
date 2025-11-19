@@ -12,12 +12,22 @@
         "vlucas/phpdotenv": "^5.4"
     },
     "require-dev": {
-        "symfony/var-dumper": "^5.4"
+        "symfony/var-dumper": "^5.4",
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": {
             "App\\": "app/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage"
     },
     "config": {
         "optimize-autoloader": true,
