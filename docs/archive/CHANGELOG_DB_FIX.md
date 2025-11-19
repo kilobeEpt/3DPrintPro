@@ -53,9 +53,9 @@
    - api/db.php
    - api/init-check.php
    - api/init-database.php (NEW)
-2. Run: https://ch167436.tw1.ru/api/init-database.php
-3. Verify: https://ch167436.tw1.ru/api/test.php
-4. Test site: https://ch167436.tw1.ru/
+2. Run: https://3dprint-omsk.ru/api/init-database.php
+3. Verify: https://3dprint-omsk.ru/api/test.php
+4. Test site: https://3dprint-omsk.ru/
 
 ### 📝 Files Changed
 - `api/test.php` - Fixed active column check logic

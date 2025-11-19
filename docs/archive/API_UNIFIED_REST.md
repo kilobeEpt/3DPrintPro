@@ -7,7 +7,7 @@ The 3D Print API follows RESTful conventions with standardized response structur
 ## Base URL
 
 ```
-https://ch167436.tw1.ru/api
+https://3dprint-omsk.ru/api
 ```
 
 ## Authentication
@@ -488,16 +488,16 @@ php scripts/api_smoke_test.php
 ### Manual Testing
 ```bash
 # Get orders
-curl https://ch167436.tw1.ru/api/orders.php
+curl https://3dprint-omsk.ru/api/orders.php
 
 # Create order (with rate limit headers)
-curl -X POST https://ch167436.tw1.ru/api/orders.php \
+curl -X POST https://3dprint-omsk.ru/api/orders.php \
   -H "Content-Type: application/json" \
   -d '{"name":"John","phone":"+79991234567"}' \
   -i
 
 # Check rate limit headers
-curl -I https://ch167436.tw1.ru/api/orders.php
+curl -I https://3dprint-omsk.ru/api/orders.php
 ```
 
 ---

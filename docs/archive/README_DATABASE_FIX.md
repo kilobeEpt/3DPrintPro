@@ -20,7 +20,7 @@ This branch contains a **complete fix for the database integration** that was no
 
 Open in browser:
 ```
-https://ch167436.tw1.ru/api/init-check.php
+https://3dprint-omsk.ru/api/init-check.php
 ```
 
 **Expected:** Green checkmarks ✅ everywhere
@@ -104,24 +104,24 @@ https://ch167436.tw1.ru/api/init-check.php
 
 ```bash
 # 1. Test API diagnostics
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 
 # Expected: JSON with "success": true
 
 # 2. Test services API
-curl https://ch167436.tw1.ru/api/services.php
+curl https://3dprint-omsk.ru/api/services.php
 
 # Expected: JSON with services array
 
 # 3. Test in browser
-open https://ch167436.tw1.ru/api/init-check.php
+open https://3dprint-omsk.ru/api/init-check.php
 
 # Expected: Green checkmarks ✅
 ```
 
 ### Frontend Test:
 
-1. Open: https://ch167436.tw1.ru/
+1. Open: https://3dprint-omsk.ru/
 2. Press F12 (open console)
 3. Look for these logs:
    ```

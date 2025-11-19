@@ -275,7 +275,7 @@ return [
         'company_name' => '3D PrintPro',
         'company_address' => 'г. Омск',
         'company_phone' => '+7 (383) 000-00-00',
-        'company_email' => 'info@3dprintpro.ru',
+        'company_email' => 'info@3dprint-omsk.ru',
         'company_hours' => 'Пн-Пт: 10:00-18:00, Сб-Вс: 10:00-16:00',
         
         // Telegram Settings (managed via admin panel)
@@ -286,7 +286,7 @@ return [
         'telegram_notify_status_change' => '1',
         
         // Email Settings
-        'admin_email' => 'info@3dprintpro.ru',
+        'admin_email' => 'info@3dprint-omsk.ru',
         'email_notifications_enabled' => '0',
         
         // Calculator Settings
@@ -311,7 +311,7 @@ return [
                 'enable_email_notification' => false,
                 'rate_limit' => '10/hour',
             ],
-            'notification_email' => 'info@3dprintpro.ru',
+            'notification_email' => 'info@3dprint-omsk.ru',
             'success_message' => 'Спасибо за обращение! Мы свяжемся с вами в ближайшее время.',
             'redirect_url' => null,
             'sort_order' => 1,
@@ -326,7 +326,7 @@ return [
                 'enable_email_notification' => false,
                 'require_calculator_data' => true,
             ],
-            'notification_email' => 'info@3dprintpro.ru',
+            'notification_email' => 'info@3dprint-omsk.ru',
             'success_message' => 'Заказ принят! Номер вашего заказа: {order_number}. Мы свяжемся с вами для уточнения деталей.',
             'redirect_url' => null,
             'sort_order' => 2,

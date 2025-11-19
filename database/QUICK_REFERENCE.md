@@ -11,19 +11,19 @@ mysql -u ch167436_3dprint -p ch167436_3dprint < database/schema.sql
 php database/verify-schema.php
 
 # Check via HTTP
-curl https://ch167436.tw1.ru/database/verify-schema.php
+curl https://3dprint-omsk.ru/database/verify-schema.php
 ```
 
 ### Data Management
 ```bash
 # Seed database
-curl https://ch167436.tw1.ru/api/init-database.php
+curl https://3dprint-omsk.ru/api/init-database.php
 
 # Hard reset (with token)
-curl "https://ch167436.tw1.ru/api/init-database.php?reset=RESET_TOKEN"
+curl "https://3dprint-omsk.ru/api/init-database.php?reset=RESET_TOKEN"
 
 # Test API
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 ```
 
 ### Backups
@@ -41,7 +41,7 @@ php database/backup.php --data-only
 php database/backup.php --tables=orders,settings
 
 # Via HTTP (with token)
-curl "https://ch167436.tw1.ru/database/backup.php?token=BACKUP_TOKEN"
+curl "https://3dprint-omsk.ru/database/backup.php?token=BACKUP_TOKEN"
 ```
 
 ### Restore
@@ -70,7 +70,7 @@ gunzip < database/backups/BACKUP_FILE.sql.gz | mysql -u ch167436_3dprint -p ch16
 ### Connection Details
 
 **Production:**
-- Host: `localhost` (or `ch167436.tw1.ru` remote)
+- Host: `localhost` (or `3dprint-omsk.ru` remote)
 - Database: `ch167436_3dprint`
 - User: `ch167436_3dprint`
 - Charset: `utf8mb4`
@@ -119,10 +119,10 @@ mysql -u ch167436_3dprint -p ch167436_3dprint < database/schema.sql
 php database/verify-schema.php
 
 # 4. Seed data
-curl https://ch167436.tw1.ru/api/init-database.php
+curl https://3dprint-omsk.ru/api/init-database.php
 
 # 5. Test
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 
 # 6. Backup
 php database/backup.php
@@ -140,7 +140,7 @@ mysql -u ch167436_3dprint -p ch167436_3dprint < database/schema.sql
 php database/verify-schema.php
 
 # 4. Test
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 ```
 
 ### Recovery from Backup
@@ -153,7 +153,7 @@ mysql -u ch167436_3dprint -p ch167436_3dprint < database/backups/BACKUP_FILE.sql
 
 # 3. Verify
 php database/verify-schema.php
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 ```
 
 ### Hard Reset
@@ -162,11 +162,11 @@ curl https://ch167436.tw1.ru/api/test.php
 php database/backup.php
 
 # 2. Reset via API
-curl "https://ch167436.tw1.ru/api/init-database.php?reset=RESET_TOKEN"
+curl "https://3dprint-omsk.ru/api/init-database.php?reset=RESET_TOKEN"
 
 # 3. Verify
 php database/verify-schema.php
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 ```
 
 ## Expected Record Counts
@@ -213,7 +213,7 @@ mysql -u ch167436_3dprint -p ch167436_3dprint -e "
 "
 
 # API status
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 
 # Schema verification
 php database/verify-schema.php | grep -E '(status|production_ready|summary)'

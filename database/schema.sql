@@ -33,7 +33,7 @@
 -- 3. Verify: Visit /api/test.php or use database/verify-schema.php
 --
 -- PRODUCTION TARGET:
--- Host: localhost / ch167436.tw1.ru
+-- Host: localhost / 3dprint-omsk.ru
 -- Database: ch167436_3dprint
 -- User: ch167436_3dprint
 --

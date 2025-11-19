@@ -39,7 +39,7 @@ This guide documents the database integration fixes applied to the project.
 
 Open in browser:
 ```
-https://ch167436.tw1.ru/api/init-check.php
+https://3dprint-omsk.ru/api/init-check.php
 ```
 
 This page will show:
@@ -54,43 +54,43 @@ Test each endpoint directly in browser:
 
 1. **Test API (Diagnostics)**
    ```
-   https://ch167436.tw1.ru/api/test.php
+   https://3dprint-omsk.ru/api/test.php
    ```
    Returns JSON with database diagnostics
 
 2. **Settings API**
    ```
-   https://ch167436.tw1.ru/api/settings.php
+   https://3dprint-omsk.ru/api/settings.php
    ```
    Returns all settings as JSON
 
 3. **Services API**
    ```
-   https://ch167436.tw1.ru/api/services.php
+   https://3dprint-omsk.ru/api/services.php
    ```
    Returns list of services
 
 4. **Portfolio API**
    ```
-   https://ch167436.tw1.ru/api/portfolio.php
+   https://3dprint-omsk.ru/api/portfolio.php
    ```
    Returns portfolio items
 
 5. **Testimonials API**
    ```
-   https://ch167436.tw1.ru/api/testimonials.php
+   https://3dprint-omsk.ru/api/testimonials.php
    ```
    Returns testimonials
 
 6. **FAQ API**
    ```
-   https://ch167436.tw1.ru/api/faq.php
+   https://3dprint-omsk.ru/api/faq.php
    ```
    Returns FAQ items
 
 7. **Orders API**
    ```
-   https://ch167436.tw1.ru/api/orders.php
+   https://3dprint-omsk.ru/api/orders.php
    ```
    Returns list of orders (GET) or creates new order (POST)
 
@@ -142,7 +142,7 @@ Test each endpoint directly in browser:
 **Cause:** Records in database have `active = 0` or `approved = 0`
 
 **Fix:**
-1. Open `https://ch167436.tw1.ru/api/init-check.php`
+1. Open `https://3dprint-omsk.ru/api/init-check.php`
 2. Click "Fix: Set all to active=1" button
 3. Refresh page to verify
 
@@ -182,7 +182,7 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 **Cause:** Database not initialized with default data
 
 **Fix:**
-1. Open `https://ch167436.tw1.ru/api/init-database.php`
+1. Open `https://3dprint-omsk.ru/api/init-database.php`
 2. This will populate all tables with default data
 3. Check `api/init-check.php` to verify
 
@@ -400,7 +400,7 @@ php scripts/api_smoke.php --url=https://your-site.com
 **Examples:**
 ```bash
 # Test production
-php scripts/api_smoke.php --url=https://ch167436.tw1.ru
+php scripts/api_smoke.php --url=https://3dprint-omsk.ru
 
 # Test local development
 php scripts/api_smoke.php --url=http://localhost:8000
@@ -428,7 +428,7 @@ The smoke test performs:
 
 ```
 🧪 API Smoke Test Suite
-Base URL: https://ch167436.tw1.ru
+Base URL: https://3dprint-omsk.ru
 ================================================================================
 
 📦 Testing: Health/Test Endpoint

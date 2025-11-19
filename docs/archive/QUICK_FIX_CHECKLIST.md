@@ -15,7 +15,7 @@
 
 Open in browser:
 ```
-https://ch167436.tw1.ru/api/init-check.php
+https://3dprint-omsk.ru/api/init-check.php
 ```
 
 **Expected:** Green checkmarks ✅  
@@ -46,7 +46,7 @@ Click all links on init-check page. Each should return JSON like:
 ### Step 5: Test Frontend 🎨
 
 1. Clear browser cache: `Ctrl+Shift+Del` → "All time" → Clear
-2. Open site: https://ch167436.tw1.ru/
+2. Open site: https://3dprint-omsk.ru/
 3. Press F12 → Console tab
 4. Should see:
    ```
@@ -168,7 +168,7 @@ All these files should exist and have correct content:
 ls -la api/config.php
 
 # Test API directly
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 
 # Check database tables
 # (Open PHPMyAdmin → ch167436_3dprint database → Browse tables)

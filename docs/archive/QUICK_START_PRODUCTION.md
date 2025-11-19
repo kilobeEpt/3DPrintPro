@@ -1,6 +1,6 @@
 # 🚀 QUICK START - PRODUCTION SETUP
 
-**Site:** https://ch167436.tw1.ru/  
+**Site:** https://3dprint-omsk.ru/  
 **Database:** ch167436_3dprint  
 **Status:** ✅ Ready for initialization  
 
@@ -10,7 +10,7 @@
 
 ### Step 1: Verify Database Connection (30 seconds)
 ```
-Open in browser: https://ch167436.tw1.ru/api/test.php
+Open in browser: https://3dprint-omsk.ru/api/test.php
 ```
 
 **Expected result:**
@@ -33,7 +33,7 @@ Open in browser: https://ch167436.tw1.ru/api/test.php
 
 ### Step 2: Check Database Tables (30 seconds)
 ```
-Open in browser: https://ch167436.tw1.ru/api/init-check.php
+Open in browser: https://3dprint-omsk.ru/api/init-check.php
 ```
 
 **What you'll see:**
@@ -50,7 +50,7 @@ Open in browser: https://ch167436.tw1.ru/api/init-check.php
 ```
 Click: "Initialize Database" button
 OR
-Open: https://ch167436.tw1.ru/api/init-database.php
+Open: https://3dprint-omsk.ru/api/init-database.php
 ```
 This will populate:
 - 6 Services (FDM печать, SLA печать, etc.)
@@ -61,7 +61,7 @@ This will populate:
 ```
 Click: "Fix: Set all to active=1" button
 OR
-Open: https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+Open: https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 ```
 This will activate all existing records.
 
@@ -72,13 +72,13 @@ This will activate all existing records.
 Open these URLs and verify they return data (not empty arrays):
 ```
 
-✅ **Services:** https://ch167436.tw1.ru/api/services.php  
+✅ **Services:** https://3dprint-omsk.ru/api/services.php  
 Expected: `{ "success": true, "services": [...] }`
 
-✅ **FAQ:** https://ch167436.tw1.ru/api/faq.php  
+✅ **FAQ:** https://3dprint-omsk.ru/api/faq.php  
 Expected: `{ "success": true, "faq": [...] }`
 
-✅ **Testimonials:** https://ch167436.tw1.ru/api/testimonials.php  
+✅ **Testimonials:** https://3dprint-omsk.ru/api/testimonials.php  
 Expected: `{ "success": true, "testimonials": [...] }`
 
 ---
@@ -87,7 +87,7 @@ Expected: `{ "success": true, "testimonials": [...] }`
 
 **Open homepage:**
 ```
-https://ch167436.tw1.ru/
+https://3dprint-omsk.ru/
 ```
 
 **Check Console (F12 → Console tab):**
@@ -138,7 +138,7 @@ https://ch167436.tw1.ru/
 ### Problem: API returns empty arrays
 **Solution:**
 ```
-Open: https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+Open: https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 ```
 This will activate all records.
 
@@ -170,7 +170,7 @@ This means apiClient is not initialized. Check:
 **Solution:**
 1. Check Console for errors (F12)
 2. Verify api/orders.php is accessible
-3. Test: https://ch167436.tw1.ru/api/orders.php (should return JSON)
+3. Test: https://3dprint-omsk.ru/api/orders.php (should return JSON)
 4. Check that api/config.php has CORS headers
 
 ---
@@ -240,7 +240,7 @@ After setup, verify these items:
 5. **Calculator Form** - Calculates cost and saves to orders table
 
 ### Admin Panel:
-- Access: https://ch167436.tw1.ru/admin.html
+- Access: https://3dprint-omsk.ru/admin.html
 - Features:
   - View all orders
   - Manage services
@@ -323,22 +323,22 @@ After completing all steps:
 
 **Activate all records:**
 ```
-https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 ```
 
 **Populate empty database:**
 ```
-https://ch167436.tw1.ru/api/init-database.php
+https://3dprint-omsk.ru/api/init-database.php
 ```
 
 **Check database status:**
 ```
-https://ch167436.tw1.ru/api/test.php
+https://3dprint-omsk.ru/api/test.php
 ```
 
 **View table status:**
 ```
-https://ch167436.tw1.ru/api/init-check.php
+https://3dprint-omsk.ru/api/init-check.php
 ```
 
 ---

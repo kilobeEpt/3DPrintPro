@@ -2,7 +2,7 @@
 
 **Date:** $(date)  
 **Project:** 3D Print Pro  
-**Environment:** Production (https://ch167436.tw1.ru)  
+**Environment:** Production (https://3dprint-omsk.ru)  
 **Database:** ch167436_3dprint  
 
 ---
@@ -237,7 +237,7 @@
 ### Deployment ✅
 - ✅ Production database credentials configured
 - ✅ Database: ch167436_3dprint
-- ✅ Site URL: https://ch167436.tw1.ru
+- ✅ Site URL: https://3dprint-omsk.ru
 - ✅ All files uploaded
 - ✅ API endpoints accessible
 - ✅ Forms working
@@ -261,40 +261,40 @@
 
 ### Step 1: Verify Database Connection
 ```
-Open: https://ch167436.tw1.ru/api/test.php
+Open: https://3dprint-omsk.ru/api/test.php
 Expected: JSON with database_status: "Connected"
 ```
 
 ### Step 2: Check Database Tables
 ```
-Open: https://ch167436.tw1.ru/api/init-check.php
+Open: https://3dprint-omsk.ru/api/init-check.php
 Expected: HTML table showing all 7 tables with counts
 ```
 
 ### Step 3: Fix Active Records
 ```
-Open: https://ch167436.tw1.ru/api/init-check.php?fix_active=1
+Open: https://3dprint-omsk.ru/api/init-check.php?fix_active=1
 Action: Sets all records to active=1, approved=1
 ```
 
 ### Step 4: Populate Empty Tables (if needed)
 ```
-Open: https://ch167436.tw1.ru/api/init-database.php
+Open: https://3dprint-omsk.ru/api/init-database.php
 Action: Populates all tables with default data
 ```
 
 ### Step 5: Verify API Endpoints
 Visit each endpoint to ensure it returns data:
-- https://ch167436.tw1.ru/api/settings.php
-- https://ch167436.tw1.ru/api/services.php
-- https://ch167436.tw1.ru/api/portfolio.php
-- https://ch167436.tw1.ru/api/testimonials.php
-- https://ch167436.tw1.ru/api/faq.php
-- https://ch167436.tw1.ru/api/orders.php
+- https://3dprint-omsk.ru/api/settings.php
+- https://3dprint-omsk.ru/api/services.php
+- https://3dprint-omsk.ru/api/portfolio.php
+- https://3dprint-omsk.ru/api/testimonials.php
+- https://3dprint-omsk.ru/api/faq.php
+- https://3dprint-omsk.ru/api/orders.php
 
 ### Step 6: Test Frontend
 ```
-1. Open: https://ch167436.tw1.ru/
+1. Open: https://3dprint-omsk.ru/
 2. Press F12 → Console tab
 3. Look for:
    ✅ APIClient initialized
@@ -317,7 +317,7 @@ Visit each endpoint to ensure it returns data:
 ### Step 8: Test Incognito Mode
 ```
 1. Open incognito window
-2. Visit: https://ch167436.tw1.ru/
+2. Visit: https://3dprint-omsk.ru/
 3. Data should load from API
 4. Submit form
 5. Form should work (saves to MySQL)
@@ -354,9 +354,9 @@ Visit each endpoint to ensure it returns data:
 10. ✅ Verified form submission flow
 
 **Next steps for site administrator:**
-1. Visit https://ch167436.tw1.ru/api/init-check.php
+1. Visit https://3dprint-omsk.ru/api/init-check.php
 2. Click "Fix: Set all to active=1" button if any tables show 0 active records
-3. If tables are empty, visit https://ch167436.tw1.ru/api/init-database.php
+3. If tables are empty, visit https://3dprint-omsk.ru/api/init-database.php
 4. Clear browser cache and reload site
 5. Test forms and data loading
 6. Configure Telegram Chat ID in admin panel (optional)

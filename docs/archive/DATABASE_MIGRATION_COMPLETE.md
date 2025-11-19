@@ -190,7 +190,7 @@ $ grep -r "db\.getData" /home/engine/project/js/*.js | grep -v "admin.js" | grep
 2. Создайте БД через PHPMyAdmin
 3. Импортируйте `database/schema.sql`
 4. Обновите `api/config.php`:
-   - `DB_HOST` → реальный хост (ch167436.tw1.ru)
+   - `DB_HOST` → реальный хост (3dprint-omsk.ru)
    - `SITE_URL` → реальный домен
 5. Откройте: `https://yourdomain.com/api/init-database.php`
 6. Настройте Telegram Chat ID в админ панели

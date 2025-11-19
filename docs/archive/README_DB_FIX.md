@@ -40,7 +40,7 @@
 
 ### Step 1: Initialize Database
 ```
-https://ch167436.tw1.ru/api/init-database.php
+https://3dprint-omsk.ru/api/init-database.php
 ```
 This will:
 - Fill portfolio with 4 projects
@@ -50,13 +50,13 @@ This will:
 
 ### Step 2: Verify
 ```
-https://ch167436.tw1.ru/api/test.php
+https://3dprint-omsk.ru/api/test.php
 ```
 Should return JSON without errors showing all tables OK
 
 ### Step 3: Test Website
 ```
-https://ch167436.tw1.ru/
+https://3dprint-omsk.ru/
 ```
 - Clear cache (Ctrl+Shift+Del)
 - Check console (F12) - no errors

@@ -663,7 +663,7 @@ settingsModule shows toast notification (line 152)
 **Request:**
 ```
 POST /api/orders.php HTTP/1.1
-Host: 3dprintpro.ru
+Host: 3dprint-omsk.ru
 Content-Type: application/json
 Accept: application/json
 
@@ -714,7 +714,7 @@ Content-Type: application/json
 **Request:**
 ```
 POST /api/settings.php HTTP/1.1
-Host: 3dprintpro.ru
+Host: 3dprint-omsk.ru
 Content-Type: application/json
 Accept: application/json
 X-CSRF-Token: abc123def456...
@@ -725,7 +725,7 @@ X-CSRF-Token: abc123def456...
   "telegram_contact_url": "https://t.me/PrintPro_Omsk",
   "telegram_notify_new_order": "1",
   "telegram_notify_status_change": "1",
-  "admin_email": "admin@3dprintpro.ru",
+  "admin_email": "admin@3dprint-omsk.ru",
   "email_notifications_enabled": "0"
 }
 ```

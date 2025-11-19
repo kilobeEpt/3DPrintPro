@@ -1,7 +1,7 @@
 # ✅ COMPLETE TEST CHECKLIST
 
 **Date:** January 2025  
-**Site:** https://ch167436.tw1.ru/  
+**Site:** https://3dprint-omsk.ru/  
 **Purpose:** Verify all functionality before production launch  
 
 ---
@@ -40,7 +40,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ## 🌐 API ENDPOINT TESTS
 
 ### Test 1: Database Connection
-**URL:** https://ch167436.tw1.ru/api/test.php
+**URL:** https://3dprint-omsk.ru/api/test.php
 
 **Expected Response:**
 ```json
@@ -74,7 +74,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ---
 
 ### Test 2: Database Tables Status
-**URL:** https://ch167436.tw1.ru/api/init-check.php
+**URL:** https://3dprint-omsk.ru/api/init-check.php
 
 **Expected Result:**
 - HTML page showing 7 tables
@@ -95,7 +95,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ---
 
 ### Test 3: Services API
-**URL:** https://ch167436.tw1.ru/api/services.php
+**URL:** https://3dprint-omsk.ru/api/services.php
 
 **Expected Response:**
 ```json
@@ -128,7 +128,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ---
 
 ### Test 4: FAQ API
-**URL:** https://ch167436.tw1.ru/api/faq.php
+**URL:** https://3dprint-omsk.ru/api/faq.php
 
 **Expected Response:**
 ```json
@@ -156,7 +156,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ---
 
 ### Test 5: Testimonials API
-**URL:** https://ch167436.tw1.ru/api/testimonials.php
+**URL:** https://3dprint-omsk.ru/api/testimonials.php
 
 **Expected Response:**
 ```json
@@ -186,7 +186,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ---
 
 ### Test 6: Portfolio API
-**URL:** https://ch167436.tw1.ru/api/portfolio.php
+**URL:** https://3dprint-omsk.ru/api/portfolio.php
 
 **Expected Response:**
 ```json
@@ -206,7 +206,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ---
 
 ### Test 7: Settings API
-**URL:** https://ch167436.tw1.ru/api/settings.php
+**URL:** https://3dprint-omsk.ru/api/settings.php
 
 **Expected Response:**
 ```json
@@ -227,7 +227,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ---
 
 ### Test 8: Orders API (GET)
-**URL:** https://ch167436.tw1.ru/api/orders.php
+**URL:** https://3dprint-omsk.ru/api/orders.php
 
 **Expected Response:**
 ```json
@@ -249,7 +249,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ## 🎨 FRONTEND TESTS
 
 ### Test 9: Homepage Load
-**URL:** https://ch167436.tw1.ru/
+**URL:** https://3dprint-omsk.ru/
 
 **Steps:**
 1. Open URL in browser
@@ -469,7 +469,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ### Test 17: Incognito Mode
 **Steps:**
 1. Open incognito/private window
-2. Visit: https://ch167436.tw1.ru/
+2. Visit: https://3dprint-omsk.ru/
 3. Check Console (F12)
 4. Verify data loads from API
 5. Submit a form
@@ -490,7 +490,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 
 ### Test 18: Online/Offline Behavior
 **Steps:**
-1. Open site in browser: https://ch167436.tw1.ru/
+1. Open site in browser: https://3dprint-omsk.ru/
 2. Open Console (F12)
 3. Verify data loads from API
 4. Turn off API (or go to Network tab → Throttling → Offline)
@@ -639,7 +639,7 @@ grep "api/config.php" .gitignore  # Should show: api/config.php
 ## 🔐 SECURITY TESTS
 
 ### Test 22: Config File Protection
-**URL:** https://ch167436.tw1.ru/api/config.php
+**URL:** https://3dprint-omsk.ru/api/config.php
 
 **Expected Result:**
 - 403 Forbidden
@@ -707,7 +707,7 @@ Access-Control-Allow-Headers: Content-Type
 ## 📱 MULTI-PAGE TESTS
 
 ### Test 21: About Page
-**URL:** https://ch167436.tw1.ru/about.html
+**URL:** https://3dprint-omsk.ru/about.html
 
 **Checks:**
 - [ ] Page loads without errors
@@ -721,7 +721,7 @@ Access-Control-Allow-Headers: Content-Type
 ---
 
 ### Test 22: Services Page
-**URL:** https://ch167436.tw1.ru/services.html
+**URL:** https://3dprint-omsk.ru/services.html
 
 **Checks:**
 - [ ] Page loads without errors
@@ -733,7 +733,7 @@ Access-Control-Allow-Headers: Content-Type
 ---
 
 ### Test 23: Portfolio Page
-**URL:** https://ch167436.tw1.ru/portfolio.html
+**URL:** https://3dprint-omsk.ru/portfolio.html
 
 **Checks:**
 - [ ] Page loads without errors
@@ -744,7 +744,7 @@ Access-Control-Allow-Headers: Content-Type
 ---
 
 ### Test 24: Contact Page
-**URL:** https://ch167436.tw1.ru/contact.html
+**URL:** https://3dprint-omsk.ru/contact.html
 
 **Checks:**
 - [ ] Page loads without errors
@@ -756,7 +756,7 @@ Access-Control-Allow-Headers: Content-Type
 ---
 
 ### Test 25: Admin Panel
-**URL:** https://ch167436.tw1.ru/admin.html
+**URL:** https://3dprint-omsk.ru/admin.html
 
 **Checks:**
 - [ ] Page loads without errors

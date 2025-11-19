@@ -8,7 +8,7 @@
 
 ```
 Database: ch167436_3dprint
-Host: ch167436.tw1.ru (production) или localhost (local)
+Host: 3dprint-omsk.ru (production) или localhost (local)
 User: ch167436_3dprint
 Password: 852789456
 Telegram Bot Token: 8241807858:AAE0JXxWO9HumqesNK6x_vvaMrxvRK9qKBI
@@ -75,7 +75,7 @@ Telegram Bot Token: 8241807858:AAE0JXxWO9HumqesNK6x_vvaMrxvRK9qKBI
    ```
 
 2. **Создание БД через PHPMyAdmin:**
-   - Откройте: https://ch167436.tw1.ru/phpmyadmin
+   - Откройте: https://3dprint-omsk.ru/phpmyadmin
    - Логин: ch167436_3dprint
    - Пароль: 852789456
    - Создайте БД (если не создана): ch167436_3dprint
@@ -83,7 +83,7 @@ Telegram Bot Token: 8241807858:AAE0JXxWO9HumqesNK6x_vvaMrxvRK9qKBI
 
 3. **Обновление api/config.php:**
    ```php
-   define('DB_HOST', 'ch167436.tw1.ru'); // Измените на реальный хост
+   define('DB_HOST', '3dprint-omsk.ru'); // Измените на реальный хост
    define('SITE_URL', 'https://your-domain.ru'); // Ваш домен
    ```
 

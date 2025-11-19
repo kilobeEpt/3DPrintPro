@@ -49,7 +49,7 @@ mysql -u ch167436_3dprint -p ch167436_3dprint < database/schema.sql
 
 **Шаг 2: Заполнить начальными данными**
 ```
-Откройте: https://ch167436.tw1.ru/api/init-database.php
+Откройте: https://3dprint-omsk.ru/api/init-database.php
 ```
 
 **Ожидаемый результат:**
@@ -82,7 +82,7 @@ mysql -u ch167436_3dprint -p ch167436_3dprint < database/schema.sql
 
 Просто откройте:
 ```
-https://ch167436.tw1.ru/api/init-database.php
+https://3dprint-omsk.ru/api/init-database.php
 ```
 
 Скрипт:
@@ -97,7 +97,7 @@ https://ch167436.tw1.ru/api/init-database.php
 **Только для экстренного восстановления после серьёзного сбоя!**
 
 ```
-https://ch167436.tw1.ru/api/init-database.php?reset=CHANGE_ME_IN_PRODUCTION_123456
+https://3dprint-omsk.ru/api/init-database.php?reset=CHANGE_ME_IN_PRODUCTION_123456
 ```
 
 ⚠️ **ВНИМАНИЕ:** Это удалит ВСЕ данные из таблиц:
@@ -133,10 +133,10 @@ https://ch167436.tw1.ru/api/init-database.php?reset=CHANGE_ME_IN_PRODUCTION_1234
 mysql -u user -p dbname < database/schema.sql
 
 # Шаг 2: Заполнить данными
-curl https://ch167436.tw1.ru/api/init-database.php
+curl https://3dprint-omsk.ru/api/init-database.php
 
 # Шаг 3: Проверить статус
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 
 # Готово! ✅
 ```
@@ -160,7 +160,7 @@ mysql -u user -p dbname -e "SHOW TABLES;"
 
 **Шаг 2: Проверить seed-данные**
 ```
-Откройте: https://ch167436.tw1.ru/api/init-database.php
+Откройте: https://3dprint-omsk.ru/api/init-database.php
 ```
 
 **Ожидаемый результат (первый запуск):**
@@ -209,11 +209,11 @@ mysql -u user -p dbname -e "SHOW TABLES;"
 
 **Шаг 3: Проверить API endpoints**
 ```bash
-curl https://ch167436.tw1.ru/api/services.php
-curl https://ch167436.tw1.ru/api/portfolio.php
-curl https://ch167436.tw1.ru/api/testimonials.php
-curl https://ch167436.tw1.ru/api/faq.php
-curl https://ch167436.tw1.ru/api/content.php
+curl https://3dprint-omsk.ru/api/services.php
+curl https://3dprint-omsk.ru/api/portfolio.php
+curl https://3dprint-omsk.ru/api/testimonials.php
+curl https://3dprint-omsk.ru/api/faq.php
+curl https://3dprint-omsk.ru/api/content.php
 ```
 
 Все должны вернуть:
@@ -226,7 +226,7 @@ curl https://ch167436.tw1.ru/api/content.php
 ```
 
 **Шаг 4: Тестировать сайт**
-1. Откройте: https://ch167436.tw1.ru/
+1. Откройте: https://3dprint-omsk.ru/
 2. Очистите кэш браузера (Ctrl+Shift+Del)
 3. Проверьте консоль (F12) - не должно быть ошибок
 4. Убедитесь что отображаются:
@@ -277,10 +277,10 @@ mysql -u user -p dbname < database/schema.sql
 **Решение:**
 ```bash
 # Заполните данными:
-curl https://ch167436.tw1.ru/api/init-database.php
+curl https://3dprint-omsk.ru/api/init-database.php
 
 # Проверьте результат:
-curl https://ch167436.tw1.ru/api/test.php
+curl https://3dprint-omsk.ru/api/test.php
 ```
 
 ### Проблема: Дубликаты данных после повторного запуска

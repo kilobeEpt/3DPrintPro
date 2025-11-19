@@ -23,7 +23,7 @@ New in v2.1: 4 files (verify-schema.php, backup.php, 2 guides)
 Updated in v2.1: 2 files (schema.sql, README.md)
 
 Production Target:
-- Host: localhost / ch167436.tw1.ru
+- Host: localhost / 3dprint-omsk.ru
 - Database: ch167436_3dprint
 - User: ch167436_3dprint
 - MySQL: 8.0+
