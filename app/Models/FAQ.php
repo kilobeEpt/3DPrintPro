@@ -9,6 +9,7 @@ namespace App\Models;
  * 
  * @property int $id
  * @property string $question
+ * @property string $slug
  * @property string $answer
  * @property int $sort_order
  * @property bool $active
@@ -31,6 +32,7 @@ class FAQ extends BaseModel
      */
     protected $fillable = [
         'question',
+        'slug',
         'answer',
         'sort_order',
         'active',

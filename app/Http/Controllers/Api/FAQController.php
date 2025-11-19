@@ -18,11 +18,19 @@ class FAQController extends BaseApiController
      */
     protected function handleGet()
     {
-        // Get single FAQ item by ID
+        // Get single FAQ item by ID or slug
         if ($this->query('id')) {
             $id = $this->validateId($this->query('id'), 'FAQ item');
             $item = FAQ::findOrFail($id);
             
+            $this->cacheService->setCacheHeaders($item->updated_at);
+            $this->success(['item' => $item->toArray()]);
+        }
+        
+        if ($this->query('slug')) {
+            $item = FAQ::where('slug', $this->query('slug'))->firstOrFail();
+            
+            $this->cacheService->setCacheHeaders($item->updated_at);
             $this->success(['item' => $item->toArray()]);
         }
         
@@ -40,6 +48,15 @@ class FAQController extends BaseApiController
         
         // Apply pagination
         $result = $this->paginate($query, $this->query);
+        
+        // Set cache headers
+        if (!empty($result['data'])) {
+            $collection = collect($result['data']);
+            $latestTimestamp = $this->cacheService->getLatestTimestamp($collection);
+            if ($latestTimestamp) {
+                $this->cacheService->setCacheHeaders($latestTimestamp);
+            }
+        }
         
         $this->success(
             ['items' => $result['data']],
@@ -71,8 +88,19 @@ class FAQController extends BaseApiController
             $this->validationError('Validation failed', $errors);
         }
         
+        // Generate unique slug if not provided
+        $data = $this->input;
+        if (empty($data['slug'])) {
+            $data['slug'] = $this->generateUniqueSlug($data['question'], FAQ::class);
+        } else {
+            $data['slug'] = $this->generateUniqueSlug($data['slug'], FAQ::class);
+        }
+        
         // Create FAQ item
-        $item = FAQ::create($this->input);
+        $item = FAQ::create($data);
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('faq');
         
         \ApiLogger::info("FAQ item created successfully", [
             'faq_id' => $item->id,
@@ -112,8 +140,16 @@ class FAQController extends BaseApiController
         $data = $this->input;
         unset($data['id']);
         
+        // Handle slug update if provided
+        if (isset($data['slug']) && $data['slug'] !== $item->slug) {
+            $data['slug'] = $this->generateUniqueSlug($data['slug'], FAQ::class, $id);
+        }
+        
         // Update FAQ item
         $item->update($data);
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('faq');
         
         \ApiLogger::info("FAQ item updated successfully", [
             'faq_id' => $id,
@@ -149,6 +185,9 @@ class FAQController extends BaseApiController
         // Find and delete FAQ item
         $item = FAQ::findOrFail($id);
         $item->delete();
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('faq');
         
         \ApiLogger::info("FAQ item deleted successfully", ['faq_id' => $id]);
         

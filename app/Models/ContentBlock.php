@@ -9,6 +9,7 @@ namespace App\Models;
  * 
  * @property int $id
  * @property string $block_name
+ * @property string $slug
  * @property string|null $title
  * @property string|null $content
  * @property array|null $data
@@ -34,6 +35,7 @@ class ContentBlock extends BaseModel
      */
     protected $fillable = [
         'block_name',
+        'slug',
         'title',
         'content',
         'data',

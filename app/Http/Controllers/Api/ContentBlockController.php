@@ -23,10 +23,27 @@ class ContentBlockController extends BaseApiController
             $id = $this->validateId($this->query('id'), 'content block');
             $block = ContentBlock::findOrFail($id);
             
+            $this->cacheService->setCacheHeaders($block->updated_at);
             $this->success(['block' => $block->toArray()]);
         }
         
-        // Get by block name
+        // Get by slug
+        if ($this->query('slug')) {
+            $block = ContentBlock::where('slug', $this->query('slug'))
+                ->active()
+                ->ordered()
+                ->first();
+            
+            if (!$block) {
+                \ApiLogger::warning("Content block not found", ['slug' => $this->query('slug')]);
+                $this->notFound('Content block not found');
+            }
+            
+            $this->cacheService->setCacheHeaders($block->updated_at);
+            $this->success(['block' => $block->toArray()]);
+        }
+        
+        // Get by block name (legacy support)
         if ($this->query('name')) {
             $block = ContentBlock::where('block_name', $this->query('name'))
                 ->active()
@@ -38,6 +55,7 @@ class ContentBlockController extends BaseApiController
                 $this->notFound('Content block not found');
             }
             
+            $this->cacheService->setCacheHeaders($block->updated_at);
             $this->success(['block' => $block->toArray()]);
         }
         
@@ -59,6 +77,15 @@ class ContentBlockController extends BaseApiController
         
         // Apply pagination
         $result = $this->paginate($query, $this->query);
+        
+        // Set cache headers
+        if (!empty($result['data'])) {
+            $collection = collect($result['data']);
+            $latestTimestamp = $this->cacheService->getLatestTimestamp($collection);
+            if ($latestTimestamp) {
+                $this->cacheService->setCacheHeaders($latestTimestamp);
+            }
+        }
         
         $this->success(
             ['blocks' => $result['data']],
@@ -90,8 +117,19 @@ class ContentBlockController extends BaseApiController
             $this->validationError('Validation failed', $errors);
         }
         
+        // Generate unique slug if not provided
+        $data = $this->input;
+        if (empty($data['slug'])) {
+            $data['slug'] = $this->generateUniqueSlug($data['block_name'], ContentBlock::class);
+        } else {
+            $data['slug'] = $this->generateUniqueSlug($data['slug'], ContentBlock::class);
+        }
+        
         // Create content block
-        $block = ContentBlock::create($this->input);
+        $block = ContentBlock::create($data);
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('content_blocks');
         
         \ApiLogger::info("Content block created successfully", [
             'block_id' => $block->id,
@@ -131,8 +169,16 @@ class ContentBlockController extends BaseApiController
         $data = $this->input;
         unset($data['id']);
         
+        // Handle slug update if provided
+        if (isset($data['slug']) && $data['slug'] !== $block->slug) {
+            $data['slug'] = $this->generateUniqueSlug($data['slug'], ContentBlock::class, $id);
+        }
+        
         // Update content block
         $block->update($data);
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('content_blocks');
         
         \ApiLogger::info("Content block updated successfully", [
             'block_id' => $id,
@@ -168,6 +214,9 @@ class ContentBlockController extends BaseApiController
         // Find and delete content block
         $block = ContentBlock::findOrFail($id);
         $block->delete();
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache('content_blocks');
         
         \ApiLogger::info("Content block deleted successfully", ['block_id' => $id]);
         
