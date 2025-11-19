@@ -204,6 +204,71 @@ try {
         )
     ");
     
+    echo "Creating admin_users table...\n";
+    $db->statement("
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email VARCHAR(255) NOT NULL UNIQUE,
+            name VARCHAR(255) NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            role VARCHAR(20) DEFAULT 'admin',
+            status VARCHAR(20) DEFAULT 'active',
+            last_login_at DATETIME NULL,
+            last_login_ip VARCHAR(45) NULL,
+            failed_login_attempts INTEGER DEFAULT 0,
+            locked_until DATETIME NULL,
+            remember_token VARCHAR(100) NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+    
+    echo "Creating admin_sessions table...\n";
+    $db->statement("
+        CREATE TABLE IF NOT EXISTS admin_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id VARCHAR(128) NOT NULL UNIQUE,
+            user_id INTEGER NOT NULL,
+            ip_address VARCHAR(45) NOT NULL,
+            user_agent TEXT,
+            csrf_token VARCHAR(64) NULL,
+            expires_at DATETIME NOT NULL,
+            last_activity_at DATETIME NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+        )
+    ");
+    
+    echo "Creating admin_login_attempts table...\n";
+    $db->statement("
+        CREATE TABLE IF NOT EXISTS admin_login_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email VARCHAR(255) NOT NULL,
+            ip_address VARCHAR(45) NOT NULL,
+            user_agent TEXT,
+            success INTEGER NOT NULL DEFAULT 0,
+            failure_reason VARCHAR(255) NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ");
+    
+    echo "Creating admin_action_logs table...\n";
+    $db->statement("
+        CREATE TABLE IF NOT EXISTS admin_action_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            action VARCHAR(100) NOT NULL,
+            entity_type VARCHAR(100) NULL,
+            entity_id INTEGER NULL,
+            payload TEXT,
+            ip_address VARCHAR(45) NOT NULL,
+            user_agent TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES admin_users(id) ON DELETE CASCADE
+        )
+    ");
+    
     $settingCount = $db->table('settings')->count();
     if ($settingCount === 0) {
         $db->table('settings')->insert([
@@ -221,7 +286,11 @@ try {
     echo "  Forms: " . $db->table('forms')->count() . "\n";
     echo "  Form Fields: " . $db->table('form_fields')->count() . "\n";
     echo "  Form Submissions: " . $db->table('form_submissions')->count() . "\n";
-    echo "  Settings Audit: " . $db->table('settings_audit')->count() . "\n\n";
+    echo "  Settings Audit: " . $db->table('settings_audit')->count() . "\n";
+    echo "  Admin Users: " . $db->table('admin_users')->count() . "\n";
+    echo "  Admin Sessions: " . $db->table('admin_sessions')->count() . "\n";
+    echo "  Admin Login Attempts: " . $db->table('admin_login_attempts')->count() . "\n";
+    echo "  Admin Action Logs: " . $db->table('admin_action_logs')->count() . "\n\n";
     
 } catch (Exception $e) {
     echo "\n✗ Error: " . $e->getMessage() . "\n\n";

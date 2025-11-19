@@ -12,13 +12,15 @@ if (!defined('ADMIN_INIT')) {
 
 class CSRF {
     /**
-     * Generate a new CSRF token and store in session
+     * Generate a new CSRF token and store in session (and optionally DB)
      * 
      * @return string The generated token
      */
     public static function generateToken() {
         if (!isset($_SESSION['CSRF_TOKEN']) || empty($_SESSION['CSRF_TOKEN'])) {
             $_SESSION['CSRF_TOKEN'] = bin2hex(random_bytes(32));
+            
+            self::syncTokenToDatabase();
         }
         
         return $_SESSION['CSRF_TOKEN'];
@@ -44,8 +46,35 @@ class CSRF {
             return false;
         }
         
-        // Use hash_equals to prevent timing attacks
         return hash_equals($_SESSION['CSRF_TOKEN'], $token);
+    }
+    
+    /**
+     * Sync CSRF token to database session
+     */
+    private static function syncTokenToDatabase() {
+        if (!isset($_SESSION['CSRF_TOKEN'])) {
+            return;
+        }
+        
+        $sessionId = session_id();
+        if (empty($sessionId)) {
+            return;
+        }
+        
+        try {
+            if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
+                require_once __DIR__ . '/../../vendor/autoload.php';
+                require_once __DIR__ . '/../../bootstrap/eloquent.php';
+                
+                $session = \App\Models\AdminSession::bySessionId($sessionId)->first();
+                if ($session) {
+                    $session->csrf_token = $_SESSION['CSRF_TOKEN'];
+                    $session->save();
+                }
+            }
+        } catch (Exception $e) {
+        }
     }
     
     /**
@@ -107,9 +136,10 @@ class CSRF {
     }
     
     /**
-     * Regenerate CSRF token (call after successful form submission)
+     * Regenerate CSRF token (call after successful form submission or auth changes)
      */
     public static function regenerateToken() {
         $_SESSION['CSRF_TOKEN'] = bin2hex(random_bytes(32));
+        self::syncTokenToDatabase();
     }
 }

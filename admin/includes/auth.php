@@ -83,10 +83,22 @@ class Auth {
      * Log out a user
      */
     public static function logout() {
-        // Unset all session variables
+        $sessionId = session_id();
+        
+        try {
+            if (!empty($sessionId) && file_exists(__DIR__ . '/../../vendor/autoload.php')) {
+                require_once __DIR__ . '/../../vendor/autoload.php';
+                require_once __DIR__ . '/../../bootstrap/eloquent.php';
+                
+                $authService = new \App\Services\AdminAuthService();
+                $authService->destroySession($sessionId);
+            }
+        } catch (Exception $e) {
+            error_log('Logout error: ' . $e->getMessage());
+        }
+        
         $_SESSION = [];
         
-        // Delete the session cookie
         if (isset($_COOKIE[session_name()])) {
             $params = session_get_cookie_params();
             setcookie(
@@ -100,7 +112,6 @@ class Auth {
             );
         }
         
-        // Destroy the session
         session_destroy();
     }
     
