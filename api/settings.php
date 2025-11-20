@@ -16,19 +16,28 @@ use App\Services\SettingsService;
 SecurityHeaders::apply();
 SecurityHeaders::handlePreflight();
 
-// Settings are admin-only - require authentication for all operations
-requireAdminAuth();
-
 $settingsService = new SettingsService();
 $method = $_SERVER['REQUEST_METHOD'];
 $rateLimiter = new RateLimiter();
 
+// Public read groups that don't require authentication
+$publicGroups = ['contact', 'social', 'seo'];
+
 try {
     switch ($method) {
         case 'GET':
+            // Check if grouped read is for a public group
+            $isPublicRead = isset($_GET['group']) && in_array($_GET['group'], $publicGroups);
+            
+            // Require authentication for non-public reads
+            if (!$isPublicRead) {
+                requireAdminAuth();
+            }
+            
             // Get settings with optional grouping or single key lookup
             if (isset($_GET['key'])) {
-                // Single setting lookup
+                // Single setting lookup - admin only
+                requireAdminAuth();
                 $key = $_GET['key'];
                 
                 if (empty($key) || !is_string($key)) {
@@ -52,7 +61,7 @@ try {
                     ApiResponse::serverError('Failed to retrieve setting. Please try again.');
                 }
             } elseif (isset($_GET['group'])) {
-                // Grouped settings lookup
+                // Grouped settings lookup - public for certain groups
                 $group = $_GET['group'];
                 
                 if (empty($group) || !is_string($group)) {
@@ -60,18 +69,23 @@ try {
                 }
                 
                 try {
-                    $settings = $settingsService->getGrouped($group, true);
+                    $settings = $settingsService->getGrouped($group . '_', true);
                     ApiResponse::success([
                         'group' => $group,
                         'settings' => $settings,
-                        'count' => count($settings)
+                        'count' => count($settings),
+                        'cache_info' => [
+                            'enabled' => true,
+                            'ttl' => 300
+                        ]
                     ]);
                 } catch (\Exception $e) {
                     ApiLogger::error('Failed to retrieve grouped settings', ['group' => $group, 'error' => $e->getMessage()]);
                     ApiResponse::serverError('Failed to retrieve settings. Please try again.');
                 }
             } elseif (isset($_GET['audit'])) {
-                // Get audit history
+                // Get audit history - admin only
+                requireAdminAuth();
                 $key = $_GET['audit'] !== '' ? $_GET['audit'] : null;
                 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 50;
                 
@@ -86,7 +100,8 @@ try {
                     ApiResponse::serverError('Failed to retrieve audit history. Please try again.');
                 }
             } else {
-                // Get all settings
+                // Get all settings - admin only
+                requireAdminAuth();
                 try {
                     $settings = $settingsService->getAll(true);
                     ApiResponse::success([
@@ -106,6 +121,9 @@ try {
             
         case 'POST':
         case 'PUT':
+            // Require admin authentication for write operations
+            requireAdminAuth();
+            
             // Verify CSRF token for write operations
             verifyCsrfToken();
             
@@ -184,6 +202,9 @@ try {
             break;
             
         case 'DELETE':
+            // Require admin authentication for write operations
+            requireAdminAuth();
+            
             // Verify CSRF token for write operations
             verifyCsrfToken();
             

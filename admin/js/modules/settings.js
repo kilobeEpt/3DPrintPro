@@ -1,13 +1,18 @@
-// Settings Module
+// Settings Module - v2.0 with Tabbed Interface
 class SettingsModule {
     constructor() { 
         this.settings = {};
         this.tokenVisible = false;
+        this.smtpPasswordVisible = false;
         this.auditHistory = [];
+        this.currentTab = 'contacts';
     }
     
     async init() {
         console.log('⚙️ Loading settings...');
+        
+        // Initialize tabs
+        this.initTabs();
         
         // Save button
         const saveBtn = document.getElementById('saveSettingsBtn');
@@ -21,10 +26,22 @@ class SettingsModule {
             toggleBtn.addEventListener('click', () => this.toggleTokenVisibility());
         }
         
+        // Toggle SMTP password visibility button
+        const toggleSmtpBtn = document.getElementById('toggleSmtpPasswordBtn');
+        if (toggleSmtpBtn) {
+            toggleSmtpBtn.addEventListener('click', () => this.toggleSmtpPasswordVisibility());
+        }
+        
         // Test Telegram button
-        const testBtn = document.getElementById('testTelegramBtn');
-        if (testBtn) {
-            testBtn.addEventListener('click', () => this.testTelegram());
+        const testTelegramBtn = document.getElementById('testTelegramBtn');
+        if (testTelegramBtn) {
+            testTelegramBtn.addEventListener('click', () => this.testTelegram());
+        }
+        
+        // Test Email button
+        const testEmailBtn = document.getElementById('testEmailBtn');
+        if (testEmailBtn) {
+            testEmailBtn.addEventListener('click', () => this.testEmail());
         }
         
         // View Audit History button
@@ -34,6 +51,38 @@ class SettingsModule {
         }
         
         await this.loadSettings();
+    }
+    
+    initTabs() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tab = e.currentTarget.dataset.tab;
+                this.switchTab(tab);
+            });
+        });
+    }
+    
+    switchTab(tabName) {
+        // Update buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if (btn.dataset.tab === tabName) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Update content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            if (content.dataset.tab === tabName) {
+                content.classList.add('active');
+            } else {
+                content.classList.remove('active');
+            }
+        });
+        
+        this.currentTab = tabName;
     }
     
     async loadSettings() {
@@ -75,6 +124,9 @@ class SettingsModule {
             
             if (input.type === 'checkbox') {
                 input.checked = !!value || value === '1' || value === 1;
+            } else if (input.tagName === 'SELECT') {
+                // For select elements, set the selected option
+                input.value = value || '';
             } else {
                 input.value = value || '';
             }
@@ -100,6 +152,16 @@ class SettingsModule {
         this.tokenVisible = !this.tokenVisible;
         input.type = this.tokenVisible ? 'text' : 'password';
         icon.className = this.tokenVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+    }
+    
+    toggleSmtpPasswordVisibility() {
+        const input = document.getElementById('smtp_password');
+        const icon = document.querySelector('#toggleSmtpPasswordBtn i');
+        if (!input || !icon) return;
+        
+        this.smtpPasswordVisible = !this.smtpPasswordVisible;
+        input.type = this.smtpPasswordVisible ? 'text' : 'password';
+        icon.className = this.smtpPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
     }
     
     async testTelegram() {
@@ -143,6 +205,55 @@ class SettingsModule {
             // Re-enable button
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить тестовое сообщение';
+            
+            // Clear result after 5 seconds
+            setTimeout(() => {
+                if (resultSpan) resultSpan.innerHTML = '';
+            }, 5000);
+        }
+    }
+    
+    async testEmail() {
+        const btn = document.getElementById('testEmailBtn');
+        const resultSpan = document.getElementById('emailTestResult');
+        
+        if (!btn || !resultSpan) return;
+        
+        // Save settings first
+        await this.saveSettings(true);
+        
+        // Disable button and show loading
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+        resultSpan.innerHTML = '';
+        
+        try {
+            const response = await fetch('/api/email-test.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': window.ADMIN_SESSION?.csrfToken || ''
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                resultSpan.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Письмо отправлено!</span>';
+                this.showSuccess('Тестовое письмо отправлено');
+            } else {
+                const errorMsg = data.error || 'Неизвестная ошибка';
+                resultSpan.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle"></i> Ошибка: ${errorMsg}</span>`;
+                this.showError(`Ошибка: ${errorMsg}`);
+            }
+        } catch (error) {
+            console.error('❌ Failed to test Email:', error);
+            resultSpan.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle"></i> Ошибка сети</span>';
+            this.showError('Ошибка при отправке тестового письма');
+        } finally {
+            // Re-enable button
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Отправить тестовое письмо';
             
             // Clear result after 5 seconds
             setTimeout(() => {
