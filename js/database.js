@@ -8,9 +8,68 @@ class Database {
         this.metadataKey = '3dprintpro_metadata';
         this.api = typeof apiClient !== 'undefined' ? apiClient : null;
         this.useAPI = this.api !== null;
+        this.cache = typeof CacheManager !== 'undefined' ? new CacheManager() : null;
+        this.syncClient = null;
         this.lastSync = {};
         this.loadMetadata();
-        console.log(this.useAPI ? '✅ Database using API' : '⚠️ Database using localStorage fallback');
+        
+        // Initialize SSE sync if available
+        if (typeof SyncClient !== 'undefined') {
+            this.initSyncClient();
+        }
+        
+        console.log(this.useAPI ? '✅ Database using API with IndexedDB cache' : '⚠️ Database using localStorage fallback');
+    }
+    
+    initSyncClient() {
+        try {
+            this.syncClient = new SyncClient({ autoConnect: true });
+            
+            this.syncClient.on('invalidate', async (event) => {
+                console.log('🔄 Content invalidation received:', event);
+                const resource = event.resource;
+                
+                // Invalidate IndexedDB cache
+                if (this.cache) {
+                    await this.cache.invalidateResource(resource);
+                }
+                
+                // Clear localStorage cache
+                this.clearLocalStorageCache(resource);
+                
+                // Emit custom event for other components to listen
+                window.dispatchEvent(new CustomEvent('content-invalidated', {
+                    detail: { resource, timestamp: event.timestamp }
+                }));
+            });
+            
+            this.syncClient.on('connected', () => {
+                console.log('✅ Real-time sync connected');
+            });
+            
+            this.syncClient.on('disconnected', () => {
+                console.log('⚠️ Real-time sync disconnected');
+            });
+        } catch (error) {
+            console.error('❌ Failed to initialize sync client:', error);
+        }
+    }
+    
+    clearLocalStorageCache(resource) {
+        try {
+            const allData = JSON.parse(localStorage.getItem(this.storageKey)) || {};
+            if (allData[resource]) {
+                delete allData[resource];
+                localStorage.setItem(this.storageKey, JSON.stringify(allData));
+            }
+            
+            if (this.lastSync[resource]) {
+                delete this.lastSync[resource];
+                this.saveMetadata();
+            }
+        } catch (error) {
+            console.error('❌ Failed to clear localStorage cache:', error);
+        }
     }
     
     loadMetadata() {
@@ -123,12 +182,44 @@ class Database {
     async getServices(filters = {}) {
         if (this.useAPI) {
             try {
+                // Try IndexedDB cache first
+                if (this.cache) {
+                    const cached = await this.cache.get('services:list');
+                    if (cached && cached.data) {
+                        console.log('✅ Using cached services from IndexedDB');
+                        return cached.data;
+                    }
+                }
+                
+                // Fetch from API
                 const result = await this.api.getServices({ active: true, ...filters });
-                this.cacheToLocalStorage('services', result.services);
+                const services = result.services || [];
+                
+                // Cache in IndexedDB
+                if (this.cache && services.length > 0) {
+                    await this.cache.set('services:list', services, {
+                        resource: 'services',
+                        ttl: 300000 // 5 minutes
+                    });
+                }
+                
+                // Fallback to localStorage
+                this.cacheToLocalStorage('services', services);
                 this.updateSyncTimestamp('services', 'api');
-                return result.services;
+                return services;
             } catch (error) {
-                console.error('❌ Failed to fetch services from API, using localStorage fallback', error);
+                console.error('❌ Failed to fetch services from API, using cache fallback', error);
+                
+                // Try IndexedDB cache even if expired
+                if (this.cache) {
+                    const cached = await this.cache.get('services:list');
+                    if (cached && cached.data) {
+                        console.log('⚠️ Using stale cached services from IndexedDB');
+                        return cached.data;
+                    }
+                }
+                
+                // Fallback to localStorage
                 const cached = this.getFromLocalStorage('services') || this.getDefaultServices();
                 this.updateSyncTimestamp('services', 'cache');
                 return cached;
@@ -191,12 +282,40 @@ class Database {
     async getPortfolio(filters = {}) {
         if (this.useAPI) {
             try {
+                // Try IndexedDB cache first
+                if (this.cache) {
+                    const cached = await this.cache.get('portfolio:list');
+                    if (cached && cached.data) {
+                        console.log('✅ Using cached portfolio from IndexedDB');
+                        return cached.data;
+                    }
+                }
+                
+                // Fetch from API
                 const result = await this.api.getPortfolio({ active: true, ...filters });
-                this.cacheToLocalStorage('portfolio', result.items);
+                const items = result.items || [];
+                
+                // Cache in IndexedDB
+                if (this.cache && items.length > 0) {
+                    await this.cache.set('portfolio:list', items, {
+                        resource: 'portfolio',
+                        ttl: 300000
+                    });
+                }
+                
+                this.cacheToLocalStorage('portfolio', items);
                 this.updateSyncTimestamp('portfolio', 'api');
-                return result.items;
+                return items;
             } catch (error) {
-                console.error('❌ Failed to fetch portfolio from API, using localStorage fallback', error);
+                console.error('❌ Failed to fetch portfolio from API, using cache fallback', error);
+                
+                if (this.cache) {
+                    const cached = await this.cache.get('portfolio:list');
+                    if (cached && cached.data) {
+                        return cached.data;
+                    }
+                }
+                
                 const cached = this.getFromLocalStorage('portfolio') || [];
                 this.updateSyncTimestamp('portfolio', 'cache');
                 return cached;
@@ -259,12 +378,40 @@ class Database {
     async getTestimonials(filters = {}) {
         if (this.useAPI) {
             try {
+                // Try IndexedDB cache first
+                if (this.cache) {
+                    const cached = await this.cache.get('testimonials:list');
+                    if (cached && cached.data) {
+                        console.log('✅ Using cached testimonials from IndexedDB');
+                        return cached.data;
+                    }
+                }
+                
+                // Fetch from API
                 const result = await this.api.getTestimonials({ active: true, approved: true, ...filters });
-                this.cacheToLocalStorage('testimonials', result.testimonials);
+                const testimonials = result.testimonials || [];
+                
+                // Cache in IndexedDB
+                if (this.cache && testimonials.length > 0) {
+                    await this.cache.set('testimonials:list', testimonials, {
+                        resource: 'testimonials',
+                        ttl: 300000
+                    });
+                }
+                
+                this.cacheToLocalStorage('testimonials', testimonials);
                 this.updateSyncTimestamp('testimonials', 'api');
-                return result.testimonials;
+                return testimonials;
             } catch (error) {
-                console.error('❌ Failed to fetch testimonials from API, using localStorage fallback', error);
+                console.error('❌ Failed to fetch testimonials from API, using cache fallback', error);
+                
+                if (this.cache) {
+                    const cached = await this.cache.get('testimonials:list');
+                    if (cached && cached.data) {
+                        return cached.data;
+                    }
+                }
+                
                 const cached = this.getFromLocalStorage('testimonials') || this.getDefaultTestimonials();
                 this.updateSyncTimestamp('testimonials', 'cache');
                 return cached;
@@ -327,12 +474,40 @@ class Database {
     async getFAQ(filters = {}) {
         if (this.useAPI) {
             try {
+                // Try IndexedDB cache first
+                if (this.cache) {
+                    const cached = await this.cache.get('faq:list');
+                    if (cached && cached.data) {
+                        console.log('✅ Using cached FAQ from IndexedDB');
+                        return cached.data;
+                    }
+                }
+                
+                // Fetch from API
                 const result = await this.api.getFAQ({ active: true, ...filters });
-                this.cacheToLocalStorage('faq', result.items);
+                const items = result.items || [];
+                
+                // Cache in IndexedDB
+                if (this.cache && items.length > 0) {
+                    await this.cache.set('faq:list', items, {
+                        resource: 'faq',
+                        ttl: 300000
+                    });
+                }
+                
+                this.cacheToLocalStorage('faq', items);
                 this.updateSyncTimestamp('faq', 'api');
-                return result.items;
+                return items;
             } catch (error) {
-                console.error('❌ Failed to fetch FAQ from API, using localStorage fallback', error);
+                console.error('❌ Failed to fetch FAQ from API, using cache fallback', error);
+                
+                if (this.cache) {
+                    const cached = await this.cache.get('faq:list');
+                    if (cached && cached.data) {
+                        return cached.data;
+                    }
+                }
+                
                 const cached = this.getFromLocalStorage('faq') || this.getDefaultFAQ();
                 this.updateSyncTimestamp('faq', 'cache');
                 return cached;

@@ -174,7 +174,7 @@ class PortfolioController extends BaseApiController
         $item = Portfolio::create($data);
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('portfolio');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Portfolio item created successfully", [
             'item_id' => $item->id,
@@ -223,7 +223,7 @@ class PortfolioController extends BaseApiController
         $item->update($data);
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('portfolio');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Portfolio item updated successfully", [
             'item_id' => $id,
@@ -268,7 +268,7 @@ class PortfolioController extends BaseApiController
         $item->delete();
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('portfolio');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Portfolio item deleted successfully", ['item_id' => $id]);
         

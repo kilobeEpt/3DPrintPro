@@ -98,6 +98,25 @@ abstract class BaseApiController
     }
     
     /**
+     * Invalidate cache and broadcast SSE event
+     * 
+     * @param string $resourceType Resource type (defaults to controller's resource name)
+     * @return void
+     */
+    protected function invalidateResourceCache($resourceType = null)
+    {
+        $resource = $resourceType ?? $this->getResourceName();
+        
+        // Invalidate cache
+        $this->cacheService->invalidateCache($resource);
+        
+        // Broadcast SSE event
+        $this->sseBroadcaster->broadcastCacheInvalidation($resource);
+        
+        \ApiLogger::info("Cache invalidated for resource: {$resource}");
+    }
+    
+    /**
      * Parse request input based on method
      * 
      * @return array

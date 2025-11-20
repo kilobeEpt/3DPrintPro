@@ -340,7 +340,7 @@
                     FDM, SLA, SLS технологии. От прототипов до функциональных изделий.
                 </p>
             </div>
-            <div class="services-grid" id="servicesGrid">
+            <div class="services-grid" id="servicesGrid" data-content="services">
                 <!-- Services will be loaded here -->
             </div>
             <div style="text-align: center; margin-top: 30px;">
@@ -519,7 +519,7 @@
                 </p>
             </div>
 
-            <div class="portfolio-grid" id="portfolioGrid">
+            <div class="portfolio-grid" id="portfolioGrid" data-content="portfolio">
                 <!-- Portfolio items will be loaded here (limited on homepage) -->
             </div>
             
@@ -590,7 +590,7 @@
                 <span class="section-label">Отзывы</span>
                 <h2 class="section-title">Что говорят клиенты</h2>
             </div>
-            <div class="testimonials-slider" id="testimonialsSlider">
+            <div class="testimonials-slider" id="testimonialsSlider" data-content="testimonials">
                 <!-- Testimonials will be loaded here (limited on homepage) -->
             </div>
             <div class="slider-controls">
@@ -794,9 +794,13 @@
     </div>
 
     <!-- Scripts -->
+    <link rel="stylesheet" href="css/skeleton.css">
     <script src="config.js"></script>
+    <script src="js/cache-manager.js"></script>
+    <script src="js/sync-client.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/database.js"></script>
+    <script src="js/content-loader.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/validators.js"></script>
     <script src="js/status-indicator.js"></script>
@@ -804,5 +808,18 @@
     <script src="js/calculator.js"></script>
     <script src="js/telegram.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        // Bootstrap page content
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof contentLoader !== 'undefined') {
+                try {
+                    await contentLoader.bootstrapPage(['services', 'portfolio', 'testimonials']);
+                    console.log('✅ Page content bootstrapped');
+                } catch (error) {
+                    console.error('❌ Failed to bootstrap content:', error);
+                }
+            }
+        });
+    </script>
 </body>
 </html>

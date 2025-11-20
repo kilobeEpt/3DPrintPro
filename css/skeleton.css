@@ -1,0 +1,174 @@
+/* ========================================
+   SKELETON LOADING STATES
+   ======================================== */
+
+.loading-skeleton {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 0%,
+        #f8f8f8 50%,
+        #f0f0f0 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+    min-height: 100px;
+}
+
+.loading-skeleton * {
+    visibility: hidden;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.loading-skeleton::after {
+    content: "Загрузка...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #999;
+    font-size: 14px;
+    visibility: visible;
+}
+
+/* Skeleton for cards */
+.loading-skeleton.card {
+    min-height: 200px;
+}
+
+/* Skeleton for lists */
+.loading-skeleton.list {
+    min-height: 300px;
+}
+
+/* Skeleton for grid */
+.loading-skeleton.grid {
+    min-height: 400px;
+}
+
+/* Error state */
+.loading-error {
+    padding: 40px;
+    text-align: center;
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+}
+
+.loading-error .error-message {
+    color: #856404;
+}
+
+.loading-error .error-message p {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.loading-error .error-message button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.loading-error .error-message button:hover {
+    background-color: #0056b3;
+}
+
+/* Offline indicator */
+.offline-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #dc3545;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    z-index: 10000;
+    animation: slide-in-up 0.3s ease-out;
+}
+
+.offline-indicator.online {
+    background-color: #28a745;
+}
+
+@keyframes slide-in-up {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Sync status indicator */
+.sync-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #17a2b8;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 9999;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sync-indicator.syncing::before {
+    content: "🔄";
+    animation: rotate 1s linear infinite;
+}
+
+.sync-indicator.synced::before {
+    content: "✅";
+}
+
+.sync-indicator.error::before {
+    content: "❌";
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .offline-indicator {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        text-align: center;
+    }
+    
+    .sync-indicator {
+        top: 10px;
+        right: 10px;
+    }
+}
