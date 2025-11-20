@@ -14,9 +14,10 @@
 
 1. **Install Dependencies** → Run `composer install` in project root
 2. **Setup Database & Backend** → See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md)
-3. **Deploy to Production** → See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+3. **Deploy to Production** → See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) or use `bash scripts/deploy.sh`
 4. **Configure Admin Panel** → See [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)
-5. *(Optional)* **Use Eloquent ORM** → See [docs/ELOQUENT_SETUP.md](docs/ELOQUENT_SETUP.md)
+5. **Production Operations** → See [docs/PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md)
+6. *(Optional)* **Use Eloquent ORM** → See [docs/ELOQUENT_SETUP.md](docs/ELOQUENT_SETUP.md)
 
 ### For Existing Installations
 
@@ -36,6 +37,7 @@
 |----------|-------------|
 | **[SETUP_GUIDE.md](docs/SETUP_GUIDE.md)** | Complete installation and configuration guide |
 | **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** | Production deployment checklist and procedures |
+| **[PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md)** | End-to-end production deployment and operations guide |
 | **[HOSTING_AUDIT.md](docs/HOSTING_AUDIT.md)** | Hosting environment validation and readiness checks |
 | **[API_REFERENCE.md](docs/API_REFERENCE.md)** | REST API endpoints and usage documentation |
 | **[ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)** | Admin panel features and usage instructions |
@@ -256,7 +258,26 @@ See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for complete API documentatio
 
 ## 📦 Installation
 
-### Quick Installation (7 Minutes)
+### Automated Installation (5 Minutes)
+
+```bash
+# 1. Upload files to server
+scp -r * user@your-server:/var/www/html/
+
+# 2. Run automated deployment
+bash scripts/deploy.sh
+
+# 3. Configure .env with your credentials
+nano .env
+
+# 4. Setup admin user
+php scripts/create-admin.php
+
+# 5. Seed initial data (if not done during deploy)
+php scripts/provision-database.php --seed
+```
+
+### Manual Installation (10 Minutes)
 
 ```bash
 # 1. Upload files to server
@@ -269,20 +290,23 @@ exit
 mysql -u user -p your_db < database/schema.sql
 
 # 3. Configure backend
-cp api/config.example.php api/config.php
-nano api/config.php  # Edit credentials
+cp .env.production.example .env
+nano .env  # Edit credentials
 
-# 4. Setup admin user (RBAC v4.0)
+# 4. Install dependencies
+composer install --no-dev --optimize-autoloader
+
+# 5. Setup admin user (RBAC v4.0)
 php scripts/create-admin.php
 
-# 5. Seed initial data
-curl https://your-domain.com/api/init-database.php
+# 6. Seed initial data
+php scripts/provision-database.php --seed
 
-# 6. Verify installation
-curl https://your-domain.com/api/test.php?audit=full
+# 7. Verify installation
+php scripts/api_smoke.php
 ```
 
-See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) for detailed installation instructions.
+See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) for detailed installation instructions or [docs/PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md) for production deployment.
 
 ---
 
@@ -429,30 +453,57 @@ See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for detailed troubleshoot
 
 ## 📊 Production Deployment
 
+### Automated Deployment
+
+```bash
+# Validate hosting environment
+php scripts/hosting-audit.php --strict
+
+# Deploy to production (dry run first)
+bash scripts/deploy.sh --dry-run
+
+# Actual deployment
+bash scripts/deploy.sh
+
+# Review deployment log
+cat storage/logs/deploy_*.log
+```
+
 ### Pre-Deployment Checklist
 
-- [ ] All files uploaded
-- [ ] Database created and seeded
-- [ ] `api/config.php` configured
-- [ ] Admin credentials set
-- [ ] HTTPS enabled
-- [ ] Telegram configured
+- [ ] Hosting environment validated (`php scripts/hosting-audit.php --strict`)
+- [ ] Database provisioned (`php scripts/provision-database.php --seed`)
+- [ ] `.env` configured with production credentials
+- [ ] Admin credentials set (`php scripts/create-admin.php`)
+- [ ] HTTPS enabled and SSL certificate valid
+- [ ] Telegram bot configured and tested
+- [ ] SMTP configured and tested
 - [ ] Forms tested
 - [ ] Mobile responsive verified
 - [ ] SEO tags configured
 
 ### Deployment Steps
 
-1. Upload files via FTP/SFTP
-2. Import database schema
-3. Configure `api/config.php`
-4. Setup admin credentials
-5. Seed initial data
-6. Configure Telegram
-7. Test thoroughly
+Use the automated deployment script:
+
+```bash
+bash scripts/deploy.sh
+```
+
+Or follow manual steps:
+
+1. Validate hosting → `php scripts/hosting-audit.php --strict`
+2. Upload files via SFTP/rsync
+3. Install dependencies → `composer install --no-dev`
+4. Configure `.env` from `.env.production.example`
+5. Set permissions → `chmod 600 .env`, `chmod 755 storage logs`
+6. Verify database → `php database/verify-schema.php`
+7. Run smoke tests → `php scripts/api_smoke.php`
 8. Go live!
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete deployment guide.
+**See [docs/PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md) for complete end-to-end production deployment guide.**
+
+**See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment procedures.**
 
 ---
 
