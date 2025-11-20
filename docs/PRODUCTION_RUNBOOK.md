@@ -33,11 +33,12 @@ This runbook covers Steps 3 and 7–14 of the production deployment workflow for
 
 ### Quick Links
 
-- **Deployment Script**: `scripts/deploy.sh`
-- **Hosting Audit**: `scripts/hosting-audit.php`
-- **Database Provisioning**: `scripts/provision-database.php`
-- **Web Server Config**: [WEB_SERVER_CONFIG.md](WEB_SERVER_CONFIG.md)
-- **Smoke Tests**: `scripts/api_smoke.php`
+- **CI/CD Pipeline**: [CI_CD.md](CI_CD.md) - GitHub Actions automation with rollback
+- **Deployment Script**: `scripts/deploy.sh` - Manual deployment automation
+- **Hosting Audit**: `scripts/hosting-audit.php` - Environment validation
+- **Database Provisioning**: `scripts/provision-database.php` - Database setup
+- **Web Server Config**: [WEB_SERVER_CONFIG.md](WEB_SERVER_CONFIG.md) - Nginx/Apache configuration
+- **Smoke Tests**: `scripts/api_smoke.php` - Post-deployment verification
 
 ---
 
@@ -95,9 +96,35 @@ nano .env
 
 ## Automated Deployment
 
-### Using deploy.sh Script
+### Method 1: CI/CD Pipeline (Recommended for Production)
 
-The recommended deployment method uses the automated script:
+For production deployments, use the GitHub Actions CI/CD pipeline:
+
+```bash
+# Push to main branch (triggers automatic deployment after approval)
+git push origin main
+
+# Or manually trigger deployment via GitHub CLI
+gh workflow run deploy.yml --ref main
+
+# Rollback to previous release
+gh workflow run deploy.yml --ref main -f rollback_release=release_20240120_120530
+```
+
+**Features:**
+- ✅ Automated testing before deployment
+- ✅ Manual approval gate (production environment)
+- ✅ Timestamped releases with rollback support
+- ✅ Post-deployment smoke tests
+- ✅ Deployment logs as artifacts (30-day retention)
+- ✅ One-click rollback capability
+- ✅ Audit trail of all deployments
+
+📖 **See [CI_CD.md](CI_CD.md) for complete CI/CD documentation including GitHub secrets setup, rollback procedures, and monitoring integration.**
+
+### Method 2: Using deploy.sh Script
+
+For manual or server-side deployments, use the automated script:
 
 ```bash
 # Test what would happen (dry run)

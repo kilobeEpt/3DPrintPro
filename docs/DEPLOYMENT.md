@@ -3,12 +3,38 @@
 Complete guide for deploying 3D Print Pro to production hosting.
 
 **📖 For comprehensive end-to-end production operations, see [PRODUCTION_RUNBOOK.md](PRODUCTION_RUNBOOK.md).**
+**🤖 For CI/CD automation with GitHub Actions, see [CI_CD.md](CI_CD.md).**
 
 ## Quick Deployment
 
-### Automated Deployment (Recommended)
+### CI/CD Deployment (Recommended for Production)
 
-Use the automated deployment script for consistent, repeatable deployments:
+Use GitHub Actions for automated, audited deployments with built-in rollback:
+
+```bash
+# Push to main branch (triggers automatic deployment)
+git push origin main
+
+# Or manually trigger via GitHub CLI
+gh workflow run deploy.yml --ref main
+
+# Rollback to previous release
+gh workflow run deploy.yml --ref main -f rollback_release=release_20240120_120530
+```
+
+**Features:**
+- ✅ Automated testing (PHPUnit)
+- ✅ Manual approval gate (production environment)
+- ✅ Timestamped releases with rollback support
+- ✅ Post-deployment smoke tests
+- ✅ Deployment logs as artifacts (30-day retention)
+- ✅ One-click rollback capability
+
+📖 **See [CI_CD.md](CI_CD.md) for complete CI/CD pipeline documentation, GitHub secrets setup, and rollback procedures.**
+
+### Automated Script Deployment
+
+Use the automated deployment script for manual or server-side deployments:
 
 ```bash
 # Test deployment (dry run)

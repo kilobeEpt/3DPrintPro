@@ -37,6 +37,7 @@
 |----------|-------------|
 | **[SETUP_GUIDE.md](docs/SETUP_GUIDE.md)** | Complete installation and configuration guide |
 | **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** | Production deployment checklist and procedures |
+| **[CI_CD.md](docs/CI_CD.md)** | CI/CD pipeline, automated deployment, and rollback procedures |
 | **[PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md)** | End-to-end production deployment and operations guide |
 | **[HOSTING_AUDIT.md](docs/HOSTING_AUDIT.md)** | Hosting environment validation and readiness checks |
 | **[API_REFERENCE.md](docs/API_REFERENCE.md)** | REST API endpoints and usage documentation |
