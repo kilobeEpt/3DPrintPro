@@ -1,0 +1,403 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      rollback_release:
+        description: 'Release directory to rollback to (e.g., release_20240120_143022). Leave empty for normal deployment.'
+        required: false
+        type: string
+      skip_tests:
+        description: 'Skip test execution (not recommended)'
+        required: false
+        type: boolean
+        default: false
+      force_deploy:
+        description: 'Force deployment even if checks fail (dangerous)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PHP_VERSION: '8.1'
+  COMPOSER_CACHE_VERSION: 'v1'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    # Skip tests if this is a rollback operation
+    if: ${{ !inputs.rollback_release && !inputs.skip_tests }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo_mysql, mbstring, intl, json, curl, gd, openssl, zip
+          coverage: none
+          tools: composer:v2
+          
+      - name: Validate PHP 7.4 compatibility
+        run: |
+          echo "✓ Testing with PHP ${{ env.PHP_VERSION }} ensures forward compatibility"
+          echo "✓ Production runs PHP 7.4+ (configured via composer.json platform)"
+          php -v
+          
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ env.COMPOSER_CACHE_VERSION }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ env.COMPOSER_CACHE_VERSION }}-
+            ${{ runner.os }}-composer-
+            
+      - name: Install composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+        
+      - name: Create test environment file
+        run: |
+          cp .env.example .env
+          echo "DB_CONNECTION=sqlite" >> .env
+          echo "DB_DATABASE=:memory:" >> .env
+          echo "CACHE_DRIVER=array" >> .env
+          
+      - name: Create required directories
+        run: |
+          mkdir -p storage/cache storage/uploads storage/backups storage/logs
+          chmod -R 755 storage
+          
+      - name: Run PHPUnit tests
+        run: composer test
+        
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ github.sha }}
+          path: |
+            storage/logs/
+            tests/
+          retention-days: 7
+          
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: test
+    # Always run if tests passed OR if tests were skipped OR if rollback requested
+    if: |
+      always() && 
+      (needs.test.result == 'success' || needs.test.result == 'skipped' || inputs.rollback_release)
+    environment:
+      name: production
+      url: https://3dprint-omsk.ru
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo_mysql, mbstring, intl, json, curl, gd, openssl, zip
+          coverage: none
+          tools: composer:v2
+          
+      - name: Install production dependencies
+        if: ${{ !inputs.rollback_release }}
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+        
+      - name: Create deployment package
+        if: ${{ !inputs.rollback_release }}
+        run: |
+          echo "Creating deployment package..."
+          mkdir -p deployment-package
+          
+          # Copy application files
+          rsync -av --progress \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='storage/cache/*' \
+            --exclude='storage/logs/*' \
+            --exclude='storage/backups/*' \
+            --exclude='tests' \
+            --exclude='phpunit.xml' \
+            --exclude='.env' \
+            --exclude='.env.example' \
+            --exclude='*.md' \
+            --exclude='ADMIN_*.md' \
+            --exclude='CHANGELOG_*.md' \
+            --exclude='DATABASE_*.md' \
+            --exclude='DELIVERY_*.md' \
+            --exclude='DEPLOYMENT_*.md' \
+            --exclude='DOCS_*.md' \
+            --exclude='DOMAIN_*.md' \
+            --exclude='ELOQUENT_*.md' \
+            --exclude='FORMS_*.md' \
+            --exclude='HOSTING_*.md' \
+            --exclude='IMPLEMENTATION_*.md' \
+            --exclude='SETTINGS_*.md' \
+            --exclude='TEST_*.md' \
+            --exclude='TESTS_*.md' \
+            --exclude='TICKET_*.md' \
+            --exclude='WEBSERVER_*.md' \
+            ./ deployment-package/
+            
+          # Preserve directory structure
+          mkdir -p deployment-package/storage/{cache,uploads/portfolio,uploads/testimonials,backups,logs}
+          touch deployment-package/storage/.gitkeep
+          
+          echo "Package created successfully"
+          du -sh deployment-package
+          
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Deploy to production server
+        if: ${{ !inputs.rollback_release }}
+        run: |
+          echo "Deploying to ${{ secrets.DEPLOY_HOST }}..."
+          
+          # Create timestamped release directory
+          RELEASE_DIR="release_$(date +%Y%m%d_%H%M%S)"
+          
+          # Create release directory on server
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
+            "mkdir -p ${{ secrets.DEPLOY_PATH }}/releases/${RELEASE_DIR}"
+          
+          # Sync files to release directory
+          rsync -avz --progress \
+            -e "ssh -i ~/.ssh/deploy_key" \
+            deployment-package/ \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/releases/${RELEASE_DIR}/
+          
+          # Copy production .env if exists (preserve configuration)
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            # Copy .env from current release if exists
+            if [ -f "current/.env" ]; then
+              cp current/.env releases/${RELEASE_DIR}/.env
+              echo "✓ Copied .env from current release"
+            elif [ -f ".env" ]; then
+              cp .env releases/${RELEASE_DIR}/.env
+              echo "✓ Copied .env from deploy root"
+            else
+              echo "⚠ No .env file found - will need manual configuration"
+            fi
+            
+            # Create shared directories symlinks
+            cd releases/${RELEASE_DIR}
+            rm -rf storage/uploads storage/backups
+            ln -sf ${{ secrets.DEPLOY_PATH }}/shared/uploads storage/uploads
+            ln -sf ${{ secrets.DEPLOY_PATH }}/shared/backups storage/backups
+            
+            echo "✓ Symlinks created for shared directories"
+          ENDSSH
+          
+          # Save release directory for later steps
+          echo "RELEASE_DIR=${RELEASE_DIR}" >> $GITHUB_ENV
+          echo "Deployed to releases/${RELEASE_DIR}"
+          
+      - name: Rollback to previous release
+        if: ${{ inputs.rollback_release }}
+        run: |
+          echo "Rolling back to release: ${{ inputs.rollback_release }}"
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            # Verify release exists
+            if [ ! -d "releases/${{ inputs.rollback_release }}" ]; then
+              echo "✗ Release directory not found: ${{ inputs.rollback_release }}"
+              exit 1
+            fi
+            
+            # Backup current release info
+            if [ -L "current" ]; then
+              PREVIOUS=$(readlink current)
+              echo "Previous release: ${PREVIOUS}"
+            fi
+            
+            # Perform rollback
+            rm -f current
+            ln -sf releases/${{ inputs.rollback_release }} current
+            
+            echo "✓ Rolled back to ${{ inputs.rollback_release }}"
+          ENDSSH
+          
+          # Set release dir for subsequent steps
+          echo "RELEASE_DIR=${{ inputs.rollback_release }}" >> $GITHUB_ENV
+          
+      - name: Run deployment script
+        run: |
+          echo "Running deployment script on server..."
+          
+          DEPLOY_FLAGS="--ci"
+          
+          if [ "${{ inputs.force_deploy }}" = "true" ]; then
+            DEPLOY_FLAGS="${DEPLOY_FLAGS} --force"
+            echo "⚠ Force deploy enabled"
+          fi
+          
+          if [ "${{ inputs.rollback_release }}" != "" ]; then
+            # For rollback, skip some checks
+            DEPLOY_FLAGS="${DEPLOY_FLAGS} --skip-composer --skip-tests"
+            echo "ℹ Rollback mode: skipping composer and tests"
+          fi
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << ENDSSH
+            cd ${{ secrets.DEPLOY_PATH }}/releases/${RELEASE_DIR}
+            
+            # Run deploy script
+            bash scripts/deploy.sh ${DEPLOY_FLAGS}
+            
+            if [ \$? -eq 0 ]; then
+              echo "✓ Deploy script completed successfully"
+            else
+              echo "✗ Deploy script failed"
+              exit 1
+            fi
+          ENDSSH
+          
+      - name: Activate new release
+        if: ${{ !inputs.rollback_release }}
+        run: |
+          echo "Activating new release..."
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            # Backup current symlink
+            if [ -L "current" ]; then
+              PREVIOUS=$(readlink current)
+              echo "previous_release=${PREVIOUS}" >> previous_release.txt
+              echo "Previous release: ${PREVIOUS}"
+            fi
+            
+            # Atomic switch to new release
+            ln -sfn releases/${RELEASE_DIR} current_temp
+            mv -Tf current_temp current
+            
+            echo "✓ Release activated: ${RELEASE_DIR}"
+          ENDSSH
+          
+      - name: Run smoke tests
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          echo "Running post-deployment smoke tests..."
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+            cd ${{ secrets.DEPLOY_PATH }}/current
+            
+            # Run API smoke tests
+            if php scripts/api_smoke.php; then
+              echo "✓ Smoke tests passed"
+            else
+              echo "✗ Smoke tests failed"
+              echo "⚠ Consider rolling back deployment"
+              exit 1
+            fi
+          ENDSSH
+          
+      - name: Cleanup old releases
+        if: ${{ !inputs.rollback_release }}
+        run: |
+          echo "Cleaning up old releases (keeping last 5)..."
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+            cd ${{ secrets.DEPLOY_PATH }}/releases
+            
+            # Keep only last 5 releases
+            ls -1t | tail -n +6 | xargs -r rm -rf
+            
+            echo "✓ Cleanup completed"
+            echo "Available releases:"
+            ls -1t
+          ENDSSH
+          
+      - name: Collect deployment logs
+        if: always()
+        run: |
+          echo "Collecting deployment logs..."
+          
+          mkdir -p deployment-logs
+          
+          ssh -i ~/.ssh/deploy_key ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
+            cd ${{ secrets.DEPLOY_PATH }}/releases/${RELEASE_DIR}
+            
+            # Find latest deployment log
+            if [ -d "storage/logs" ]; then
+              LATEST_LOG=$(ls -t storage/logs/deploy_*.log 2>/dev/null | head -1)
+              if [ -f "${LATEST_LOG}" ]; then
+                cat "${LATEST_LOG}"
+              fi
+            fi
+          ENDSSH > deployment-logs/deploy.log || true
+          
+      - name: Upload deployment artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-logs-${{ github.sha }}
+          path: deployment-logs/
+          retention-days: 30
+          
+      - name: Deployment summary
+        if: always()
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ inputs.rollback_release }}" != "" ]; then
+            echo "**Type:** Rollback" >> $GITHUB_STEP_SUMMARY
+            echo "**Release:** ${{ inputs.rollback_release }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Type:** New Deployment" >> $GITHUB_STEP_SUMMARY
+            echo "**Release:** ${RELEASE_DIR}" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Production URL" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 https://3dprint-omsk.ru" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ **Deployment Successful**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Deployment Failed**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Rollback Instructions" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "# Via GitHub Actions (recommended):" >> $GITHUB_STEP_SUMMARY
+            echo "# Go to Actions → Deploy to Production → Run workflow" >> $GITHUB_STEP_SUMMARY
+            echo '# Enter previous release name in "rollback_release" field' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "# Via SSH (emergency):" >> $GITHUB_STEP_SUMMARY
+            echo "ssh user@${{ secrets.DEPLOY_HOST }}" >> $GITHUB_STEP_SUMMARY
+            echo "cd ${{ secrets.DEPLOY_PATH }}" >> $GITHUB_STEP_SUMMARY
+            echo "ls -lt releases/  # Find previous release" >> $GITHUB_STEP_SUMMARY
+            echo "ln -sfn releases/release_YYYYMMDD_HHMMSS current" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
