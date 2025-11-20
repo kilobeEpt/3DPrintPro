@@ -397,45 +397,90 @@ Add to crontab (`crontab -e`):
    - Login with credentials
    - Should see dashboard ✅
 
-### Step 6: Configure HTTPS
+### Steps 4-6: Web Server, DNS & SSL Configuration
 
-#### Install SSL Certificate
+📖 **Complete guide available in [WEB_SERVER_CONFIG.md](WEB_SERVER_CONFIG.md)**
 
-**Let's Encrypt (Free):**
+For detailed configuration of Nginx/Apache, DNS records, and SSL certificates, see the dedicated guide which covers:
+
+- ✅ **Nginx configuration** - Full production config with PHP-FPM, SSE, security headers
+- ✅ **Apache configuration** - VirtualHost setup with mod_php/FPM support
+- ✅ **DNS setup** - A/AAAA records, MX/SPF/DKIM for email, propagation verification
+- ✅ **SSL certificates** - Let's Encrypt with certbot, automatic renewal, troubleshooting
+- ✅ **Security verification** - SSL Labs testing, security header validation, penetration testing
+- ✅ **Rate limiting & firewall** - Nginx/Apache rate limits, UFW/firewalld, Fail2Ban, IP whitelisting
+
+#### Quick Setup (Nginx + SSL)
+
 ```bash
-# Install certbot
-sudo apt-get install certbot python3-certbot-apache
+# 1. Copy configuration
+sudo cp deploy/webserver/nginx.3dprint-omsk.conf /etc/nginx/sites-available/3dprint-omsk.conf
+sudo cp deploy/webserver/snippets/security.conf /etc/nginx/snippets/3dprint-security.conf
 
-# Get certificate
-sudo certbot --apache -d your-domain.com -d www.your-domain.com
+# 2. Customize paths (edit PHP-FPM socket, project root)
+sudo nano /etc/nginx/sites-available/3dprint-omsk.conf
 
-# Auto-renewal
-sudo certbot renew --dry-run
+# 3. Enable site
+sudo ln -s /etc/nginx/sites-available/3dprint-omsk.conf /etc/nginx/sites-enabled/
+
+# 4. Test configuration
+sudo nginx -t
+
+# 5. Obtain SSL certificate
+sudo certbot --nginx -d 3dprint-omsk.ru -d www.3dprint-omsk.ru
+
+# 6. Reload Nginx
+sudo systemctl reload nginx
 ```
 
-**Or use hosting panel SSL installer**
+#### Quick Setup (Apache + SSL)
 
-#### Force HTTPS Redirect
+```bash
+# 1. Copy configuration
+sudo cp deploy/webserver/apache.3dprint-omsk.conf /etc/apache2/sites-available/3dprint-omsk.conf
 
-Add to root `.htaccess`:
-```apache
-RewriteEngine On
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
+# 2. Enable required modules
+sudo a2enmod rewrite ssl headers expires deflate http2
+
+# 3. Customize paths (edit DocumentRoot, SSL paths)
+sudo nano /etc/apache2/sites-available/3dprint-omsk.conf
+
+# 4. Enable site
+sudo a2ensite 3dprint-omsk.conf
+
+# 5. Test configuration
+sudo apachectl configtest
+
+# 6. Obtain SSL certificate
+sudo certbot --apache -d 3dprint-omsk.ru -d www.3dprint-omsk.ru
+
+# 7. Reload Apache
+sudo systemctl reload apache2
 ```
 
-### Step 7: Configure Domain
+#### DNS Configuration Summary
 
-1. **DNS Settings**
-   - A Record: `your-domain.com` → `server_ip_address`
-   - A Record: `www.your-domain.com` → `server_ip_address`
-   - Wait for propagation (up to 48 hours)
+```
+# A Records (IPv4)
+3dprint-omsk.ru        A      YOUR_SERVER_IP
+www.3dprint-omsk.ru    A      YOUR_SERVER_IP
 
-2. **Verify DNS**
-   ```bash
-   ping your-domain.com
-   nslookup your-domain.com
-   ```
+# MX Record (Email)
+3dprint-omsk.ru        MX     10 mx.yandex.ru
+
+# TXT Records (Email Authentication)
+3dprint-omsk.ru        TXT    v=spf1 mx ~all
+_dmarc.3dprint-omsk.ru TXT    v=DMARC1; p=quarantine; rua=mailto:dmarc@3dprint-omsk.ru
+```
+
+**Verify DNS propagation:**
+```bash
+dig 3dprint-omsk.ru A
+dig www.3dprint-omsk.ru A
+nslookup 3dprint-omsk.ru
+```
+
+📖 **For comprehensive DNS/SSL/webserver setup, see [WEB_SERVER_CONFIG.md](WEB_SERVER_CONFIG.md)**
 
 ### Step 8: Final Verification
 

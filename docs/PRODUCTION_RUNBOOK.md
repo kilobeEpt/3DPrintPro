@@ -29,12 +29,14 @@ This runbook covers Steps 3 and 7–14 of the production deployment workflow for
 
 - **Step 1**: Hosting environment validation (see [HOSTING_AUDIT.md](HOSTING_AUDIT.md))
 - **Step 2**: Database provisioning (see [DATABASE_OPERATIONS.md](DATABASE_OPERATIONS.md))
+- **Steps 4-6**: Web server, DNS & SSL configuration (see [WEB_SERVER_CONFIG.md](WEB_SERVER_CONFIG.md))
 
 ### Quick Links
 
 - **Deployment Script**: `scripts/deploy.sh`
 - **Hosting Audit**: `scripts/hosting-audit.php`
 - **Database Provisioning**: `scripts/provision-database.php`
+- **Web Server Config**: [WEB_SERVER_CONFIG.md](WEB_SERVER_CONFIG.md)
 - **Smoke Tests**: `scripts/api_smoke.php`
 
 ---
