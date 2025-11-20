@@ -41,9 +41,75 @@ class SettingsService
      * Can be extended by the application
      */
     private $typeMap = [
+        // Contact Information
+        'contact_phone' => self::TYPE_STRING,
+        'contact_email' => self::TYPE_STRING,
+        'contact_address' => self::TYPE_STRING,
+        'contact_city' => self::TYPE_STRING,
+        'contact_postal_code' => self::TYPE_STRING,
+        'contact_region' => self::TYPE_STRING,
+        'contact_country' => self::TYPE_STRING,
+        'contact_working_hours' => self::TYPE_STRING,
+        'contact_latitude' => self::TYPE_FLOAT,
+        'contact_longitude' => self::TYPE_FLOAT,
+        
+        // Social Links
+        'social_telegram' => self::TYPE_STRING,
+        'social_vk' => self::TYPE_STRING,
+        'social_instagram' => self::TYPE_STRING,
+        'social_facebook' => self::TYPE_STRING,
+        'social_youtube' => self::TYPE_STRING,
+        'social_twitter' => self::TYPE_STRING,
+        'social_whatsapp' => self::TYPE_STRING,
+        
+        // SEO Metadata
+        'seo_title' => self::TYPE_STRING,
+        'seo_description' => self::TYPE_STRING,
+        'seo_keywords' => self::TYPE_STRING,
+        'seo_og_image' => self::TYPE_STRING,
+        'seo_og_type' => self::TYPE_STRING,
+        'seo_site_name' => self::TYPE_STRING,
+        'seo_canonical_url' => self::TYPE_STRING,
+        
+        // Email SMTP Configuration
+        'smtp_host' => self::TYPE_STRING,
+        'smtp_port' => self::TYPE_INT,
+        'smtp_username' => self::TYPE_STRING,
+        'smtp_password' => self::TYPE_STRING,
+        'smtp_encryption' => self::TYPE_STRING,
+        'smtp_from_email' => self::TYPE_STRING,
+        'smtp_from_name' => self::TYPE_STRING,
+        
+        // Telegram Integration
         'telegram_chat_id' => self::TYPE_STRING,
         'telegram_bot_token' => self::TYPE_STRING,
+        'telegram_contact_url' => self::TYPE_STRING,
+        'telegram_notify_new_order' => self::TYPE_BOOL,
+        'telegram_notify_status_change' => self::TYPE_BOOL,
+        
+        // Email Notifications
+        'email_notifications_enabled' => self::TYPE_BOOL,
+        'admin_email' => self::TYPE_STRING,
         'notifications_enabled' => self::TYPE_BOOL,
+        'notifications_telegram_status_change' => self::TYPE_BOOL,
+        'notifications_email_status_change' => self::TYPE_BOOL,
+        'notifications_email_address' => self::TYPE_STRING,
+        
+        // Logging & Analytics
+        'analytics_enabled' => self::TYPE_BOOL,
+        'analytics_google_id' => self::TYPE_STRING,
+        'analytics_yandex_id' => self::TYPE_STRING,
+        'logging_enabled' => self::TYPE_BOOL,
+        'logging_level' => self::TYPE_STRING,
+        'logging_max_files' => self::TYPE_INT,
+        
+        // Caching Parameters
+        'cache_enabled' => self::TYPE_BOOL,
+        'cache_ttl' => self::TYPE_INT,
+        'cache_driver' => self::TYPE_STRING,
+        'cache_prefix' => self::TYPE_STRING,
+        
+        // Legacy settings
         'max_file_size' => self::TYPE_INT,
         'price_per_gram' => self::TYPE_FLOAT,
         'allowed_extensions' => self::TYPE_ARRAY,
@@ -55,6 +121,108 @@ class SettingsService
      * Format: 'key' => ['rule' => 'value', ...]
      */
     private $validationRules = [
+        // Contact Information
+        'contact_phone' => [
+            'type' => 'string',
+            'maxLength' => 50,
+        ],
+        'contact_email' => [
+            'type' => 'string',
+            'maxLength' => 255,
+            'pattern' => '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+        ],
+        'contact_address' => [
+            'type' => 'string',
+            'maxLength' => 500,
+        ],
+        'contact_city' => [
+            'type' => 'string',
+            'maxLength' => 100,
+        ],
+        'contact_postal_code' => [
+            'type' => 'string',
+            'maxLength' => 20,
+        ],
+        'contact_working_hours' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        'contact_latitude' => [
+            'type' => 'float',
+            'min' => -90,
+            'max' => 90,
+        ],
+        'contact_longitude' => [
+            'type' => 'float',
+            'min' => -180,
+            'max' => 180,
+        ],
+        
+        // Social Links
+        'social_telegram' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        'social_vk' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        'social_instagram' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        'social_facebook' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        'social_youtube' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        
+        // SEO Metadata
+        'seo_title' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        'seo_description' => [
+            'type' => 'string',
+            'maxLength' => 500,
+        ],
+        'seo_keywords' => [
+            'type' => 'string',
+            'maxLength' => 500,
+        ],
+        'seo_og_image' => [
+            'type' => 'string',
+            'maxLength' => 500,
+        ],
+        
+        // Email SMTP Configuration
+        'smtp_host' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        'smtp_port' => [
+            'type' => 'int',
+            'min' => 1,
+            'max' => 65535,
+        ],
+        'smtp_username' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        'smtp_password' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        'smtp_from_email' => [
+            'type' => 'string',
+            'maxLength' => 255,
+            'pattern' => '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+        ],
+        
+        // Telegram Integration
         'telegram_chat_id' => [
             'type' => 'string',
             'maxLength' => 255,
@@ -63,6 +231,54 @@ class SettingsService
             'type' => 'string',
             'maxLength' => 255,
         ],
+        'telegram_contact_url' => [
+            'type' => 'string',
+            'maxLength' => 255,
+        ],
+        
+        // Email Notifications
+        'admin_email' => [
+            'type' => 'string',
+            'maxLength' => 255,
+            'pattern' => '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+        ],
+        'notifications_email_address' => [
+            'type' => 'string',
+            'maxLength' => 255,
+            'pattern' => '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+        ],
+        
+        // Logging & Analytics
+        'analytics_google_id' => [
+            'type' => 'string',
+            'maxLength' => 50,
+        ],
+        'analytics_yandex_id' => [
+            'type' => 'string',
+            'maxLength' => 50,
+        ],
+        'logging_level' => [
+            'type' => 'string',
+            'maxLength' => 20,
+        ],
+        'logging_max_files' => [
+            'type' => 'int',
+            'min' => 1,
+            'max' => 365,
+        ],
+        
+        // Caching Parameters
+        'cache_ttl' => [
+            'type' => 'int',
+            'min' => 0,
+            'max' => 86400, // 24 hours
+        ],
+        'cache_prefix' => [
+            'type' => 'string',
+            'maxLength' => 50,
+        ],
+        
+        // Legacy settings
         'max_file_size' => [
             'type' => 'int',
             'min' => 0,
@@ -438,6 +654,13 @@ class SettingsService
         if (isset($rules['max']) && is_numeric($value)) {
             if ($value > $rules['max']) {
                 throw new \InvalidArgumentException("Setting '{$key}' must not exceed {$rules['max']}");
+            }
+        }
+        
+        // Pattern validation (regex)
+        if (isset($rules['pattern']) && is_string($value) && !empty($value)) {
+            if (!preg_match($rules['pattern'], $value)) {
+                throw new \InvalidArgumentException("Setting '{$key}' has an invalid format");
             }
         }
     }
