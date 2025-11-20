@@ -2,6 +2,40 @@
 
 Complete guide for deploying 3D Print Pro to production hosting.
 
+**📖 For comprehensive end-to-end production operations, see [PRODUCTION_RUNBOOK.md](PRODUCTION_RUNBOOK.md).**
+
+## Quick Deployment
+
+### Automated Deployment (Recommended)
+
+Use the automated deployment script for consistent, repeatable deployments:
+
+```bash
+# Test deployment (dry run)
+bash scripts/deploy.sh --dry-run
+
+# Production deployment
+bash scripts/deploy.sh
+
+# CI/CD deployment (non-interactive)
+bash scripts/deploy.sh --ci
+```
+
+**What it does:**
+1. ✅ Validates hosting environment (`hosting-audit.php --strict`)
+2. ✅ Installs composer dependencies (`--no-dev --optimize-autoloader`)
+3. ✅ Configures environment (`.env` from template)
+4. ✅ Sets permissions (`storage/`, `logs/`, `.env`)
+5. ✅ Verifies database schema
+6. ✅ Runs smoke tests (`api_smoke.php`)
+7. ✅ Generates deployment report
+
+**Deployment logs:** `storage/logs/deploy_YYYYMMDD_HHMMSS.log`
+
+📖 **See [PRODUCTION_RUNBOOK.md](PRODUCTION_RUNBOOK.md) for complete production deployment guide with post-deployment configuration, monitoring, and troubleshooting.**
+
+---
+
 ## Pre-Deployment Checklist
 
 ### Hosting Environment Audit
@@ -65,6 +99,43 @@ php scripts/hosting-audit.php --format=json > hosting-audit-report.json
 - [ ] Admin panel accessible
 
 ## Deployment Process
+
+### Option A: Automated Deployment (Recommended)
+
+**Use the deployment script for streamlined, consistent deployments:**
+
+```bash
+# 1. Validate hosting environment
+php scripts/hosting-audit.php --strict
+
+# 2. Upload files to server
+rsync -avz --exclude 'vendor' --exclude '.git' --exclude 'node_modules' \
+  /local/path/to/project/ user@3dprint-omsk.ru:/var/www/html/
+
+# 3. SSH into server
+ssh user@3dprint-omsk.ru
+cd /var/www/html
+
+# 4. Run deployment script
+bash scripts/deploy.sh
+
+# 5. Configure environment
+nano .env  # Edit with production credentials
+
+# 6. Create admin user
+php scripts/create-admin.php
+
+# 7. Verify
+php scripts/api_smoke.php
+```
+
+**Deployment complete!** See [PRODUCTION_RUNBOOK.md](PRODUCTION_RUNBOOK.md) for post-deployment configuration (Telegram, email, monitoring, etc.).
+
+---
+
+### Option B: Manual Deployment
+
+Follow these steps for manual deployment:
 
 ### Step 1: Validate Hosting & Upload Files
 
@@ -246,32 +317,36 @@ Add to crontab (`crontab -e`):
 
 ### Step 3: Configure Backend
 
-1. **Copy Configuration**
+1. **Copy Production Environment Template**
    ```bash
-   cp api/config.example.php api/config.php
-   chmod 600 api/config.php
+   cp .env.production.example .env
+   chmod 600 .env
    ```
 
-2. **Edit Configuration**
-   ```php
-   <?php
-   // Database Configuration
-   define('DB_HOST', 'localhost');  // Usually 'localhost'
-   define('DB_NAME', 'your_database_name');
-   define('DB_USER', 'your_database_user');
-   define('DB_PASS', 'your_database_password');
+2. **Edit Environment Configuration**
+   ```bash
+   nano .env
+   ```
    
-   // Rate Limiting
-   define('RATE_LIMIT_MAX_REQUESTS', 60);
-   define('RATE_LIMIT_TIME_WINDOW', 60);
+   **Required values:**
+   - `DB_PASSWORD` - MySQL database password
+   - `TELEGRAM_BOT_TOKEN` - Telegram bot token
+   - `TELEGRAM_CHAT_ID` - Your Telegram chat ID
+   - `SMTP_PASSWORD` - SMTP password for emails
    
-   // Security Tokens (CHANGE THESE!)
-   define('RESET_TOKEN', 'YOUR_RANDOM_TOKEN_HERE');
+   **Security settings:**
+   - `APP_DEBUG=false` (CRITICAL for production)
+   - `APP_ENV=production`
+   - `SESSION_SECURE_COOKIE=true` (requires HTTPS)
+
+3. **Install Composer Dependencies**
+   ```bash
+   composer install --no-dev --optimize-autoloader --no-interaction
    ```
 
-3. **Test Connection**
+4. **Test Connection**
    ```bash
-   curl https://your-domain.com/api/test.php
+   curl https://3dprint-omsk.ru/api/test.php
    ```
    
    Expected response:
@@ -364,21 +439,25 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
 
 ### Step 8: Final Verification
 
-#### Run Database Audit
+#### Run Smoke Tests
 
 ```bash
-# Via CLI
-php scripts/db_audit.php
+# Run comprehensive API smoke tests
+php scripts/api_smoke.php
 
-# Via HTTP
-curl https://your-domain.com/api/test.php?audit=full
+# Expected output:
+# ✅ Services API - GET/POST/PUT/DELETE
+# ✅ Portfolio API - GET/POST/PUT/DELETE
+# ✅ FAQ API - GET/POST/PUT/DELETE
+# ✅ Testimonials API - GET/POST/PUT/DELETE
+# ✅ Orders API - GET/POST
 ```
 
 All checks should pass ✅
 
 #### Test Frontend
 
-1. Open: `https://your-domain.com/`
+1. Open: `https://3dprint-omsk.ru/`
 2. Open DevTools (F12) → Console
 3. Verify:
    ```
@@ -410,31 +489,64 @@ All checks should pass ✅
 - [ ] Services CRUD works
 - [ ] Settings page accessible
 
+#### Review Deployment Log
+
+```bash
+# View latest deployment log (if using deploy.sh)
+cat storage/logs/deploy_*.log | tail -100
+
+# Check for errors
+grep -i error storage/logs/deploy_*.log
+```
+
 ## Post-Deployment Configuration
 
-### Configure Telegram Notifications
+**📖 For complete post-deployment setup, see [PRODUCTION_RUNBOOK.md](PRODUCTION_RUNBOOK.md) which covers:**
 
-1. **Create Telegram Bot** (if not done)
+- ✅ **Step 9-10**: Admin user creation and global settings configuration
+- ✅ **Step 11**: Content management (services, portfolio, testimonials, FAQ)
+- ✅ **Step 12**: Email & Telegram notification setup
+- ✅ **Step 13**: Monitoring & logging (error logs, uptime monitoring, performance)
+- ✅ **Step 14**: Analytics integration (Google Analytics, Yandex.Metrica)
+- ✅ **Step 15**: Performance optimization (Redis, database, caching, CDN)
+- ✅ **Step 16**: Quality assurance testing (functional, mobile, browser, automated)
+- ✅ **Step 17**: Security validation (SSL, headers, permissions, CSRF, XSS)
+- ✅ **Step 18**: Rollback procedures
+- ✅ **Step 19**: Backup strategy and automation
+- ✅ **Step 20**: Final launch checklist
+
+### Quick Post-Deployment Checklist
+
+**Essential tasks:**
+
+1. **Configure Telegram Bot** (see [PRODUCTION_RUNBOOK.md](PRODUCTION_RUNBOOK.md#telegram-setup))
    - Message @BotFather: `/newbot`
-   - Follow prompts
-   - Save bot token
+   - Get bot token and chat ID
+   - Configure in Admin → Settings → Telegram
+   - Test notification
 
-2. **Get Chat ID**
-   - Start conversation with your bot
-   - Send a message
-   - Visit: `https://api.telegram.org/bot{TOKEN}/getUpdates`
-   - Find `"chat":{"id":123456789}`
+2. **Configure SMTP Email** (see [PRODUCTION_RUNBOOK.md](PRODUCTION_RUNBOOK.md#emailsmtp-setup))
+   - Configure SMTP settings in .env
+   - Test in Admin → Settings → Email
+   - Enable order notifications
 
-3. **Configure in Admin**
-   - Login to admin panel
-   - Go to Settings
-   - Enter Bot Token
-   - Enter Chat ID
-   - Save
-   - Click "Send Test Message"
-   - Verify message received ✅
+3. **Add Initial Content**
+   - Add services (minimum 5)
+   - Upload portfolio projects (minimum 10)
+   - Add testimonials (minimum 5)
+   - Configure FAQ (minimum 10 questions)
 
-See [TELEGRAM_INTEGRATION.md](TELEGRAM_INTEGRATION.md) for details.
+4. **Setup Monitoring**
+   - Configure error logging
+   - Enable uptime monitoring (UptimeRobot)
+   - Setup log rotation
+   - Schedule database backups
+
+5. **Verify Everything Works**
+   - Submit test order → Check Telegram + Email
+   - Test calculator
+   - Test admin panel
+   - Test on mobile devices
 
 ### Customize Content
 
@@ -443,7 +555,7 @@ Via admin panel:
 2. **Portfolio** - Add your projects
 3. **Testimonials** - Add client reviews
 4. **FAQ** - Update questions/answers
-5. **Settings** - Update company info
+5. **Settings** - Update company info, social links, SEO metadata
 
 ### Setup Monitoring
 

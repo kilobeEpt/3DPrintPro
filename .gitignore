@@ -135,6 +135,7 @@ composer.phar
 *.cache
 sessions/
 storage/cache/
+storage/logs/
 
 # Test databases (SQLite)
 database/test.sqlite
