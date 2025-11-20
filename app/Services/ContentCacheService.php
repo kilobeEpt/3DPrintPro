@@ -225,4 +225,111 @@ class ContentCacheService
             unlink($filePath);
         }
     }
+    
+    /**
+     * Store JSON snapshot for a resource
+     * 
+     * @param string $resourceType Resource type (e.g., 'services', 'portfolio')
+     * @param array $data Data to cache
+     * @param int $ttl Time-to-live in seconds (default: 300 = 5 minutes)
+     * @return bool Success status
+     */
+    public function storeSnapshot($resourceType, $data, $ttl = 300)
+    {
+        $snapshotFile = self::CACHE_DIR . '/' . $resourceType . '_snapshot.json';
+        
+        if (!is_dir(self::CACHE_DIR)) {
+            mkdir(self::CACHE_DIR, 0755, true);
+        }
+        
+        $snapshot = [
+            'resource' => $resourceType,
+            'data' => $data,
+            'timestamp' => time(),
+            'expiresAt' => time() + $ttl,
+            'etag' => $this->generateETag($data)
+        ];
+        
+        $result = file_put_contents($snapshotFile, json_encode($snapshot, JSON_PRETTY_PRINT));
+        
+        if ($result !== false) {
+            $this->invalidateCache($resourceType);
+        }
+        
+        return $result !== false;
+    }
+    
+    /**
+     * Load JSON snapshot for a resource
+     * 
+     * @param string $resourceType Resource type
+     * @return array|null Snapshot data or null if not found/expired
+     */
+    public function loadSnapshot($resourceType)
+    {
+        $snapshotFile = self::CACHE_DIR . '/' . $resourceType . '_snapshot.json';
+        
+        if (!file_exists($snapshotFile)) {
+            return null;
+        }
+        
+        $content = file_get_contents($snapshotFile);
+        $snapshot = json_decode($content, true);
+        
+        if (!is_array($snapshot)) {
+            return null;
+        }
+        
+        if (isset($snapshot['expiresAt']) && $snapshot['expiresAt'] < time()) {
+            unlink($snapshotFile);
+            return null;
+        }
+        
+        return $snapshot;
+    }
+    
+    /**
+     * Delete snapshot for a resource
+     * 
+     * @param string $resourceType Resource type
+     * @return bool Success status
+     */
+    public function deleteSnapshot($resourceType)
+    {
+        $snapshotFile = self::CACHE_DIR . '/' . $resourceType . '_snapshot.json';
+        
+        if (file_exists($snapshotFile)) {
+            return unlink($snapshotFile);
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get all active invalidation events
+     * 
+     * @param int $since Unix timestamp to filter events after
+     * @return array Array of events with resource and timestamp
+     */
+    public function getInvalidationEvents($since = null)
+    {
+        $cacheData = $this->loadCacheTimestamps();
+        $events = [];
+        
+        foreach ($cacheData as $resource => $timestamp) {
+            if ($since === null || $timestamp > $since) {
+                $events[] = [
+                    'resource' => $resource,
+                    'timestamp' => $timestamp,
+                    'event' => 'invalidate'
+                ];
+            }
+        }
+        
+        usort($events, function($a, $b) {
+            return $b['timestamp'] - $a['timestamp'];
+        });
+        
+        return $events;
+    }
 }

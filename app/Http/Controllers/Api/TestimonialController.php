@@ -177,7 +177,7 @@ class TestimonialController extends BaseApiController
         $testimonial = Testimonial::create($data);
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('testimonials');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Testimonial created successfully", [
             'testimonial_id' => $testimonial->id,
@@ -226,7 +226,7 @@ class TestimonialController extends BaseApiController
         $testimonial->update($data);
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('testimonials');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Testimonial updated successfully", [
             'testimonial_id' => $id,
@@ -271,7 +271,7 @@ class TestimonialController extends BaseApiController
         $testimonial->delete();
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('testimonials');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Testimonial deleted successfully", ['testimonial_id' => $id]);
         

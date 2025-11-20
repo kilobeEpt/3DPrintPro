@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Sync & SSE Test</title>
+    <link rel="stylesheet" href="css/skeleton.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin: 4px 0;
+            padding: 4px;
+        }
+        .log-entry.info { color: #0c5460; }
+        .log-entry.success { color: #155724; }
+        .log-entry.error { color: #721c24; }
+        .log-entry.warn { color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 4px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .metric {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Content Sync & SSE Test Suite</h1>
+
+    <!-- SSE Status -->
+    <div class="test-section">
+        <h2>SSE Connection</h2>
+        <div id="sseStatus">
+            <span class="status info">Initializing...</span>
+        </div>
+        <div class="metrics" style="margin-top: 20px;">
+            <div class="metric">
+                <div class="metric-label">Connected</div>
+                <div class="metric-value" id="sseConnected">-</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Uptime</div>
+                <div class="metric-value" id="sseUptime">-</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Reconnect Attempts</div>
+                <div class="metric-value" id="sseReconnects">-</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Last Event ID</div>
+                <div class="metric-value" id="sseLastEvent">-</div>
+            </div>
+        </div>
+        <button onclick="testSSE()">Reconnect SSE</button>
+        <button onclick="disconnectSSE()">Disconnect</button>
+    </div>
+
+    <!-- Cache Status -->
+    <div class="test-section">
+        <h2>IndexedDB Cache</h2>
+        <div id="cacheStatus">
+            <span class="status info">Checking...</span>
+        </div>
+        <div class="metrics" style="margin-top: 20px;">
+            <div class="metric">
+                <div class="metric-label">Total Entries</div>
+                <div class="metric-value" id="cacheTotal">-</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Valid</div>
+                <div class="metric-value" id="cacheValid">-</div>
+            </div>
+            <div class="metric">
+                <div class="metric-label">Expired</div>
+                <div class="metric-value" id="cacheExpired">-</div>
+            </div>
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="testCache()">Test Cache Operations</button>
+            <button onclick="testCachePerformance()">Performance Test</button>
+            <button onclick="clearCache()">Clear All Cache</button>
+        </div>
+    </div>
+
+    <!-- Content Loader -->
+    <div class="test-section">
+        <h2>Content Loader</h2>
+        <div id="loaderStatus">
+            <span class="status info">Ready</span>
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="testBootstrap()">Bootstrap Page</button>
+            <button onclick="testLoadResource('services')">Load Services</button>
+            <button onclick="testLoadResource('portfolio')">Load Portfolio</button>
+            <button onclick="testReload('services')">Reload Services</button>
+        </div>
+        <div id="loaderData" style="margin-top: 10px; display: none;">
+            <h3>Loaded Data</h3>
+            <pre id="loaderDataContent" style="background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto;"></pre>
+        </div>
+    </div>
+
+    <!-- Event Log -->
+    <div class="test-section">
+        <h2>Event Log</h2>
+        <button onclick="clearLog()">Clear Log</button>
+        <div id="eventLog" class="log"></div>
+    </div>
+
+    <!-- Test Content Area -->
+    <div class="test-section">
+        <h2>Test Content Area</h2>
+        <div id="testContent" data-content="services">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="config.js"></script>
+    <script src="js/cache-manager.js"></script>
+    <script src="js/sync-client.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/content-loader.js"></script>
+
+    <script>
+        // Global instances
+        let cacheManager = null;
+        let syncClient = null;
+
+        // Initialize
+        async function init() {
+            log('Initializing test suite...', 'info');
+
+            // Create cache manager
+            cacheManager = new CacheManager();
+            log('✅ CacheManager initialized', 'success');
+
+            // Update cache stats
+            await updateCacheStats();
+
+            // Setup event listeners
+            setupEventListeners();
+
+            log('✅ Test suite ready', 'success');
+        }
+
+        function setupEventListeners() {
+            // SSE events
+            if (db && db.syncClient) {
+                syncClient = db.syncClient;
+                
+                syncClient.on('connected', () => {
+                    updateSSEStatus('success', 'Connected');
+                    log('✅ SSE connected', 'success');
+                    updateSSEMetrics();
+                });
+
+                syncClient.on('disconnected', (data) => {
+                    updateSSEStatus('error', `Disconnected (${data.reason})`);
+                    log(`⚠️ SSE disconnected: ${data.reason}`, 'warn');
+                    updateSSEMetrics();
+                });
+
+                syncClient.on('invalidate', (event) => {
+                    log(`🔄 Cache invalidated: ${event.resource}`, 'info');
+                });
+
+                updateSSEMetrics();
+            }
+
+            // Content events
+            window.addEventListener('content-invalidated', (e) => {
+                log(`🔄 Content invalidated: ${e.detail.resource}`, 'info');
+            });
+
+            window.addEventListener('content-ready', (e) => {
+                log(`✅ Content ready: ${e.detail.resources.join(', ')}`, 'success');
+            });
+
+            window.addEventListener('content-reloaded', (e) => {
+                log(`✅ Content reloaded: ${e.detail.resource}`, 'success');
+            });
+
+            window.addEventListener('content-reload-needed', (e) => {
+                log(`⚠️ Reload needed: ${e.detail.resource}`, 'warn');
+            });
+        }
+
+        async function updateCacheStats() {
+            if (!cacheManager) return;
+            
+            const stats = await cacheManager.getStats();
+            document.getElementById('cacheTotal').textContent = stats.total;
+            document.getElementById('cacheValid').textContent = stats.valid;
+            document.getElementById('cacheExpired').textContent = stats.expired;
+            
+            if (stats.total > 0) {
+                updateCacheStatus('success', `${stats.valid} valid entries`);
+            } else {
+                updateCacheStatus('info', 'Empty');
+            }
+        }
+
+        function updateSSEMetrics() {
+            if (!syncClient) return;
+            
+            const status = syncClient.getStatus();
+            document.getElementById('sseConnected').textContent = status.connected ? 'Yes' : 'No';
+            document.getElementById('sseUptime').textContent = formatDuration(status.uptime);
+            document.getElementById('sseReconnects').textContent = status.reconnectAttempts;
+            document.getElementById('sseLastEvent').textContent = status.lastEventId || '-';
+
+            // Update every second
+            setTimeout(updateSSEMetrics, 1000);
+        }
+
+        function formatDuration(ms) {
+            if (!ms) return '0s';
+            const seconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            if (minutes > 0) {
+                return `${minutes}m ${seconds % 60}s`;
+            }
+            return `${seconds}s`;
+        }
+
+        async function testSSE() {
+            log('Testing SSE connection...', 'info');
+            if (syncClient) {
+                syncClient.disconnect();
+                setTimeout(() => syncClient.connect(), 100);
+            }
+        }
+
+        function disconnectSSE() {
+            if (syncClient) {
+                syncClient.disconnect();
+                log('SSE disconnected manually', 'info');
+            }
+        }
+
+        async function testCache() {
+            log('Testing cache operations...', 'info');
+            
+            try {
+                // Write test
+                const testData = { test: true, timestamp: Date.now() };
+                await cacheManager.set('test:data', testData, {
+                    resource: 'test',
+                    ttl: 60000
+                });
+                log('✅ Cache write successful', 'success');
+                
+                // Read test
+                const cached = await cacheManager.get('test:data');
+                if (cached && cached.data.test) {
+                    log('✅ Cache read successful', 'success');
+                } else {
+                    log('❌ Cache read failed', 'error');
+                }
+                
+                // Delete test
+                await cacheManager.delete('test:data');
+                log('✅ Cache delete successful', 'success');
+                
+                await updateCacheStats();
+            } catch (error) {
+                log(`❌ Cache test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCachePerformance() {
+            log('Testing cache performance...', 'info');
+            
+            const iterations = 100;
+            
+            // Write performance
+            console.time('cache-write');
+            for (let i = 0; i < iterations; i++) {
+                await cacheManager.set(`perf:${i}`, { index: i }, { resource: 'perf' });
+            }
+            console.timeEnd('cache-write');
+            log(`✅ Wrote ${iterations} entries`, 'success');
+            
+            // Read performance
+            console.time('cache-read');
+            for (let i = 0; i < iterations; i++) {
+                await cacheManager.get(`perf:${i}`);
+            }
+            console.timeEnd('cache-read');
+            log(`✅ Read ${iterations} entries`, 'success');
+            
+            // Cleanup
+            await cacheManager.invalidateResource('perf');
+            log('✅ Cleaned up test data', 'success');
+            
+            await updateCacheStats();
+        }
+
+        async function clearCache() {
+            log('Clearing all cache...', 'info');
+            await cacheManager.clearAll();
+            log('✅ Cache cleared', 'success');
+            await updateCacheStats();
+        }
+
+        async function testBootstrap() {
+            log('Testing page bootstrap...', 'info');
+            
+            try {
+                const startTime = Date.now();
+                const data = await contentLoader.bootstrapPage(['services', 'portfolio', 'testimonials']);
+                const duration = Date.now() - startTime;
+                
+                log(`✅ Bootstrap completed in ${duration}ms`, 'success');
+                displayData(data);
+            } catch (error) {
+                log(`❌ Bootstrap failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLoadResource(resource) {
+            log(`Testing load ${resource}...`, 'info');
+            
+            try {
+                const startTime = Date.now();
+                const data = await contentLoader.loadResource(resource);
+                const duration = Date.now() - startTime;
+                
+                log(`✅ Loaded ${resource} in ${duration}ms (${data ? data.length : 0} items)`, 'success');
+                displayData({ [resource]: data });
+            } catch (error) {
+                log(`❌ Load failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testReload(resource) {
+            log(`Testing reload ${resource}...`, 'info');
+            
+            try {
+                const startTime = Date.now();
+                const data = await contentLoader.reloadResource(resource);
+                const duration = Date.now() - startTime;
+                
+                log(`✅ Reloaded ${resource} in ${duration}ms`, 'success');
+                displayData({ [resource]: data });
+            } catch (error) {
+                log(`❌ Reload failed: ${error.message}`, 'error');
+            }
+        }
+
+        function displayData(data) {
+            const container = document.getElementById('loaderData');
+            const content = document.getElementById('loaderDataContent');
+            content.textContent = JSON.stringify(data, null, 2);
+            container.style.display = 'block';
+        }
+
+        function updateSSEStatus(type, message) {
+            const statusEl = document.getElementById('sseStatus');
+            statusEl.innerHTML = `<span class="status ${type}">${message}</span>`;
+        }
+
+        function updateCacheStatus(type, message) {
+            const statusEl = document.getElementById('cacheStatus');
+            statusEl.innerHTML = `<span class="status ${type}">${message}</span>`;
+        }
+
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('eventLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.insertBefore(entry, logEl.firstChild);
+            
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('eventLog').innerHTML = '';
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

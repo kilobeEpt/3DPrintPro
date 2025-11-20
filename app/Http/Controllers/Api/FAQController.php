@@ -100,7 +100,7 @@ class FAQController extends BaseApiController
         $item = FAQ::create($data);
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('faq');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("FAQ item created successfully", [
             'faq_id' => $item->id,
@@ -149,7 +149,7 @@ class FAQController extends BaseApiController
         $item->update($data);
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('faq');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("FAQ item updated successfully", [
             'faq_id' => $id,
@@ -187,7 +187,7 @@ class FAQController extends BaseApiController
         $item->delete();
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('faq');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("FAQ item deleted successfully", ['faq_id' => $id]);
         

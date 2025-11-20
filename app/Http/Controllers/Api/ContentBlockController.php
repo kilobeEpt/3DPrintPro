@@ -129,7 +129,7 @@ class ContentBlockController extends BaseApiController
         $block = ContentBlock::create($data);
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('content_blocks');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Content block created successfully", [
             'block_id' => $block->id,
@@ -178,7 +178,7 @@ class ContentBlockController extends BaseApiController
         $block->update($data);
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('content_blocks');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Content block updated successfully", [
             'block_id' => $id,
@@ -216,7 +216,7 @@ class ContentBlockController extends BaseApiController
         $block->delete();
         
         // Invalidate cache
-        $this->cacheService->invalidateCache('content_blocks');
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Content block deleted successfully", ['block_id' => $id]);
         

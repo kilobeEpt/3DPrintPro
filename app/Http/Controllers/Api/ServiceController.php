@@ -112,8 +112,8 @@ class ServiceController extends BaseApiController
         // Create service
         $service = Service::create($data);
         
-        // Invalidate cache
-        $this->cacheService->invalidateCache('services');
+        // Invalidate cache and broadcast
+        $this->invalidateResourceCache();
         
         \ApiLogger::info("Service created successfully", [
             'service_id' => $service->id,
