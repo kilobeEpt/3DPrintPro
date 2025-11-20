@@ -41,16 +41,29 @@
 | **[DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)** | Database tables, columns, and relationships |
 | **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** | Common issues and solutions |
 
-### Additional Documentation
+### Feature Guides
+
+- **[FORMS_SYSTEM.md](docs/FORMS_SYSTEM.md)** - Complete form builder guide with field types and validation
+- **[REAL_TIME_SYNC_GUIDE.md](docs/REAL_TIME_SYNC_GUIDE.md)** - SSE and IndexedDB caching system
+- **[CALCULATOR_SETTINGS.md](docs/CALCULATOR_SETTINGS.md)** - Dynamic calculator configuration
+- **[GLOBAL_SETTINGS.md](docs/GLOBAL_SETTINGS.md)** - Centralized settings management
+- **[CONTENT_SYNC_SSE.md](docs/CONTENT_SYNC_SSE.md)** - Real-time content synchronization
+- **[ORDERS_API_V2.md](docs/ORDERS_API_V2.md)** - Enhanced orders with status history and notes
+- **[SECURITY.md](docs/SECURITY.md)** - Comprehensive security guide
+
+### Technical Documentation
 
 - **[ELOQUENT_SETUP.md](docs/ELOQUENT_SETUP.md)** - Eloquent ORM integration and usage guide
 - **[SETTINGS_SERVICE.md](docs/SETTINGS_SERVICE.md)** - Settings service with caching and audit logging
 - **[MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md)** - Guide for migrating from legacy DB class to Eloquent
 - **[TELEGRAM_INTEGRATION.md](docs/TELEGRAM_INTEGRATION.md)** - Telegram bot setup and configuration
-- **[ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md)** - Legacy authentication details (v1.0)
-- **[RBAC_AUTHENTICATION.md](docs/RBAC_AUTHENTICATION.md)** - New RBAC auth system (v4.0)
+- **[RBAC_AUTHENTICATION.md](docs/RBAC_AUTHENTICATION.md)** - Role-based access control system (v4.0)
 - **[RBAC_MIGRATION_GUIDE.md](docs/RBAC_MIGRATION_GUIDE.md)** - Migrate from old to new auth system
+
+### Testing & QA
+
 - **[TESTING.md](docs/TESTING.md)** - Complete testing guide with PHPUnit and smoke tests
+- **[QA_REGRESSION.md](docs/QA_REGRESSION.md)** - Manual test cases for comprehensive QA
 - **[TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md)** - Testing procedures and checklist
 
 ---
@@ -319,18 +332,43 @@ composer test-coverage
 vendor/bin/phpunit tests/Unit/SettingsServiceTest.php
 ```
 
-**Test Coverage:**
+**Unit Test Coverage:**
 - ✅ **Settings Service** - Typed casting, caching, audit logging, validation
 - ✅ **Form Validation** - Field types, rules, relationships, scopes
-- ✅ **Form Submission** - End-to-end submission flow, order linking, status updates
 - ✅ **Admin Auth Service** - Authentication, rate limiting, CSRF, session management
-- ✅ **Admin Auth Integration** - Login/logout flow, lockout, audit logging
+- ✅ **Content Controllers** - Slug generation, featured content, media metadata
+- ✅ **CSRF Protection** - Token generation, validation, rotation
+- ✅ **Rate Limiter** - Profiles, limits, violations, cleanup
+- ✅ **Order Export** - CSV/PDF generation, signed URLs, field selection
+- ✅ **Formula Validator** - Calculator formula validation and security
+- ✅ **Media Upload** - File validation, size limits, MIME types
+
+**Integration Test Coverage:**
+- ✅ **Form Submission** - End-to-end submission flow, order linking, status updates
+- ✅ **Form Builder** - Field management, conditional logic, notifications
+- ✅ **Admin Auth** - Login/logout flow, lockout, audit logging
+- ✅ **Orders Flow** - Status history, notes, archiving, exports
+- ✅ **Content API** - CRUD operations, slugs, featured content, cache
+- ✅ **Calculator Settings** - Configuration management, validation, caching
+- ✅ **Base API Controller** - Pagination, validation, slug management
 
 ### Smoke Tests
 
 ```bash
-# Form API smoke test (end-to-end)
+# Admin authentication smoke test
+php scripts/admin-auth-smoke.php
+
+# Content API smoke test (all content types)
+php scripts/content-api-smoke.php
+
+# Orders export service smoke test
+php scripts/orders-export-smoke.php
+
+# Form API smoke test
 php scripts/form-api-smoke.php
+
+# Orders domain smoke test
+php scripts/orders-smoke-test.php
 
 # Settings service smoke test
 php scripts/test-settings-service.php
@@ -338,40 +376,34 @@ php scripts/test-settings-service.php
 # Eloquent ORM smoke test
 php scripts/eloquent-smoke.php
 
-# Database health check
-php scripts/db_audit.php
-
-# API smoke test
-php scripts/api_smoke_test.php
-
-# Web-based audit
-curl https://your-domain.com/api/test.php?audit=full
+# General API smoke test
+php scripts/api_smoke.php
 ```
 
 **Smoke Test Coverage:**
-- ✅ **Form API** - Seeds form, submits data, validates persistence, creates linked orders
-- ✅ **Settings Service** - Cache operations, type casting, validation, audit logging
-- ✅ **Eloquent ORM** - Database connection, model CRUD operations, relationships
+- ✅ **Admin Auth** - Login, rate limiting, lockout, session management, CSRF
+- ✅ **Content API** - Services, portfolio, FAQ, testimonials, content blocks
+- ✅ **Orders Export** - CSV/PDF generation, signed URLs, filters, field selection
+- ✅ **Form API** - Form builder, validation, submission processing
+- ✅ **Orders Domain** - Status history, notes, archiving, filtering
+- ✅ **Settings** - Cache operations, type casting, validation, audit
+- ✅ **Eloquent** - Model CRUD, relationships, scopes
 
-### Manual Testing
+### Manual Testing & QA
 
-1. **Frontend:**
-   - Visit homepage
-   - Open DevTools (F12)
-   - Check console for ✅ success messages
+**Quick Smoke Test (5 minutes):**
+1. Login to admin panel
+2. Create/edit a service
+3. Submit contact form on public site
+4. View new order in admin
+5. Export orders to CSV
 
-2. **Forms:**
-   - Submit contact form
-   - Verify order appears in database
-   - Check Telegram notification
+**Full Regression Test (2 hours):**
+- See [docs/QA_REGRESSION.md](docs/QA_REGRESSION.md) for complete manual test cases
+- Covers admin panel, forms, orders, security, real-time sync, and more
 
-3. **Admin Panel:**
-   - Login at `/admin/login.php`
-   - View orders list
-   - Edit a service
-   - Send test Telegram message
-
-See [docs/TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md) for comprehensive testing procedures.
+**Testing Checklist:**
+- See [docs/TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md) for systematic testing procedures
 
 ---
 
