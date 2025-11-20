@@ -36,6 +36,7 @@
 |----------|-------------|
 | **[SETUP_GUIDE.md](docs/SETUP_GUIDE.md)** | Complete installation and configuration guide |
 | **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** | Production deployment checklist and procedures |
+| **[HOSTING_AUDIT.md](docs/HOSTING_AUDIT.md)** | Hosting environment validation and readiness checks |
 | **[API_REFERENCE.md](docs/API_REFERENCE.md)** | REST API endpoints and usage documentation |
 | **[ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)** | Admin panel features and usage instructions |
 | **[DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)** | Database tables, columns, and relationships |

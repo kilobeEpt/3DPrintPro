@@ -4,6 +4,42 @@ Complete guide for deploying 3D Print Pro to production hosting.
 
 ## Pre-Deployment Checklist
 
+### Hosting Environment Audit
+
+**⚠️ CRITICAL STEP: Run hosting audit before proceeding with deployment**
+
+Validate your hosting environment meets all requirements:
+
+```bash
+# Navigate to project directory
+cd /path/to/project
+
+# Run hosting audit
+php scripts/hosting-audit.php
+
+# Or for shared hosting (skip Redis checks)
+php scripts/hosting-audit.php --skip-redis
+
+# Generate JSON report for documentation
+php scripts/hosting-audit.php --format=json > hosting-audit-report.json
+```
+
+**Expected Result**: All CRITICAL checks must PASS before deployment.
+
+📖 **See [HOSTING_AUDIT.md](HOSTING_AUDIT.md) for detailed instructions, troubleshooting, and remediation steps.**
+
+**Hosting Audit Checklist**:
+
+- [ ] PHP version >= 7.4 (recommended: 8.1+)
+- [ ] Required PHP extensions installed (pdo_mysql, mbstring, intl, json, curl, openssl, zip)
+- [ ] CLI tools available (composer, php, mysql, mysqldump)
+- [ ] MySQL service running
+- [ ] Minimum 1 GB disk space free
+- [ ] Minimum 256 MB memory available
+- [ ] Storage directories writable (storage/, logs/, storage/cache/)
+- [ ] Project root writable by SSH user
+- [ ] Audit report attached to deployment ticket
+
 ### Files and Code
 
 - [ ] All HTML files present (10+ pages)
@@ -30,7 +66,19 @@ Complete guide for deploying 3D Print Pro to production hosting.
 
 ## Deployment Process
 
-### Step 1: Upload Files
+### Step 1: Validate Hosting & Upload Files
+
+**⚠️ Before uploading files, ensure hosting audit passed (see Pre-Deployment Checklist above)**
+
+If you haven't run the hosting audit yet, do so now:
+
+```bash
+# On the target server, upload and run the audit script first
+scp scripts/hosting-audit.php user@your-server.com:/tmp/
+ssh user@your-server.com 'php /tmp/hosting-audit.php --skip-redis'
+```
+
+Once the audit passes, proceed with file upload.
 
 #### Via FTP/SFTP
 
