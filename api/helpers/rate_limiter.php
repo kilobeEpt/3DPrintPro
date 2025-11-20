@@ -1,24 +1,50 @@
 <?php
 // ========================================
-// Rate Limiter Helper
-// Simple IP-based rate limiting for API endpoints
+// Rate Limiter Helper v2.0
+// Enhanced with settings integration and admin logging
 // ========================================
 
 class RateLimiter {
     private $storageDir;
     private $maxRequests;
     private $timeWindow;
+    private $endpoint;
+    
+    // Default rate limit profiles
+    const PROFILE_AUTH = 'auth';           // 5 requests per 15 min
+    const PROFILE_API_READ = 'api_read';   // 100 requests per minute
+    const PROFILE_API_WRITE = 'api_write'; // 30 requests per minute
+    const PROFILE_ADMIN = 'admin';         // 60 requests per minute
+    const PROFILE_PUBLIC = 'public';       // 60 requests per minute
+    
+    private static $profiles = [
+        self::PROFILE_AUTH => ['max' => 5, 'window' => 900],      // 5 per 15 min
+        self::PROFILE_API_READ => ['max' => 100, 'window' => 60], // 100 per min
+        self::PROFILE_API_WRITE => ['max' => 30, 'window' => 60], // 30 per min
+        self::PROFILE_ADMIN => ['max' => 60, 'window' => 60],     // 60 per min
+        self::PROFILE_PUBLIC => ['max' => 60, 'window' => 60],    // 60 per min
+    ];
     
     /**
      * Initialize rate limiter
      * 
-     * @param int $maxRequests Maximum requests per time window
-     * @param int $timeWindow Time window in seconds
+     * @param string|null $profile Rate limit profile or null for custom
+     * @param int|null $maxRequests Maximum requests per time window (if custom)
+     * @param int|null $timeWindow Time window in seconds (if custom)
      */
-    public function __construct($maxRequests = null, $timeWindow = null) {
-        $this->maxRequests = $maxRequests ?? (defined('RATE_LIMIT_MAX_REQUESTS') ? RATE_LIMIT_MAX_REQUESTS : 60);
-        $this->timeWindow = $timeWindow ?? (defined('RATE_LIMIT_TIME_WINDOW') ? RATE_LIMIT_TIME_WINDOW : 60);
-        $this->storageDir = __DIR__ . '/../../logs/rate_limits';
+    public function __construct($profile = null, $maxRequests = null, $timeWindow = null) {
+        // Load from profile or use custom values
+        if ($profile && isset(self::$profiles[$profile])) {
+            $this->maxRequests = self::$profiles[$profile]['max'];
+            $this->timeWindow = self::$profiles[$profile]['window'];
+            $this->endpoint = $profile;
+        } else {
+            $this->maxRequests = $maxRequests ?? $this->loadSettingOrDefault('rate_limit_default_max', 60);
+            $this->timeWindow = $timeWindow ?? $this->loadSettingOrDefault('rate_limit_default_window', 60);
+            $this->endpoint = $profile ?? 'default';
+        }
+        
+        $this->storageDir = __DIR__ . '/../../storage/cache/rate_limits';
         
         // Create storage directory if it doesn't exist
         if (!is_dir($this->storageDir)) {
@@ -27,7 +53,36 @@ class RateLimiter {
     }
     
     /**
-     * Get client IP address
+     * Load setting from database or return default
+     * 
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    private function loadSettingOrDefault($key, $default) {
+        try {
+            // Try to load from settings service if available
+            if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
+                require_once __DIR__ . '/../../vendor/autoload.php';
+                require_once __DIR__ . '/../../bootstrap/eloquent.php';
+                
+                if (class_exists('\App\Services\SettingsService')) {
+                    $service = new \App\Services\SettingsService();
+                    $value = $service->get($key);
+                    if ($value !== null) {
+                        return $value;
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Ignore errors, use default
+        }
+        
+        return $default;
+    }
+    
+    /**
+     * Get client IP address with proxy support
      */
     private function getClientIp() {
         $ipKeys = ['HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'REMOTE_ADDR'];
@@ -75,11 +130,12 @@ class RateLimiter {
         }
         
         // Get endpoint-specific data or global data
-        $key = $endpoint ?: 'global';
+        $key = $endpoint ?: $this->endpoint;
         if (!isset($data[$key])) {
             $data[$key] = [
                 'requests' => [],
-                'reset' => $now + $this->timeWindow
+                'reset' => $now + $this->timeWindow,
+                'violations' => 0
             ];
         }
         
@@ -107,6 +163,13 @@ class RateLimiter {
             
             // Save updated data
             @file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+        } else {
+            // Track violation
+            $limitData['violations'] = ($limitData['violations'] ?? 0) + 1;
+            @file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+            
+            // Log violation to admin logs
+            $this->logViolation($ip, $key, $limitData['violations']);
         }
         
         $remaining = max(0, $this->maxRequests - $requestCount);
@@ -116,7 +179,9 @@ class RateLimiter {
             'allowed' => $allowed,
             'remaining' => $remaining,
             'reset' => $limitData['reset'],
-            'retry_after' => $retryAfter
+            'retry_after' => $retryAfter,
+            'ip' => $ip,
+            'endpoint' => $key
         ];
     }
     
@@ -154,6 +219,44 @@ class RateLimiter {
     }
     
     /**
+     * Log rate limit violation to admin action logs
+     * 
+     * @param string $ip
+     * @param string $endpoint
+     * @param int $violationCount
+     */
+    private function logViolation($ip, $endpoint, $violationCount) {
+        try {
+            if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
+                require_once __DIR__ . '/../../vendor/autoload.php';
+                require_once __DIR__ . '/../../bootstrap/eloquent.php';
+                
+                if (class_exists('\App\Models\AdminActionLog')) {
+                    \App\Models\AdminActionLog::create([
+                        'user_id' => null, // System action
+                        'action' => 'rate_limit_violation',
+                        'entity_type' => 'rate_limiter',
+                        'entity_id' => null,
+                        'ip_address' => $ip,
+                        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+                        'payload' => json_encode([
+                            'endpoint' => $endpoint,
+                            'violation_count' => $violationCount,
+                            'limit' => $this->maxRequests,
+                            'window' => $this->timeWindow,
+                            'url' => $_SERVER['REQUEST_URI'] ?? null,
+                            'method' => $_SERVER['REQUEST_METHOD'] ?? null
+                        ])
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            // Silently fail - rate limiting should not break the app
+            error_log("Rate limit violation logging failed: " . $e->getMessage());
+        }
+    }
+    
+    /**
      * Clean up old rate limit files (maintenance)
      */
     public function cleanup() {
@@ -175,4 +278,34 @@ class RateLimiter {
         
         return $cleaned;
     }
+    
+    /**
+     * Get rate limit profile configuration
+     * 
+     * @param string $profile
+     * @return array|null
+     */
+    public static function getProfile($profile) {
+        return self::$profiles[$profile] ?? null;
+    }
+    
+    /**
+     * Get all available profiles
+     * 
+     * @return array
+     */
+    public static function getProfiles() {
+        return self::$profiles;
+    }
+}
+
+/**
+ * Helper function to quickly apply rate limiting
+ * 
+ * @param string $profile Rate limit profile
+ * @param string|null $endpoint Optional endpoint identifier
+ */
+function applyRateLimit($profile = RateLimiter::PROFILE_PUBLIC, $endpoint = null) {
+    $limiter = new RateLimiter($profile);
+    $limiter->apply($endpoint);
 }

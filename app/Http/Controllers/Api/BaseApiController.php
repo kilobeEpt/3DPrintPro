@@ -73,12 +73,44 @@ abstract class BaseApiController
      */
     public function __construct()
     {
-        $this->rateLimiter = new \RateLimiter();
+        // Initialize rate limiter with appropriate profile
+        $profile = $this->getRateLimitProfile();
+        $this->rateLimiter = new \RateLimiter($profile);
+        
         $this->cacheService = new ContentCacheService();
         $this->sseBroadcaster = new SSEBroadcaster();
         $this->method = $_SERVER['REQUEST_METHOD'];
         $this->query = $_GET;
         $this->input = $this->parseInput();
+    }
+    
+    /**
+     * Get rate limit profile for this controller
+     * Override in child controllers for custom profiles
+     * 
+     * @return string
+     */
+    protected function getRateLimitProfile()
+    {
+        // Read operations get higher limits
+        if ($this->method === 'GET') {
+            return \RateLimiter::PROFILE_API_READ;
+        }
+        
+        // Write operations (POST/PUT/PATCH/DELETE) get stricter limits
+        return \RateLimiter::PROFILE_API_WRITE;
+    }
+    
+    /**
+     * Apply rate limiting to current request
+     * Call this in controller actions that need rate limiting
+     * 
+     * @param string|null $endpoint Optional endpoint identifier
+     * @return void
+     */
+    protected function applyRateLimit($endpoint = null)
+    {
+        $this->rateLimiter->apply($endpoint);
     }
     
     /**
