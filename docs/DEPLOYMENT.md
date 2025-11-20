@@ -138,7 +138,50 @@ chmod 644 logs/*.log 2>/dev/null || true
 
 ### Step 2: Database Setup
 
-#### Create Database
+📖 **Complete guide available in [DATABASE_OPERATIONS.md](DATABASE_OPERATIONS.md)**
+
+#### Automated Provisioning (Recommended)
+
+The fastest way to set up your database is using the automated provisioning script:
+
+```bash
+# Navigate to project directory
+cd /path/to/project
+
+# Configure database credentials in .env
+cp .env.example .env
+nano .env  # Edit DB_DATABASE, DB_USERNAME, DB_PASSWORD
+
+# Run provisioning with seeding
+php scripts/provision-database.php --seed
+```
+
+This will:
+- ✅ Create database with UTF8MB4 collation
+- ✅ Create application user with restricted privileges
+- ✅ Import complete schema (18 tables)
+- ✅ Seed baseline data (services, forms, settings)
+- ✅ Verify schema integrity
+- ✅ Display backup automation commands
+
+**Expected output:**
+```
+✅ Database Provisioning Complete!
+
+Database: ch167436_3dprint
+User:     ch167436_3dprint
+Host:     localhost
+
+📦 Backup Automation
+Add these cron jobs for automated backups:
+
+# Daily full backup at 2 AM (keep 30 days)
+0 2 * * * cd /path/to/project && php database/backup.php --retention=30 >> logs/backup.log 2>&1
+```
+
+#### Manual Setup (Alternative)
+
+If you prefer manual setup or don't have admin MySQL credentials:
 
 **Via PHPMyAdmin:**
 1. Login to PHPMyAdmin
@@ -146,9 +189,13 @@ chmod 644 logs/*.log 2>/dev/null || true
 3. Database name: `your_database_name`
 4. Collation: `utf8mb4_unicode_ci`
 5. Click "Create"
+6. Go to "Import" tab
+7. Choose file: `database/schema.sql`
+8. Click "Go"
 
 **Via MySQL CLI:**
 ```bash
+# Create database
 mysql -u root -p
 ```
 ```sql
@@ -162,40 +209,40 @@ FLUSH PRIVILEGES;
 EXIT;
 ```
 
-#### Import Schema
-
-**Via PHPMyAdmin:**
-1. Select your database
-2. Go to "Import" tab
-3. Choose file: `database/schema.sql`
-4. Click "Go"
-5. Verify 7 tables created
-
-**Via CLI:**
 ```bash
+# Import schema
 mysql -u your_user -p your_database_name < database/schema.sql
-```
 
-#### Verify Tables
-
-```bash
+# Verify tables
 mysql -u your_user -p your_database_name -e "SHOW TABLES;"
 ```
 
-Expected output:
+Expected output: 18 tables including `orders`, `services`, `portfolio`, `admin_users`, etc.
+
+#### Verify Schema
+
+```bash
+# Run verification script
+php database/verify-schema.php
 ```
-+--------------------------------+
-| Tables_in_your_database_name   |
-+--------------------------------+
-| orders                         |
-| settings                       |
-| services                       |
-| portfolio                      |
-| testimonials                   |
-| faq                            |
-| content_blocks                 |
-+--------------------------------+
+
+Expected result: All 18 tables present with correct structure.
+
+#### Setup Backup Automation
+
+Add to crontab (`crontab -e`):
+
+```bash
+# Daily full backup at 2 AM (keep 30 days)
+0 2 * * * cd /path/to/project && php database/backup.php --retention=30 >> logs/backup.log 2>&1
+
+# Weekly schema-only backup (keep 12 weeks)
+0 3 * * 0 cd /path/to/project && php database/backup.php --schema-only --retention=12 >> logs/backup.log 2>&1
 ```
+
+**Note**: The provision script outputs ready-to-copy cron commands with correct paths.
+
+📖 **For detailed database operations, backup strategies, and restore procedures, see [DATABASE_OPERATIONS.md](DATABASE_OPERATIONS.md)**
 
 ### Step 3: Configure Backend
 
