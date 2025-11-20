@@ -1,11 +1,11 @@
 <?php
 // ========================================
-// Database Backup Script
-// Version: 1.0
+// Database Backup Script v2.0
+// Enhanced with rotation, checksums, and scheduling
 // ========================================
 //
 // This script creates timestamped backups of schema and data
-// Backups are saved to database/backups/ directory
+// Backups are saved to storage/backups/ directory with rotation
 //
 // CLI Usage:
 //   php database/backup.php [options]
@@ -14,17 +14,25 @@
 //   --schema-only    Backup only schema (no data)
 //   --data-only      Backup only data (no schema)
 //   --tables=t1,t2   Backup specific tables only
+//   --retention=N    Keep only N most recent backups (default: 30)
+//   --compress       Create compressed version (default: true)
+//   --verify         Verify backup integrity after creation
 //
 // Examples:
 //   php database/backup.php
 //   php database/backup.php --schema-only
-//   php database/backup.php --tables=orders,settings
+//   php database/backup.php --tables=orders,settings --retention=7
+//   php database/backup.php --verify
 //
-// HTTP Usage:
-//   https://your-site.com/database/backup.php?token=SECRET
+// HTTP Usage (Admin-only):
+//   https://your-site.com/database/backup.php (requires admin authentication)
 //
-// Security:
-//   Set BACKUP_TOKEN in this file for HTTP access
+// Cron Setup:
+//   # Daily backup at 2 AM
+//   0 2 * * * cd /path/to/project && php database/backup.php --retention=30 >> logs/backup.log 2>&1
+//
+//   # Weekly schema-only backup
+//   0 3 * * 0 cd /path/to/project && php database/backup.php --schema-only --retention=12 >> logs/backup.log 2>&1
 //
 // ========================================
 
@@ -32,21 +40,14 @@
 $isCli = php_sapi_name() === 'cli';
 
 if (!$isCli) {
+    // HTTP access requires admin authentication
+    require_once __DIR__ . '/../api/helpers/admin_auth.php';
+    require_once __DIR__ . '/../api/helpers/security_headers.php';
+    
+    SecurityHeaders::apply(SecurityHeaders::CONTEXT_API);
+    requireAdminAuth();
+    
     header('Content-Type: application/json; charset=utf-8');
-    header('Access-Control-Allow-Origin: *');
-    
-    // Security token for HTTP access (change this!)
-    define('BACKUP_TOKEN', 'CHANGE_ME_FOR_PRODUCTION');
-    
-    if (!isset($_GET['token']) || $_GET['token'] !== BACKUP_TOKEN) {
-        http_response_code(403);
-        echo json_encode([
-            'status' => 'ERROR',
-            'message' => 'Invalid or missing token',
-            'help' => 'Use ?token=YOUR_TOKEN or run from CLI'
-        ], JSON_PRETTY_PRINT);
-        exit(1);
-    }
 }
 
 // Load database config
@@ -67,7 +68,10 @@ require_once $configPath;
 $options = [
     'schema_only' => false,
     'data_only' => false,
-    'tables' => null
+    'tables' => null,
+    'retention' => 30,
+    'compress' => true,
+    'verify' => false
 ];
 
 if ($isCli && $argc > 1) {
@@ -79,6 +83,12 @@ if ($isCli && $argc > 1) {
         } elseif (strpos($argv[$i], '--tables=') === 0) {
             $tables = substr($argv[$i], 9);
             $options['tables'] = explode(',', $tables);
+        } elseif (strpos($argv[$i], '--retention=') === 0) {
+            $options['retention'] = intval(substr($argv[$i], 12));
+        } elseif ($argv[$i] === '--no-compress') {
+            $options['compress'] = false;
+        } elseif ($argv[$i] === '--verify') {
+            $options['verify'] = true;
         }
     }
 }
@@ -90,6 +100,20 @@ if (!$isCli) {
     if (isset($_GET['tables'])) {
         $options['tables'] = explode(',', $_GET['tables']);
     }
+    if (isset($_GET['retention'])) {
+        $options['retention'] = intval($_GET['retention']);
+    }
+    if (isset($_GET['no_compress'])) {
+        $options['compress'] = false;
+    }
+    if (isset($_GET['verify'])) {
+        $options['verify'] = true;
+    }
+    
+    // Log admin action
+    if (function_exists('logAdminAction')) {
+        logAdminAction('trigger_backup', 'backup', null, $options);
+    }
 }
 
 $response = [
@@ -98,12 +122,13 @@ $response = [
     'database' => DB_NAME,
     'host' => DB_HOST,
     'options' => $options,
-    'files_created' => []
+    'files_created' => [],
+    'checksums' => []
 ];
 
 try {
     // Create backups directory if it doesn't exist
-    $backupDir = __DIR__ . '/backups';
+    $backupDir = __DIR__ . '/../storage/backups';
     if (!file_exists($backupDir)) {
         mkdir($backupDir, 0755, true);
         $response['info'][] = 'Created backups directory';
@@ -112,7 +137,7 @@ try {
     // Generate timestamp for filename
     $timestamp = date('Y-m-d_H-i-s');
     
-    // Connect to database
+    // Connect to database for table listing
     $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
     $pdo = new PDO($dsn, DB_USER, DB_PASS, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -130,34 +155,40 @@ try {
     }
     
     // Build mysqldump command
-    $dumpFile = $backupDir . '/' . DB_NAME . '_backup_' . $timestamp . '.sql';
+    $type = $options['schema_only'] ? 'schema' : ($options['data_only'] ? 'data' : 'full');
+    $dumpFile = $backupDir . '/' . DB_NAME . '_' . $type . '_' . $timestamp . '.sql';
     
-    $command = sprintf(
-        'mysqldump -h %s -u %s -p%s %s %s %s > %s 2>&1',
-        escapeshellarg(DB_HOST),
-        escapeshellarg(DB_USER),
-        escapeshellarg(DB_PASS),
-        $options['schema_only'] ? '--no-data' : '',
-        $options['data_only'] ? '--no-create-info' : '',
-        escapeshellarg(DB_NAME)
-    );
+    $cmdParts = [
+        'mysqldump',
+        '-h ' . escapeshellarg(DB_HOST),
+        '-u ' . escapeshellarg(DB_USER),
+        '-p' . escapeshellarg(DB_PASS),
+        '--single-transaction',
+        '--routines',
+        '--triggers'
+    ];
+    
+    if ($options['schema_only']) {
+        $cmdParts[] = '--no-data';
+    }
+    
+    if ($options['data_only']) {
+        $cmdParts[] = '--no-create-info';
+    }
+    
+    $cmdParts[] = escapeshellarg(DB_NAME);
     
     // Add specific tables if requested
     if ($options['tables']) {
-        $command = sprintf(
-            'mysqldump -h %s -u %s -p%s %s %s %s %s > %s 2>&1',
-            escapeshellarg(DB_HOST),
-            escapeshellarg(DB_USER),
-            escapeshellarg(DB_PASS),
-            $options['schema_only'] ? '--no-data' : '',
-            $options['data_only'] ? '--no-create-info' : '',
-            escapeshellarg(DB_NAME),
-            implode(' ', array_map('escapeshellarg', $tables)),
-            escapeshellarg($dumpFile)
-        );
-    } else {
-        $command .= ' ' . implode(' ', array_map('escapeshellarg', $tables));
+        foreach ($tables as $table) {
+            $cmdParts[] = escapeshellarg($table);
+        }
     }
+    
+    $cmdParts[] = '> ' . escapeshellarg($dumpFile);
+    $cmdParts[] = '2>&1';
+    
+    $command = implode(' ', $cmdParts);
     
     // Execute mysqldump
     exec($command, $output, $returnCode);
@@ -171,30 +202,66 @@ try {
     }
     
     $fileSize = filesize($dumpFile);
+    
+    // Calculate checksum
+    $checksum = md5_file($dumpFile);
+    $response['checksums'][$dumpFile] = $checksum;
+    
     $response['files_created'][] = [
         'filename' => basename($dumpFile),
         'path' => $dumpFile,
         'size' => $fileSize,
         'size_formatted' => formatBytes($fileSize),
-        'type' => $options['schema_only'] ? 'schema-only' : ($options['data_only'] ? 'data-only' : 'full')
+        'type' => $type,
+        'checksum' => $checksum
     ];
     
+    // Create checksum file
+    file_put_contents($dumpFile . '.md5', $checksum . '  ' . basename($dumpFile));
+    
     // Create a compressed version
-    $gzFile = $dumpFile . '.gz';
-    if (function_exists('gzencode')) {
+    if ($options['compress']) {
+        $gzFile = $dumpFile . '.gz';
+        
         $sqlContent = file_get_contents($dumpFile);
         $gzContent = gzencode($sqlContent, 9);
         file_put_contents($gzFile, $gzContent);
         
         $gzSize = filesize($gzFile);
+        $gzChecksum = md5_file($gzFile);
+        $response['checksums'][$gzFile] = $gzChecksum;
+        
         $response['files_created'][] = [
             'filename' => basename($gzFile),
             'path' => $gzFile,
             'size' => $gzSize,
             'size_formatted' => formatBytes($gzSize),
             'type' => 'compressed',
-            'compression_ratio' => round(($fileSize - $gzSize) / $fileSize * 100, 1) . '%'
+            'compression_ratio' => round(($fileSize - $gzSize) / $fileSize * 100, 1) . '%',
+            'checksum' => $gzChecksum
         ];
+        
+        // Create checksum file for compressed version
+        file_put_contents($gzFile . '.md5', $gzChecksum . '  ' . basename($gzFile));
+    }
+    
+    // Verify backup integrity
+    if ($options['verify']) {
+        $verifyResult = verifyBackup($dumpFile, $checksum);
+        $response['verification'] = $verifyResult;
+        
+        if (!$verifyResult['valid']) {
+            $response['status'] = 'WARNING';
+            $response['warning'] = 'Backup created but verification failed';
+        }
+    }
+    
+    // Apply retention policy
+    if ($options['retention'] > 0) {
+        $deleted = applyRetentionPolicy($backupDir, $options['retention']);
+        if ($deleted > 0) {
+            $response['info'][] = "Deleted {$deleted} old backup(s) per retention policy";
+        }
     }
     
     $response['summary'] = sprintf(
@@ -209,7 +276,7 @@ try {
         'Ensure mysqldump is installed and in PATH',
         'Check database credentials in api/config.php',
         'Verify database exists and is accessible',
-        'Check write permissions for database/backups/ directory'
+        'Check write permissions for storage/backups/ directory'
     ];
 }
 
@@ -217,12 +284,19 @@ try {
 $json = json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 echo $json;
 
+// Write backup log
+$logFile = __DIR__ . '/../storage/backups/backup.log';
+file_put_contents($logFile, date('Y-m-d H:i:s') . ' - ' . $response['status'] . ' - ' . ($response['summary'] ?? $response['error'] ?? 'Unknown') . "\n", FILE_APPEND);
+
 // Exit with appropriate code for CLI
 if ($isCli) {
     exit($response['status'] === 'OK' ? 0 : 1);
 }
 
-// Helper function to format bytes
+// ========================================
+// Helper Functions
+// ========================================
+
 function formatBytes($bytes, $precision = 2) {
     $units = ['B', 'KB', 'MB', 'GB', 'TB'];
     $bytes = max($bytes, 0);
@@ -230,4 +304,72 @@ function formatBytes($bytes, $precision = 2) {
     $pow = min($pow, count($units) - 1);
     $bytes /= pow(1024, $pow);
     return round($bytes, $precision) . ' ' . $units[$pow];
+}
+
+function verifyBackup($file, $expectedChecksum) {
+    $result = [
+        'valid' => false,
+        'checksum_match' => false,
+        'readable' => false,
+        'has_data' => false
+    ];
+    
+    // Verify file is readable
+    if (!is_readable($file)) {
+        return $result;
+    }
+    $result['readable'] = true;
+    
+    // Verify checksum
+    $actualChecksum = md5_file($file);
+    if ($actualChecksum === $expectedChecksum) {
+        $result['checksum_match'] = true;
+    }
+    
+    // Verify file has data
+    $fileSize = filesize($file);
+    if ($fileSize > 100) { // At least 100 bytes
+        $result['has_data'] = true;
+    }
+    
+    // Overall validity
+    $result['valid'] = $result['readable'] && $result['checksum_match'] && $result['has_data'];
+    
+    return $result;
+}
+
+function applyRetentionPolicy($backupDir, $retention) {
+    // Get all backup files
+    $files = glob($backupDir . '/*.sql');
+    $files = array_merge($files, glob($backupDir . '/*.sql.gz'));
+    
+    if (count($files) <= $retention) {
+        return 0; // No files to delete
+    }
+    
+    // Sort by modification time (oldest first)
+    usort($files, function($a, $b) {
+        return filemtime($a) - filemtime($b);
+    });
+    
+    // Delete oldest files
+    $toDelete = count($files) - $retention;
+    $deleted = 0;
+    
+    for ($i = 0; $i < $toDelete; $i++) {
+        $file = $files[$i];
+        
+        // Delete main file
+        if (file_exists($file)) {
+            unlink($file);
+            $deleted++;
+        }
+        
+        // Delete checksum file
+        if (file_exists($file . '.md5')) {
+            unlink($file . '.md5');
+        }
+    }
+    
+    return $deleted;
 }

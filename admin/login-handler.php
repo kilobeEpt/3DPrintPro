@@ -11,11 +11,21 @@ require_once __DIR__ . '/../bootstrap/eloquent.php';
 require_once __DIR__ . '/includes/session-config.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
+require_once __DIR__ . '/../api/helpers/rate_limiter.php';
 
 use App\Services\AdminAuthService;
 use App\Models\AdminUser;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: /admin/login.php');
+    exit;
+}
+
+// Apply strict rate limiting for login attempts
+$rateLimiter = new RateLimiter(RateLimiter::PROFILE_AUTH);
+$rateCheck = $rateLimiter->check('admin_login');
+if (!$rateCheck['allowed']) {
+    $_SESSION['LOGIN_ERROR'] = 'Слишком много попыток входа. Попробуйте через ' . $rateCheck['retry_after'] . ' секунд.';
     header('Location: /admin/login.php');
     exit;
 }

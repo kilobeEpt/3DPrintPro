@@ -77,6 +77,10 @@ try {
             <i class="fas fa-sliders-h"></i>
             <span>Настройки</span>
         </a>
+        <a href="/admin/audit.php" class="nav-item <?php echo $currentPage === 'audit' ? 'active' : ''; ?>" data-page="audit">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Журнал действий</span>
+        </a>
         <?php if ($isSuperAdmin): ?>
         <a href="/admin/users.php" class="nav-item <?php echo $currentPage === 'users' ? 'active' : ''; ?>" data-page="users">
             <i class="fas fa-users"></i>
