@@ -108,10 +108,15 @@ require_once __DIR__ . '/bootstrap/eloquent.php';
 
 use App\Models\Service;
 use App\Models\Order;
+use Illuminate\Support\Facades\DB;
 
-// Now you can use Eloquent models
+// Use Eloquent models
 $services = Service::active()->get();
 $order = Order::find(1);
+
+// Or use DB Facade for direct queries
+$count = DB::table('admin_users')->count();
+$users = DB::table('admin_users')->where('status', 'active')->get();
 ```
 
 ### Model Examples
@@ -187,17 +192,43 @@ Setting::set('site_config', [
 $allSettings = Setting::getAll();
 ```
 
-### Raw Query Builder
+### Using Facades (Recommended)
 
-For complex queries, you can use the query builder directly:
+Laravel Facades provide a clean, static interface to database operations:
+
+```php
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+// Query builder via DB Facade
+$services = DB::table('services')
+    ->where('active', 1)
+    ->orderBy('sort_order')
+    ->get();
+
+// Raw query
+$results = DB::select('SELECT * FROM services WHERE active = ?', [1]);
+
+// Count records
+$count = DB::table('admin_users')->count();
+
+// Check if table exists
+$hasTable = Schema::hasTable('services');
+
+// Get column listing
+$columns = Schema::getColumnListing('services');
+```
+
+### Raw Query Builder (Alternative Methods)
+
+You can also use Capsule directly or helper functions:
 
 ```php
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-// Raw query
+// Via Capsule
 $results = Capsule::select('SELECT * FROM services WHERE active = ?', [1]);
 
-// Query builder
 $services = Capsule::table('services')
     ->where('active', 1)
     ->orderBy('sort_order')
@@ -275,10 +306,18 @@ The `bootstrap/eloquent.php` file:
 
 1. Loads environment variables from `.env` (if exists)
 2. Falls back to legacy config constants if no `.env`
-3. Configures database connection (MySQL or SQLite)
-4. Sets up event dispatcher for model events
-5. Makes Capsule available globally
-6. Boots Eloquent ORM
+3. Creates a Container instance for dependency injection
+4. Sets up Facade application root for Laravel Facades
+5. Configures database connection (MySQL or SQLite)
+6. Sets up event dispatcher for model events
+7. Makes Capsule available globally
+8. Boots Eloquent ORM
+
+This setup enables you to use:
+- **Facades** (DB, Schema) - Recommended for clean static interface
+- **Capsule** - Direct access to database manager
+- **Models** - Eloquent ORM with relationships and scopes
+- **Helper functions** - Quick access to common operations
 
 ### Configuration Priority
 
@@ -317,6 +356,9 @@ Tests include:
 - Query scopes
 - JSON casting
 - Helper functions
+- DB Facade support
+- Schema Facade support
+- Facade/Capsule consistency
 - Legacy code compatibility
 
 ### Test Database Setup

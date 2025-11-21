@@ -5,6 +5,7 @@
  * Initializes the test environment with:
  * - Composer autoloader
  * - Eloquent ORM with SQLite in-memory database
+ * - Laravel Facade support (DB, Schema)
  * - Database schema creation
  * - Test data seeding
  */
@@ -14,6 +15,13 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
+use Illuminate\Support\Facades\Facade;
+
+// Create container instance for Facade support
+$container = new Container;
+
+// Set up Facade application root for tests
+Facade::setFacadeApplication($container);
 
 // Create Capsule instance
 $capsule = new Capsule;
@@ -25,8 +33,8 @@ $capsule->addConnection([
     'prefix' => '',
 ]);
 
-// Set up the event dispatcher
-$capsule->setEventDispatcher(new Dispatcher(new Container));
+// Set up the event dispatcher with container
+$capsule->setEventDispatcher(new Dispatcher($container));
 
 // Make this Capsule instance available globally
 $capsule->setAsGlobal();
