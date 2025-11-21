@@ -18,6 +18,8 @@ use App\Models\Service;
 use App\Models\Order;
 use App\Models\Setting;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 // ANSI color codes for terminal output
 $green = "\033[32m";
@@ -142,6 +144,37 @@ runTest('Legacy Database class doesn\'t interfere', function() {
     // Check if DB class file exists and can be read
     $dbPath = __DIR__ . '/../api/db.php';
     return file_exists($dbPath) && is_readable($dbPath);
+});
+
+// Test 13: Verify DB Facade is available
+runTest('DB Facade is available', function() {
+    $count = DB::table('admin_users')->count();
+    return is_int($count) && $count >= 0;
+});
+
+// Test 14: Verify DB::select() Facade works
+runTest('DB::select() Facade works', function() {
+    $result = DB::select('SELECT COUNT(*) as total FROM settings');
+    return !empty($result) && isset($result[0]->total);
+});
+
+// Test 15: Verify Schema Facade is available
+runTest('Schema Facade is available', function() {
+    $hasTable = Schema::hasTable('admin_users');
+    return $hasTable === true;
+});
+
+// Test 16: Verify Schema::getColumnListing() works
+runTest('Schema::getColumnListing() works', function() {
+    $columns = Schema::getColumnListing('admin_users');
+    return is_array($columns) && in_array('id', $columns) && in_array('email', $columns);
+});
+
+// Test 17: Verify DB Facade and Capsule consistency
+runTest('DB Facade and Capsule are consistent', function() {
+    $dbCount = DB::table('settings')->count();
+    $capsuleCount = Capsule::table('settings')->count();
+    return $dbCount === $capsuleCount;
 });
 
 // Display summary
