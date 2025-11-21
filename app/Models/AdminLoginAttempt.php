@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class AdminLoginAttempt extends Model
 {
@@ -53,7 +54,7 @@ class AdminLoginAttempt extends Model
     
     public function scopeRecent($query, $minutes = 15)
     {
-        return $query->where('created_at', '>=', now()->subMinutes($minutes));
+        return $query->where('created_at', '>=', Carbon::now()->subMinutes($minutes));
     }
     
     public static function logSuccess($email, $ipAddress, $userAgent = null)

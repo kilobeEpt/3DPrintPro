@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Carbon;
+
 /**
  * SettingsAudit Model
  * 
@@ -49,7 +51,7 @@ class SettingsAudit extends BaseModel
     
     public function scopeRecent($query, $days = 30)
     {
-        return $query->where('created_at', '>=', now()->subDays($days));
+        return $query->where('created_at', '>=', Carbon::now()->subDays($days));
     }
     
     public static function logChange($settingKey, $oldValue, $newValue, $changedBy = 'system')

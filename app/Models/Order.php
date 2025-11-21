@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Carbon;
+
 /**
  * Order Model
  * 
@@ -255,7 +257,7 @@ class Order extends BaseModel
      */
     public function archive()
     {
-        $this->archived_at = now();
+        $this->archived_at = Carbon::now();
         return $this->save();
     }
     

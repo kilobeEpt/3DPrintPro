@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class AdminSession extends Model
 {
@@ -43,12 +44,12 @@ class AdminSession extends Model
     
     public function scopeActive($query)
     {
-        return $query->where('expires_at', '>', now());
+        return $query->where('expires_at', '>', Carbon::now());
     }
     
     public function scopeExpired($query)
     {
-        return $query->where('expires_at', '<=', now());
+        return $query->where('expires_at', '<=', Carbon::now());
     }
     
     public function scopeByUser($query, $userId)
@@ -68,13 +69,13 @@ class AdminSession extends Model
     
     public function updateActivity()
     {
-        $this->last_activity_at = now();
+        $this->last_activity_at = Carbon::now();
         $this->save();
     }
     
     public function extendExpiration($minutes = 30)
     {
-        $this->expires_at = now()->addMinutes($minutes);
+        $this->expires_at = Carbon::now()->addMinutes($minutes);
         $this->save();
     }
     

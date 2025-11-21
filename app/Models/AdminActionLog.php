@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class AdminActionLog extends Model
 {
@@ -65,7 +66,7 @@ class AdminActionLog extends Model
     
     public function scopeRecent($query, $days = 30)
     {
-        return $query->where('created_at', '>=', now()->subDays($days));
+        return $query->where('created_at', '>=', Carbon::now()->subDays($days));
     }
     
     public static function log($userId, $action, $entityType = null, $entityId = null, $payload = null, $ipAddress = null, $userAgent = null)
