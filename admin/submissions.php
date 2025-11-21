@@ -143,7 +143,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Submission Detail Modal -->
-<div class="modal" id="submissionDetailModal">
+<div class="modal" id="submissionDetailModal" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <div class="modal-header">
@@ -169,7 +169,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Bulk Actions Modal -->
-<div class="modal" id="bulkActionsModal">
+<div class="modal" id="bulkActionsModal" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <div class="modal-header">
@@ -214,7 +214,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Change Status Modal -->
-<div class="modal" id="changeStatusModal">
+<div class="modal" id="changeStatusModal" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <div class="modal-header">

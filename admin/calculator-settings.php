@@ -180,7 +180,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Material Modal -->
-<div id="materialModal" class="modal">
+<div id="materialModal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="materialModalTitle">Добавить материал</h3>
@@ -231,7 +231,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Service Modal -->
-<div id="serviceModal" class="modal">
+<div id="serviceModal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="serviceModalTitle">Добавить услугу</h3>
@@ -282,7 +282,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Discount Modal -->
-<div id="discountModal" class="modal">
+<div id="discountModal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="discountModalTitle">Добавить скидку</h3>
@@ -319,7 +319,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Formula Modal -->
-<div id="formulaModal" class="modal">
+<div id="formulaModal" class="modal" style="display: none;">
     <div class="modal-content modal-large">
         <div class="modal-header">
             <h3 id="formulaModalTitle">Редактировать формулу</h3>

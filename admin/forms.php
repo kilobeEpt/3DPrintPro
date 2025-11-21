@@ -258,7 +258,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Field Editor Modal -->
-<div class="modal" id="fieldEditorModal">
+<div class="modal" id="fieldEditorModal" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <div class="modal-header">
@@ -369,7 +369,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Condition Editor Modal -->
-<div class="modal" id="conditionEditorModal">
+<div class="modal" id="conditionEditorModal" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <div class="modal-header">
