@@ -124,9 +124,9 @@ class CalculatorSettingsController extends BaseApiController
     public function updateMaterials()
     {
         $this->requireAuth();
-        $this->verifyCsrf();
+        verifyCsrfToken();
         
-        $data = $this->getJsonInput();
+        $data = $this->input();
         
         if (!isset($data['materials']) || !is_array($data['materials'])) {
             $this->validationError('Materials must be an array');
@@ -141,7 +141,8 @@ class CalculatorSettingsController extends BaseApiController
         }
         
         try {
-            $changedBy = $this->getAuthUser()['email'] ?? 'admin';
+            $user = getAuthenticatedUser();
+            $changedBy = $user ? $user->email : 'admin';
             $this->settingsService->set('calculator.materials', $data['materials'], $changedBy);
             
             $this->success([
@@ -162,9 +163,9 @@ class CalculatorSettingsController extends BaseApiController
     public function updateServices()
     {
         $this->requireAuth();
-        $this->verifyCsrf();
+        verifyCsrfToken();
         
-        $data = $this->getJsonInput();
+        $data = $this->input();
         
         if (!isset($data['services']) || !is_array($data['services'])) {
             $this->validationError('Services must be an array');
@@ -179,7 +180,8 @@ class CalculatorSettingsController extends BaseApiController
         }
         
         try {
-            $changedBy = $this->getAuthUser()['email'] ?? 'admin';
+            $user = getAuthenticatedUser();
+            $changedBy = $user ? $user->email : 'admin';
             $this->settingsService->set('calculator.services', $data['services'], $changedBy);
             
             $this->success([
@@ -200,9 +202,9 @@ class CalculatorSettingsController extends BaseApiController
     public function updateQualityMultipliers()
     {
         $this->requireAuth();
-        $this->verifyCsrf();
+        verifyCsrfToken();
         
-        $data = $this->getJsonInput();
+        $data = $this->input();
         
         if (!isset($data['quality_multipliers']) || !is_array($data['quality_multipliers'])) {
             $this->validationError('Quality multipliers must be an object');
@@ -217,7 +219,8 @@ class CalculatorSettingsController extends BaseApiController
         }
         
         try {
-            $changedBy = $this->getAuthUser()['email'] ?? 'admin';
+            $user = getAuthenticatedUser();
+            $changedBy = $user ? $user->email : 'admin';
             $this->settingsService->set('calculator.quality_multipliers', $data['quality_multipliers'], $changedBy);
             
             $this->success([
@@ -238,9 +241,9 @@ class CalculatorSettingsController extends BaseApiController
     public function updateDiscounts()
     {
         $this->requireAuth();
-        $this->verifyCsrf();
+        verifyCsrfToken();
         
-        $data = $this->getJsonInput();
+        $data = $this->input();
         
         if (!isset($data['discounts']) || !is_array($data['discounts'])) {
             $this->validationError('Discounts must be an array');
@@ -255,7 +258,8 @@ class CalculatorSettingsController extends BaseApiController
         }
         
         try {
-            $changedBy = $this->getAuthUser()['email'] ?? 'admin';
+            $user = getAuthenticatedUser();
+            $changedBy = $user ? $user->email : 'admin';
             $this->settingsService->set('calculator.discounts', $data['discounts'], $changedBy);
             
             $this->success([
@@ -276,9 +280,9 @@ class CalculatorSettingsController extends BaseApiController
     public function updateFormulas()
     {
         $this->requireAuth();
-        $this->verifyCsrf();
+        verifyCsrfToken();
         
-        $data = $this->getJsonInput();
+        $data = $this->input();
         
         if (!isset($data['formulas']) || !is_array($data['formulas'])) {
             $this->validationError('Formulas must be an object');
@@ -299,7 +303,8 @@ class CalculatorSettingsController extends BaseApiController
         }
         
         try {
-            $changedBy = $this->getAuthUser()['email'] ?? 'admin';
+            $user = getAuthenticatedUser();
+            $changedBy = $user ? $user->email : 'admin';
             $this->settingsService->set('calculator.formulas', $data['formulas'], $changedBy);
             
             $this->success([
@@ -321,7 +326,7 @@ class CalculatorSettingsController extends BaseApiController
     {
         $this->requireAuth();
         
-        $data = $this->getJsonInput();
+        $data = $this->input();
         
         if (!isset($data['formula'])) {
             $this->validationError('Formula is required');
@@ -355,7 +360,7 @@ class CalculatorSettingsController extends BaseApiController
     {
         $this->requireAuth();
         
-        $data = $this->getJsonInput();
+        $data = $this->input();
         
         // Get current configuration
         $materials = $this->settingsService->get('calculator.materials', []);
