@@ -32,7 +32,7 @@ class OrderDetailModule {
         drawerBody.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p>Загрузка...</p></div>';
         
         try {
-            const response = await window.adminApi.get(`/api/orders.php?id=${orderId}&with_relations=true`);
+            const response = await window.adminApi.get(`orders.php?id=${orderId}&with_relations=true`);
             this.currentOrder = response.order;
             
             document.getElementById('drawerTitle').textContent = `Заказ #${this.currentOrder.order_number || this.currentOrder.id.substring(0, 8)}`;
@@ -449,7 +449,7 @@ class OrderDetailModule {
         const comment = prompt('Комментарий (необязательно):');
         
         try {
-            await window.adminApi.request(`/api/orders.php?action=status&id=${this.currentOrder.id}`, 'PATCH', {
+            await window.adminApi.request(`orders.php?action=status&id=${this.currentOrder.id}`, 'PATCH', {
                 status: newStatus,
                 comment: comment || null
             });
@@ -475,7 +475,7 @@ class OrderDetailModule {
         }
         
         try {
-            await window.adminApi.request(`/api/orders.php?action=archive&id=${this.currentOrder.id}`, 'PATCH', {});
+            await window.adminApi.request(`orders.php?action=archive&id=${this.currentOrder.id}`, 'PATCH', {});
             
             AdminMain.prototype.showToast('Заказ архивирован', 'success');
             
@@ -494,7 +494,7 @@ class OrderDetailModule {
         if (!this.currentOrder) return;
         
         try {
-            await window.adminApi.request(`/api/orders.php?action=unarchive&id=${this.currentOrder.id}`, 'PATCH', {});
+            await window.adminApi.request(`orders.php?action=unarchive&id=${this.currentOrder.id}`, 'PATCH', {});
             
             AdminMain.prototype.showToast('Заказ разархивирован', 'success');
             
@@ -535,7 +535,7 @@ class OrderDetailModule {
         }
         
         try {
-            await window.adminApi.request(`/api/orders.php?action=add_note&id=${this.currentOrder.id}`, 'PATCH', {
+            await window.adminApi.request(`orders.php?action=add_note&id=${this.currentOrder.id}`, 'PATCH', {
                 note: noteText
             });
             
@@ -578,7 +578,7 @@ class OrderDetailModule {
         }
         
         try {
-            await window.adminApi.request(`/api/orders.php?action=update_note&id=${this.currentOrder.id}`, 'PATCH', {
+            await window.adminApi.request(`orders.php?action=update_note&id=${this.currentOrder.id}`, 'PATCH', {
                 note_id: noteId,
                 note: noteText
             });
@@ -600,7 +600,7 @@ class OrderDetailModule {
         }
         
         try {
-            await window.adminApi.request(`/api/orders.php?action=delete_note&id=${this.currentOrder.id}`, 'PATCH', {
+            await window.adminApi.request(`orders.php?action=delete_note&id=${this.currentOrder.id}`, 'PATCH', {
                 note_id: noteId
             });
             

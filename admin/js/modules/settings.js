@@ -93,7 +93,7 @@ class SettingsModule {
                 return;
             }
             
-            const response = await window.adminApi.get('/api/settings.php');
+            const response = await window.adminApi.get('settings.php');
             
             // Handle new response format with cache info
             if (response.settings) {
@@ -291,7 +291,7 @@ class SettingsModule {
                 throw new Error('adminApi not ready');
             }
             
-            const response = await window.adminApi.post('/api/settings.php', settings);
+            const response = await window.adminApi.post('settings.php', settings);
             
             // Handle validation errors in response
             if (response.validation_errors && Object.keys(response.validation_errors).length > 0) {
@@ -368,7 +368,7 @@ class SettingsModule {
                 throw new Error('adminApi not ready');
             }
             
-            const response = await window.adminApi.get('/api/settings.php?audit=&limit=50');
+            const response = await window.adminApi.get('settings.php?audit=&limit=50');
             this.auditHistory = response.audit || [];
             
             this.renderAuditModal();

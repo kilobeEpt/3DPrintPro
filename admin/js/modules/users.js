@@ -88,7 +88,7 @@ class UsersModule {
             if (this.filters.role) params.append('role', this.filters.role);
             if (this.filters.status) params.append('status', this.filters.status);
             
-            const url = `/api/admin/users.php${params.toString() ? '?' + params.toString() : ''}`;
+            const url = `admin/users.php${params.toString() ? '?' + params.toString() : ''}`;
             const response = await window.adminApi.get(url);
             
             this.users = response.users || [];
@@ -378,11 +378,11 @@ class UsersModule {
         try {
             if (data.id) {
                 // Update
-                await window.adminApi.put('/api/admin/users.php', data);
+                await window.adminApi.put('admin/users.php', data);
                 this.showSuccess('Пользователь успешно обновлен');
             } else {
                 // Create
-                await window.adminApi.post('/api/admin/users.php', data);
+                await window.adminApi.post('admin/users.php', data);
                 this.showSuccess('Пользователь успешно создан');
                 
                 // If onboarding, redirect to login
@@ -409,7 +409,7 @@ class UsersModule {
     
     async editUser(userId) {
         try {
-            const response = await window.adminApi.get(`/api/admin/users.php?id=${userId}`);
+            const response = await window.adminApi.get(`admin/users.php?id=${userId}`);
             this.showModal(response.user);
         } catch (error) {
             console.error('❌ Failed to load user:', error);
@@ -426,7 +426,7 @@ class UsersModule {
         }
         
         try {
-            await window.adminApi.delete(`/api/admin/users.php?id=${userId}`);
+            await window.adminApi.delete(`admin/users.php?id=${userId}`);
             this.showSuccess('Пользователь успешно удален');
             await this.loadUsers();
         } catch (error) {
@@ -465,7 +465,7 @@ class UsersModule {
         };
         
         try {
-            const response = await window.adminApi.get(`/api/admin/users.php?action=audit_history&user_id=${userId}`);
+            const response = await window.adminApi.get(`admin/users.php?action=audit_history&user_id=${userId}`);
             const logs = response.audit_logs || [];
             
             if (logs.length === 0) {

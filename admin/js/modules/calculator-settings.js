@@ -92,7 +92,7 @@ class CalculatorSettingsModule {
     
     async loadConfig() {
         try {
-            const response = await window.adminApi.get('/api/calculator-settings.php?admin=1');
+            const response = await window.adminApi.get('calculator-settings.php?admin=1');
             
             if (response.success) {
                 this.config = response.data;
@@ -740,27 +740,27 @@ class CalculatorSettingsModule {
         
         try {
             // Save materials
-            await window.adminApi.post('/api/calculator-settings.php?action=materials', {
+            await window.adminApi.post('calculator-settings.php?action=materials', {
                 materials: this.config.materials
             });
             
             // Save services
-            await window.adminApi.post('/api/calculator-settings.php?action=services', {
+            await window.adminApi.post('calculator-settings.php?action=services', {
                 services: this.config.services
             });
             
             // Save quality
-            await window.adminApi.post('/api/calculator-settings.php?action=quality', {
+            await window.adminApi.post('calculator-settings.php?action=quality', {
                 quality_multipliers: this.config.quality_multipliers
             });
             
             // Save discounts
-            await window.adminApi.post('/api/calculator-settings.php?action=discounts', {
+            await window.adminApi.post('calculator-settings.php?action=discounts', {
                 discounts: this.config.discounts
             });
             
             // Save formulas
-            await window.adminApi.post('/api/calculator-settings.php?action=formulas', {
+            await window.adminApi.post('calculator-settings.php?action=formulas', {
                 formulas: this.config.formulas
             });
             
