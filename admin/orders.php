@@ -203,7 +203,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Export Dialog Modal -->
-<div class="modal" id="exportModal">
+<div class="modal" id="exportModal" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <div class="modal-header">
@@ -296,7 +296,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Bulk Actions Modal -->
-<div class="modal" id="bulkActionsModal">
+<div class="modal" id="bulkActionsModal" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <div class="modal-header">
@@ -341,7 +341,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Save Preset Modal -->
-<div class="modal" id="savePresetModal">
+<div class="modal" id="savePresetModal" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-content">
         <div class="modal-header">

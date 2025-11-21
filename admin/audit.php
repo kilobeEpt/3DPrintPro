@@ -186,7 +186,7 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Log Details Modal -->
-<div class="modal" id="logDetailsModal">
+<div class="modal" id="logDetailsModal" style="display: none;">
     <div class="modal-content modal-lg">
         <div class="modal-header">
             <h3>Детали действия</h3>
