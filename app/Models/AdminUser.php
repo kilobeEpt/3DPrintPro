@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class AdminUser extends Model
 {
@@ -135,13 +136,13 @@ class AdminUser extends Model
     
     public function lockAccount($minutes = 15)
     {
-        $this->locked_until = now()->addMinutes($minutes);
+        $this->locked_until = Carbon::now()->addMinutes($minutes);
         $this->save();
     }
     
     public function updateLastLogin($ipAddress)
     {
-        $this->last_login_at = now();
+        $this->last_login_at = Carbon::now();
         $this->last_login_ip = $ipAddress;
         $this->save();
     }

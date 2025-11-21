@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Carbon;
+
 /**
  * FormSubmission Model
  * 
@@ -81,6 +83,6 @@ class FormSubmission extends BaseModel
     
     public function scopeRecent($query, $days = 7)
     {
-        return $query->where('submitted_at', '>=', now()->subDays($days));
+        return $query->where('submitted_at', '>=', Carbon::now()->subDays($days));
     }
 }
