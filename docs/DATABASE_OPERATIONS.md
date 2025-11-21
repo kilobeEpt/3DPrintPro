@@ -8,6 +8,7 @@ Complete guide for database provisioning, backup automation, and restore operati
 - [Backup Management](#backup-management)
 - [Restore Operations](#restore-operations)
 - [Maintenance Tasks](#maintenance-tasks)
+- [Database Audit](#database-audit)
 - [Troubleshooting](#troubleshooting)
 
 ---
@@ -642,6 +643,471 @@ mysql -u root -p ch167436_3dprint -e "
 
 ---
 
+## Database Audit
+
+### Overview
+
+The `db_audit.php` script (v2.0) provides comprehensive database health checks and diagnostics:
+
+- ✅ PDO connection validation
+- ✅ MySQL version and privileges check
+- ✅ Table existence validation (all 18 tables)
+- ✅ Schema drift detection
+- ✅ Eloquent ORM integration tests
+- ✅ Foreign key constraint validation
+- ✅ Row count analysis with critical table checks
+- ✅ Sample data retrieval with PII masking
+- ✅ Structured JSON output with file persistence
+
+### Basic Usage
+
+#### Quick Audit
+
+Run basic connectivity and schema validation:
+
+```bash
+php scripts/db_audit.php
+```
+
+Output:
+```
+========================================
+DATABASE AUDIT REPORT v2.0
+========================================
+Timestamp: 2025-01-19 14:30:00
+
+CONNECTION:
+  Status: ✅ Connected
+  Host: localhost
+  Database: ch167436_3dprint
+  User: ch167436_3dprint
+  MySQL Version: 8.0.35
+
+PRIVILEGES:
+  Status: ✅ OK
+  Granted: SELECT, INSERT, UPDATE, DELETE
+
+TABLES:
+  Expected: 18
+  Found: 18
+  Status: ✅ OK
+
+SCHEMA VALIDATION:
+  Status: ✅ OK
+
+  Table Details:
+    ✅ orders: 20 columns, 5 indexes, 147 records
+    ✅ order_status_history: 7 columns, 3 indexes, 89 records
+    ✅ order_notes: 6 columns, 3 indexes, 23 records
+    ✅ settings: 4 columns, 3 indexes, 45 records
+    ✅ services: 16 columns, 6 indexes, 6 records
+    ... (all 18 tables)
+
+========================================
+SUMMARY: ✅ All checks passed successfully. Database is fully operational.
+========================================
+```
+
+#### Full Audit with All Checks
+
+Run comprehensive audit with Eloquent, foreign keys, and sample data:
+
+```bash
+php scripts/db_audit.php --with-eloquent --with-fk --sample-data
+```
+
+This will:
+- Bootstrap Eloquent ORM and test DB/Schema facades
+- Validate all foreign key constraints
+- Check for orphaned records (FK violations)
+- Fetch and mask sample data from each table
+- Save JSON report to `storage/logs/db_audit_latest.json`
+
+#### JSON Output
+
+Get machine-readable JSON output:
+
+```bash
+php scripts/db_audit.php --json
+```
+
+#### Custom Output Location
+
+Save results to custom path:
+
+```bash
+php scripts/db_audit.php --with-eloquent --with-fk --output=reports/audit_$(date +%Y%m%d).json
+```
+
+### Command Reference
+
+```
+Usage: php scripts/db_audit.php [options]
+
+Options:
+  --json                Output JSON format (legacy, implied by --output)
+  --with-eloquent       Run Eloquent ORM tests (requires bootstrap)
+  --with-fk            Check foreign key constraints and violations
+  --sample-data        Fetch sample records from each table
+  --output=<path>      Save JSON output to file (default: storage/logs/db_audit_latest.json)
+  --help               Show this help message
+
+Exit Codes:
+  0 - All checks passed
+  1 - Critical errors detected
+```
+
+### Audit Checks Explained
+
+#### Connection Check
+
+- Validates PDO connection to MySQL
+- Reads from `api/config.php` (legacy) or `.env` (with Eloquent)
+- Reports host, database, user, charset, MySQL version
+
+#### Privilege Check
+
+- Verifies user has required privileges (SELECT, INSERT, UPDATE, DELETE)
+- Checks for CREATE privilege (optional)
+- Reports missing privileges as errors
+
+#### Table Existence Check
+
+Validates all 18 tables exist:
+
+| Table                      | Critical |
+|----------------------------|----------|
+| orders                     | ❌       |
+| order_status_history       | ❌       |
+| order_notes                | ❌       |
+| settings                   | ❌       |
+| services                   | ✅       |
+| portfolio                  | ❌       |
+| testimonials               | ❌       |
+| faq                        | ❌       |
+| content_blocks             | ❌       |
+| forms                      | ❌       |
+| form_fields                | ❌       |
+| form_submissions           | ❌       |
+| form_submission_values     | ❌       |
+| settings_audit             | ❌       |
+| admin_users                | ✅       |
+| admin_sessions             | ❌       |
+| admin_login_attempts       | ❌       |
+| admin_action_logs          | ❌       |
+
+**Critical tables**: Must contain data for system to function (services, admin_users).
+
+#### Schema Validation
+
+For each table:
+- Compares actual columns against expected schema
+- Checks for missing/extra columns
+- Validates indexes exist
+- Reports record count
+- Flags empty critical tables as errors
+
+#### Eloquent Tests (`--with-eloquent`)
+
+Requires Composer dependencies and `bootstrap/eloquent.php`:
+
+1. **DB Facade Test**: `DB::select('SELECT 1')`
+2. **Schema Facade Test**: `Schema::hasTable('admin_users')`
+3. **Query Builder Test**: `Capsule::table('settings')->count()`
+4. **Model Query Test**: `AdminUser::count()`
+
+#### Foreign Key Check (`--with-fk`)
+
+Inspects `INFORMATION_SCHEMA.KEY_COLUMN_USAGE` for:
+
+**Expected Foreign Keys**:
+- `form_fields.form_id` → `forms.id`
+- `form_submissions.form_id` → `forms.id`
+- `form_submission_values.submission_id` → `form_submissions.id`
+- `form_submission_values.field_id` → `form_fields.id`
+- `orders.form_submission_id` → `form_submissions.id`
+- `order_status_history.order_id` → `orders.id`
+- `order_status_history.changed_by` → `admin_users.id`
+- `order_notes.order_id` → `orders.id`
+- `order_notes.admin_user_id` → `admin_users.id`
+- `admin_sessions.user_id` → `admin_users.id`
+- `admin_action_logs.user_id` → `admin_users.id`
+
+**Violation Detection**:
+- Checks for orphaned records (child records without parent)
+- Reports count of violations per constraint
+- Example: `order_notes.order_id → orders: 5 orphaned record(s)`
+
+#### Sample Data Check (`--sample-data`)
+
+- Fetches 1 representative record from each table
+- Masks PII: emails (ab***@domain.com), phones (79****56), passwords ([REDACTED])
+- Verifies data is readable and properly formatted
+- Reports empty tables
+
+### Automated Audits
+
+#### Cron Schedule
+
+Add to crontab for periodic health checks:
+
+```bash
+# Daily audit at 6 AM
+0 6 * * * cd /var/www/3dprint-omsk.ru && php scripts/db_audit.php --with-eloquent --with-fk >> storage/logs/audit.log 2>&1
+
+# Weekly comprehensive audit
+0 6 * * 0 cd /var/www/3dprint-omsk.ru && php scripts/db_audit.php --with-eloquent --with-fk --sample-data --output=storage/logs/audit_weekly_$(date +\%Y\%m\%d).json
+```
+
+#### CI/CD Integration
+
+Use in deployment pipelines:
+
+```yaml
+# .github/workflows/deploy.yml
+- name: Database Audit
+  run: |
+    php scripts/db_audit.php --with-eloquent --with-fk --json > audit.json
+    if [ $? -ne 0 ]; then
+      echo "Database audit failed!"
+      exit 1
+    fi
+```
+
+### Interpreting Results
+
+#### Success Indicators
+
+✅ **All checks passed**:
+```
+success: true
+summary: "✅ All checks passed successfully. Database is fully operational."
+errors: []
+warnings: []
+```
+
+#### Warning Indicators
+
+⚠️ **Operational with warnings**:
+```
+success: true
+warnings: [
+  "MySQL version 5.7.33 detected. MySQL 8.0+ recommended for optimal performance.",
+  "3 table(s) are empty: form_submissions, order_notes, settings_audit"
+]
+```
+
+Common warnings:
+- Old MySQL version (< 8.0)
+- Empty non-critical tables
+- Extra tables not in schema
+- CREATE privilege not granted
+
+#### Error Indicators
+
+❌ **Critical failures**:
+```
+success: false
+errors: [
+  "Missing tables: order_status_history, order_notes",
+  "Critical tables are empty: admin_users, services",
+  "Foreign key violations detected: 2 constraint(s) violated"
+]
+```
+
+Critical errors:
+- Missing tables
+- Empty critical tables (admin_users, services)
+- Missing required privileges
+- Connection failures
+- Foreign key violations
+
+### Remediation
+
+#### Missing Tables
+
+```bash
+# Import schema
+mysql -u root -p ch167436_3dprint < database/schema.sql
+
+# Or re-provision
+php scripts/provision-database.php --import-only
+```
+
+#### Empty Critical Tables
+
+```bash
+# Seed baseline data
+php scripts/provision-database.php --seed
+
+# Or run individual seeders
+php scripts/seed-data.php
+php scripts/seed-forms.php
+php scripts/seed-calculator-settings.php
+```
+
+#### Foreign Key Violations
+
+```bash
+# Identify orphaned records
+mysql -u root -p ch167436_3dprint -e "
+  SELECT o.id, o.order_number, o.form_submission_id
+  FROM orders o
+  LEFT JOIN form_submissions fs ON o.form_submission_id = fs.id
+  WHERE o.form_submission_id IS NOT NULL
+    AND fs.id IS NULL;
+"
+
+# Fix by nullifying invalid FKs
+mysql -u root -p ch167436_3dprint -e "
+  UPDATE orders o
+  LEFT JOIN form_submissions fs ON o.form_submission_id = fs.id
+  SET o.form_submission_id = NULL
+  WHERE o.form_submission_id IS NOT NULL
+    AND fs.id IS NULL;
+"
+```
+
+#### Eloquent Bootstrap Failures
+
+```bash
+# Install dependencies
+composer install
+
+# Verify .env exists
+cp .env.example .env
+nano .env  # Configure DB credentials
+
+# Test Eloquent
+php scripts/eloquent-smoke.php
+```
+
+### JSON Output Structure
+
+```json
+{
+  "success": true,
+  "version": "2.0",
+  "timestamp": "2025-01-19 14:30:00",
+  "connection": {
+    "status": "connected",
+    "host": "localhost",
+    "database": "ch167436_3dprint",
+    "user": "ch167436_3dprint",
+    "mysql_version": "8.0.35",
+    "config_source": "api/config.php"
+  },
+  "eloquent": {
+    "bootstrap": "success",
+    "status": "operational",
+    "tests": {
+      "db_facade": { "status": "pass", "result": "DB facade query successful" },
+      "schema_facade": { "status": "pass", "result": "Schema facade functional" },
+      "query_builder": { "status": "pass", "settings_count": 45 },
+      "model_query": { "status": "pass", "admin_users_count": 3 }
+    }
+  },
+  "privileges": {
+    "status": "ok",
+    "granted": ["SELECT", "INSERT", "UPDATE", "DELETE"],
+    "can_create_tables": true
+  },
+  "tables": {
+    "expected": 18,
+    "found": 18,
+    "status": "ok",
+    "existing_tables": ["orders", "order_status_history", ...]
+  },
+  "foreign_keys": {
+    "status": "ok",
+    "found": 11,
+    "constraints": [...],
+    "violations": []
+  },
+  "schema_validation": {
+    "status": "ok",
+    "drift_detected": false,
+    "empty_tables": ["form_submissions", "order_notes"],
+    "tables": {
+      "orders": {
+        "status": "ok",
+        "columns": { "expected": 20, "found": 20 },
+        "indexes": { "expected": 5, "found": 5 },
+        "record_count": 147
+      }
+    }
+  },
+  "sample_data": {
+    "tables": {
+      "orders": {
+        "status": "found",
+        "sample": { "id": 1, "order_number": "ORD-20250119-001", ... }
+      }
+    }
+  },
+  "summary": "✅ All checks passed successfully. Database is fully operational.",
+  "errors": [],
+  "warnings": [],
+  "output_file": "storage/logs/db_audit_latest.json"
+}
+```
+
+### Use Cases
+
+#### Pre-Deployment Validation
+
+```bash
+# Validate database before deploy
+php scripts/db_audit.php --with-eloquent --with-fk
+if [ $? -ne 0 ]; then
+  echo "❌ Database audit failed. Fix issues before deploying."
+  exit 1
+fi
+```
+
+#### Post-Migration Verification
+
+```bash
+# After running migrations
+php scripts/migrate-orders-domain.php
+php scripts/db_audit.php --with-fk
+
+# Check for FK violations
+cat storage/logs/db_audit_latest.json | jq '.foreign_keys.violations'
+```
+
+#### Health Monitoring
+
+```bash
+# Weekly comprehensive health check
+php scripts/db_audit.php --with-eloquent --with-fk --sample-data
+
+# Parse critical metrics
+cat storage/logs/db_audit_latest.json | jq '{
+  success: .success,
+  tables: .tables.found,
+  empty_critical: .schema_validation.critical_empty,
+  fk_violations: (.foreign_keys.violations | length)
+}'
+```
+
+#### Troubleshooting Connection Issues
+
+```bash
+# Diagnose connection problems
+php scripts/db_audit.php --json | jq '.connection'
+
+# Expected output:
+# {
+#   "status": "connected",
+#   "host": "localhost",
+#   "database": "ch167436_3dprint",
+#   ...
+# }
+```
+
+---
+
 ## Troubleshooting
 
 ### Provisioning Issues
@@ -887,5 +1353,5 @@ For issues with database operations:
 ---
 
 **Last Updated**: January 19, 2025  
-**Version**: 1.0  
+**Version**: 1.1 (Added Database Audit section)  
 **Applies To**: 3D Print Pro v5.0+
