@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\SettingsAudit;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Support\Carbon;
 
 /**
  * Settings Service
@@ -405,7 +406,7 @@ class SettingsService
                 ->where('setting_key', $key)
                 ->update([
                     'setting_value' => $storageValue,
-                    'updated_at' => now(),
+                    'updated_at' => Carbon::now(),
                 ]);
         } else {
             Capsule::table('settings')->insert([

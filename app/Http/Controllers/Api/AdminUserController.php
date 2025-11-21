@@ -6,6 +6,7 @@ use App\Models\AdminUser;
 use App\Models\AdminSession;
 use App\Models\AdminActionLog;
 use App\Services\AdminAuthService;
+use Illuminate\Support\Carbon;
 
 /**
  * Admin User API Controller
@@ -63,7 +64,7 @@ class AdminUserController extends BaseApiController
             // Include related data
             $userData = $user->toArray();
             $userData['active_sessions_count'] = AdminSession::byUser($user->id)
-                ->where('expires_at', '>', now())
+                ->where('expires_at', '>', Carbon::now())
                 ->count();
             
             $this->success(['user' => $userData]);
@@ -98,7 +99,7 @@ class AdminUserController extends BaseApiController
         // Add active session counts
         $users = array_map(function($user) {
             $user['active_sessions_count'] = AdminSession::byUser($user['id'])
-                ->where('expires_at', '>', now())
+                ->where('expires_at', '>', Carbon::now())
                 ->count();
             return $user;
         }, $result['data']);

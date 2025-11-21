@@ -6,6 +6,7 @@ use App\Models\AdminUser;
 use App\Models\AdminSession;
 use App\Models\AdminLoginAttempt;
 use App\Models\AdminActionLog;
+use Illuminate\Support\Carbon;
 
 class AdminAuthService
 {
@@ -72,7 +73,7 @@ class AdminAuthService
                 $userAgent
             );
             
-            $remainingTime = $user->locked_until ? $user->locked_until->diffInMinutes(now()) : 0;
+            $remainingTime = $user->locked_until ? $user->locked_until->diffInMinutes(Carbon::now()) : 0;
             
             return [
                 'success' => false,
@@ -142,8 +143,8 @@ class AdminAuthService
         $this->destroyExistingSessionById($sessionId);
         
         $expiresAt = $rememberMe 
-            ? now()->addDays(self::REMEMBER_TOKEN_LIFETIME_DAYS)
-            : now()->addMinutes(self::SESSION_LIFETIME_MINUTES);
+            ? Carbon::now()->addDays(self::REMEMBER_TOKEN_LIFETIME_DAYS)
+            : Carbon::now()->addMinutes(self::SESSION_LIFETIME_MINUTES);
         
         $csrfToken = bin2hex(random_bytes(32));
         
@@ -154,7 +155,7 @@ class AdminAuthService
             'user_agent' => $userAgent,
             'csrf_token' => $csrfToken,
             'expires_at' => $expiresAt,
-            'last_activity_at' => now(),
+            'last_activity_at' => Carbon::now(),
         ]);
         
         if ($rememberMe) {
@@ -207,7 +208,7 @@ class AdminAuthService
         $session->updateActivity();
         
         $inactivityTimeout = self::SESSION_LIFETIME_MINUTES;
-        if ($session->last_activity_at->diffInMinutes(now()) > $inactivityTimeout) {
+        if ($session->last_activity_at->diffInMinutes(Carbon::now()) > $inactivityTimeout) {
             $this->destroySession($sessionId);
             
             return [
@@ -270,7 +271,7 @@ class AdminAuthService
             
             if ($oldestAttempt) {
                 $lockedUntil = $oldestAttempt->created_at->addMinutes(self::LOCKOUT_DURATION_MINUTES);
-                $remainingMinutes = max(0, $lockedUntil->diffInMinutes(now()));
+                $remainingMinutes = max(0, $lockedUntil->diffInMinutes(Carbon::now()));
                 
                 if ($remainingMinutes > 0) {
                     return [
