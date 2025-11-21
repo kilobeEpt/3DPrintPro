@@ -171,7 +171,7 @@ class OrdersModule {
             }
             
             const params = this.buildApiParams();
-            const response = await window.adminApi.request(`/api/orders.php?${new URLSearchParams(params).toString()}`, 'GET');
+            const response = await window.adminApi.request(`orders.php?${new URLSearchParams(params).toString()}`, 'GET');
             
             this.orders = response.orders || [];
             this.total = response.meta?.total || 0;

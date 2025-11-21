@@ -48,7 +48,7 @@ class AuditModule {
     
     async loadUsers() {
         try {
-            const response = await window.adminApi.get('/api/admin/users.php');
+            const response = await window.adminApi.get('admin/users.php');
             if (response.data) {
                 this.users = response.data;
                 this.renderUserFilter();
@@ -89,7 +89,7 @@ class AuditModule {
                 ...this.filters
             });
             
-            const response = await window.adminApi.get(`/api/admin/audit-logs.php?${params}`);
+            const response = await window.adminApi.get(`admin/audit-logs.php?${params}`);
             
             if (response.data) {
                 this.renderLogs(response.data);
@@ -103,7 +103,7 @@ class AuditModule {
     
     async loadStats() {
         try {
-            const response = await window.adminApi.get('/api/admin/audit-logs.php?stats=1');
+            const response = await window.adminApi.get('admin/audit-logs.php?stats=1');
             
             if (response.data) {
                 this.renderStats(response.data);
@@ -312,7 +312,7 @@ class AuditModule {
     async exportLogs() {
         try {
             const params = new URLSearchParams(this.filters);
-            const response = await window.adminApi.get(`/api/admin/audit-logs.php?export=csv&${params}`);
+            const response = await window.adminApi.get(`admin/audit-logs.php?export=csv&${params}`);
             
             if (response.data && response.data.url) {
                 window.open(response.data.url, '_blank');
@@ -334,7 +334,7 @@ class AuditModule {
     
     async cleanupOldLogs(days) {
         try {
-            const response = await window.adminApi.delete(`/api/admin/audit-logs.php?older_than=${days}`);
+            const response = await window.adminApi.delete(`admin/audit-logs.php?older_than=${days}`);
             
             if (response.success) {
                 window.showNotification(`Удалено записей: ${response.data.deleted}`, 'success');
