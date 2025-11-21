@@ -706,6 +706,99 @@ class AdminMain {
     }
 }
 
+// ========================================
+// Global Notification Function
+// ========================================
+
+/**
+ * Global notification function for all admin modules
+ * Shows toast notifications with different types
+ * 
+ * @param {string} message - The message to display
+ * @param {string} type - Type: 'success', 'error', 'warning', 'info'
+ * @param {number} duration - Duration in milliseconds (default: 3000)
+ */
+window.showNotification = function(message, type = 'info', duration = 3000) {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    
+    // Create container if it doesn't exist
+    let notifContainer = document.getElementById('notification-container');
+    if (!notifContainer) {
+        notifContainer = document.createElement('div');
+        notifContainer.id = 'notification-container';
+        notifContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+        document.body.appendChild(notifContainer);
+    }
+    
+    // Create notification element
+    const div = document.createElement('div');
+    div.className = `notification notification-${type}`;
+    
+    // Color mapping
+    const colors = {
+        success: '#4CAF50',
+        error: '#f44336',
+        warning: '#ff9800',
+        info: '#2196F3'
+    };
+    
+    const iconMap = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    
+    div.style.cssText = `
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        background-color: ${colors[type] || colors.info};
+        color: white;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        animation: slideIn 0.3s ease-in-out;
+        min-width: 250px;
+        max-width: 400px;
+    `;
+    
+    div.innerHTML = `
+        <i class="fas ${iconMap[type] || iconMap.info}"></i>
+        <span style="flex: 1;">${message}</span>
+        <button style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    notifContainer.appendChild(div);
+    
+    // Auto remove after duration
+    setTimeout(() => {
+        div.style.animation = 'slideOut 0.3s ease-in-out';
+        setTimeout(() => div.remove(), 300);
+    }, duration);
+};
+
+// Add CSS animations for notifications
+if (!document.getElementById('notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 // Initialize on DOM ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
