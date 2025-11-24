@@ -6,7 +6,11 @@
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../bootstrap/eloquent.php';
-require_once __DIR__ . '/../../includes/admin-session.php';
+
+// Load admin session config if not already loaded (for backward compatibility)
+if (!defined('ADMIN_SESSION_NAME')) {
+    require_once __DIR__ . '/../../includes/admin-session.php';
+}
 
 use App\Services\AdminAuthService;
 

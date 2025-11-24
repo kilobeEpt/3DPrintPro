@@ -3,6 +3,7 @@
  * API Bootstrap
  * 
  * This file loads all necessary dependencies for API endpoints:
+ * - Admin session configuration
  * - Composer autoloader
  * - Eloquent ORM
  * - Common helpers
@@ -12,6 +13,10 @@
  * Usage:
  *   require_once __DIR__ . '/bootstrap.php';
  */
+
+// CRITICAL: Load admin session configuration FIRST before any session_start() calls
+// This ensures all API endpoints use the same session name and cookie settings as admin pages
+require_once __DIR__ . '/../includes/admin-session.php';
 
 // Load Composer autoloader
 require_once __DIR__ . '/../vendor/autoload.php';
