@@ -84,16 +84,14 @@ class CSRF {
      * @param string $fieldName The form field name (default: csrf_token)
      */
     public static function verifyPostToken($fieldName = 'csrf_token') {
-        $token = $_POST[$fieldName] ?? '';
-        
-        if (!self::validateToken($token)) {
-            http_response_code(403);
-            die(json_encode([
-                'success' => false,
-                'error' => 'Invalid CSRF token. Please refresh the page and try again.'
-            ]));
-        }
+    $token = $_POST[$fieldName] ?? '';
+    
+    if (!self::validateToken($token)) {
+        $_SESSION['LOGIN_ERROR'] = 'Invalid CSRF token. Please refresh the page and try again.';
+        header('Location: /admin/login.php');
+        exit;
     }
+}
     
     /**
      * Verify CSRF token from request headers (for AJAX)
