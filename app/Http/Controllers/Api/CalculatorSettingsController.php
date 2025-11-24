@@ -45,6 +45,14 @@ class CalculatorSettingsController extends BaseApiController
                 'validation' => $this->settingsService->get('calculator.validation', []),
             ];
             
+            // Ensure arrays are always arrays (not null or false)
+            $config['materials'] = is_array($config['materials']) ? $config['materials'] : [];
+            $config['services'] = is_array($config['services']) ? $config['services'] : [];
+            $config['discounts'] = is_array($config['discounts']) ? $config['discounts'] : [];
+            $config['quality_multipliers'] = is_array($config['quality_multipliers']) ? $config['quality_multipliers'] : [];
+            $config['formulas'] = is_array($config['formulas']) ? $config['formulas'] : [];
+            $config['validation'] = is_array($config['validation']) ? $config['validation'] : [];
+            
             // Filter out inactive items
             $config['materials'] = array_values(array_filter($config['materials'], function($item) {
                 return isset($item['active']) ? $item['active'] : true;
@@ -86,6 +94,10 @@ class CalculatorSettingsController extends BaseApiController
             ]);
             
         } catch (\Exception $e) {
+            \ApiLogger::error('Calculator settings error', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             $this->serverError('Failed to load calculator configuration');
         }
     }
