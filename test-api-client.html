@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Client Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>API Client Hardening Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: CSRF Token Detection</h2>
+        <p>Testing CSRF token lookup from window.ADMIN_SESSION and meta tag fallback</p>
+        <button onclick="testCsrfToken()">Test CSRF Token</button>
+        <div id="csrf-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Credentials & Headers</h2>
+        <p>Testing that requests include credentials and proper headers</p>
+        <button onclick="testHeaders()">Test Headers</button>
+        <div id="headers-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Public API Call (Services)</h2>
+        <p>Testing public endpoint without authentication</p>
+        <button onclick="testPublicApi()">Get Services</button>
+        <div id="public-result" class="result"></div>
+    </div>
+
+    <script src="/config.js"></script>
+    <script src="/js/api-client.js"></script>
+    <script>
+        function log(elementId, message, isError = false) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = 'result ' + (isError ? 'error' : 'success');
+        }
+
+        function testCsrfToken() {
+            try {
+                const token = window.apiClient.getCsrfToken();
+                if (token) {
+                    log('csrf-result', `✅ CSRF Token found: ${token.substring(0, 16)}...`);
+                } else {
+                    log('csrf-result', '⚠️ No CSRF token found (expected for public pages)', false);
+                }
+            } catch (error) {
+                log('csrf-result', `❌ Error: ${error.message}`, true);
+            }
+        }
+
+        async function testHeaders() {
+            try {
+                log('headers-result', '🔄 Testing headers...');
+                
+                // Intercept fetch to check what headers are sent
+                const originalFetch = window.fetch;
+                let capturedRequest = null;
+                
+                window.fetch = async function(url, options) {
+                    capturedRequest = { url, options };
+                    // Restore original fetch
+                    window.fetch = originalFetch;
+                    // Actually make the request
+                    return originalFetch(url, options);
+                };
+                
+                // Make a test request
+                await window.apiClient.get('services.php').catch(() => {});
+                
+                if (capturedRequest) {
+                    const info = {
+                        credentials: capturedRequest.options.credentials,
+                        headers: capturedRequest.options.headers,
+                        hasAcceptHeader: !!capturedRequest.options.headers['Accept'],
+                        hasContentType: !!capturedRequest.options.headers['Content-Type'],
+                        hasCsrfToken: !!capturedRequest.options.headers['X-CSRF-Token']
+                    };
+                    
+                    log('headers-result', 
+                        `✅ Headers Test:\n` +
+                        `- credentials: ${info.credentials}\n` +
+                        `- Accept: ${capturedRequest.options.headers['Accept']}\n` +
+                        `- X-CSRF-Token: ${info.hasCsrfToken ? 'Present' : 'Not present (OK for public)'}\n` +
+                        `- Content-Type: ${capturedRequest.options.headers['Content-Type'] || 'Not set (correct for GET)'}`,
+                        false
+                    );
+                }
+            } catch (error) {
+                log('headers-result', `❌ Error: ${error.message}`, true);
+            }
+        }
+
+        async function testPublicApi() {
+            try {
+                log('public-result', '🔄 Fetching services...');
+                const result = await window.apiClient.getServices();
+                log('public-result', 
+                    `✅ Success!\n` +
+                    `Found ${result.services.length} services\n` +
+                    `Total: ${result.total}`,
+                    false
+                );
+            } catch (error) {
+                log('public-result', `❌ Error: ${error.message}`, true);
+            }
+        }
+
+        // Auto-run CSRF test on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(testCsrfToken, 500);
+        });
+    </script>
+</body>
+</html>

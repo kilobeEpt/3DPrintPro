@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="test-token-12345">
+    <title>Test Admin API Wrapper</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .test-result.pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-result.fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-result.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .mock-data {
+            background: #f8f9fa;
+            padding: 10px;
+            border-left: 3px solid #0066cc;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin API Wrapper Test Suite</h1>
+    <p>This page tests the refactored AdminApiClient to ensure it correctly extracts data and refreshes CSRF tokens.</p>
+
+    <div class="test-section">
+        <h2>Test Setup</h2>
+        <div id="setup-results"></div>
+        <button onclick="runSetupTests()">Run Setup Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Data Extraction Tests</h2>
+        <div id="extraction-results"></div>
+        <button onclick="runExtractionTests()">Run Extraction Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h2>CSRF Token Tests</h2>
+        <div id="csrf-results"></div>
+        <button onclick="runCsrfTests()">Run CSRF Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Integration Tests</h2>
+        <div id="integration-results"></div>
+        <button onclick="runIntegrationTests()">Run Integration Tests</button>
+    </div>
+
+    <script>
+        // Mock ADMIN_SESSION for testing
+        window.ADMIN_SESSION = {
+            authenticated: true,
+            login: 'admin',
+            csrfToken: 'test-token-12345'
+        };
+
+        // Mock base APIClient for testing
+        class MockAPIClient {
+            constructor() {
+                this._cachedCsrfToken = null;
+            }
+
+            getCsrfToken() {
+                if (this._cachedCsrfToken) return this._cachedCsrfToken;
+                if (window.ADMIN_SESSION && window.ADMIN_SESSION.csrfToken) {
+                    this._cachedCsrfToken = window.ADMIN_SESSION.csrfToken;
+                    return this._cachedCsrfToken;
+                }
+                const metaTag = document.querySelector('meta[name="csrf-token"]');
+                if (metaTag) {
+                    this._cachedCsrfToken = metaTag.getAttribute('content');
+                    return this._cachedCsrfToken;
+                }
+                return null;
+            }
+
+            async request(endpoint, method, data, options) {
+                console.log(`Mock request: ${method} ${endpoint}`, data);
+                return { success: true, endpoint, method, data };
+            }
+
+            async get(endpoint) { return this.request(endpoint, 'GET'); }
+            async post(endpoint, data) { return this.request(endpoint, 'POST', data); }
+            async put(endpoint, data) { return this.request(endpoint, 'PUT', data); }
+            async delete(endpoint, data) { return this.request(endpoint, 'DELETE', data); }
+
+            // Mock domain methods that return response objects
+            async getOrders(params) {
+                return {
+                    orders: [
+                        { id: '1', name: 'Test Order 1', amount: 1000 },
+                        { id: '2', name: 'Test Order 2', amount: 2000 }
+                    ],
+                    total: 2,
+                    limit: 20,
+                    offset: 0
+                };
+            }
+
+            async getOrder(id) {
+                return { id, name: 'Test Order', amount: 1000 };
+            }
+
+            async getServices(params) {
+                return {
+                    services: [
+                        { id: '1', name: 'Service 1', price: 500 },
+                        { id: '2', name: 'Service 2', price: 750 }
+                    ],
+                    total: 2
+                };
+            }
+
+            async getPortfolio(params) {
+                return {
+                    items: [
+                        { id: '1', title: 'Portfolio 1' },
+                        { id: '2', title: 'Portfolio 2' }
+                    ],
+                    total: 2
+                };
+            }
+
+            async getTestimonials(params) {
+                return {
+                    testimonials: [
+                        { id: '1', name: 'Customer 1', text: 'Great!' },
+                        { id: '2', name: 'Customer 2', text: 'Excellent!' }
+                    ],
+                    total: 2
+                };
+            }
+
+            async getFAQ(params) {
+                return {
+                    items: [
+                        { id: '1', question: 'Q1?', answer: 'A1' },
+                        { id: '2', question: 'Q2?', answer: 'A2' }
+                    ],
+                    total: 2
+                };
+            }
+
+            async getContentBlocks(params) {
+                return {
+                    blocks: [
+                        { id: '1', title: 'Block 1', content: 'Content 1' },
+                        { id: '2', title: 'Block 2', content: 'Content 2' }
+                    ],
+                    total: 2
+                };
+            }
+
+            async getAllSettings() {
+                return {
+                    setting1: 'value1',
+                    setting2: 'value2'
+                };
+            }
+
+            async getSetting(key) {
+                return 'setting-value';
+            }
+
+            async updateOrder(id, data) {
+                return { success: true, order: { id, ...data } };
+            }
+
+            async createService(data) {
+                return { success: true, service: { id: 'new-id', ...data } };
+            }
+
+            async deleteService(id) {
+                return { success: true };
+            }
+        }
+
+        // Create mock instance
+        window.apiClient = new MockAPIClient();
+
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = message;
+            container.appendChild(div);
+        }
+
+        function clearResults(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+
+        function runSetupTests() {
+            clearResults('setup-results');
+            
+            addResult('setup-results', '✓ window.ADMIN_SESSION exists', 'pass');
+            addResult('setup-results', `✓ CSRF token: ${window.ADMIN_SESSION.csrfToken}`, 'pass');
+            
+            if (window.apiClient) {
+                addResult('setup-results', '✓ window.apiClient exists', 'pass');
+            } else {
+                addResult('setup-results', '✗ window.apiClient missing', 'fail');
+            }
+
+            if (window.adminApi) {
+                addResult('setup-results', '✓ window.adminApi exists', 'pass');
+            } else {
+                addResult('setup-results', '⚠ window.adminApi not initialized yet (will initialize)', 'info');
+            }
+        }
+
+        async function runExtractionTests() {
+            clearResults('extraction-results');
+
+            try {
+                // Test orders extraction
+                const orders = await window.adminApi.getOrders();
+                if (Array.isArray(orders)) {
+                    addResult('extraction-results', `✓ getOrders() returns array: [${orders.length} items]`, 'pass');
+                } else {
+                    addResult('extraction-results', `✗ getOrders() returned ${typeof orders}, expected array`, 'fail');
+                }
+
+                // Test services extraction
+                const services = await window.adminApi.getServices();
+                if (Array.isArray(services)) {
+                    addResult('extraction-results', `✓ getServices() returns array: [${services.length} items]`, 'pass');
+                } else {
+                    addResult('extraction-results', `✗ getServices() returned ${typeof services}, expected array`, 'fail');
+                }
+
+                // Test portfolio extraction
+                const portfolio = await window.adminApi.getPortfolio();
+                if (Array.isArray(portfolio)) {
+                    addResult('extraction-results', `✓ getPortfolio() returns array: [${portfolio.length} items]`, 'pass');
+                } else {
+                    addResult('extraction-results', `✗ getPortfolio() returned ${typeof portfolio}, expected array`, 'fail');
+                }
+
+                // Test testimonials extraction
+                const testimonials = await window.adminApi.getTestimonials();
+                if (Array.isArray(testimonials)) {
+                    addResult('extraction-results', `✓ getTestimonials() returns array: [${testimonials.length} items]`, 'pass');
+                } else {
+                    addResult('extraction-results', `✗ getTestimonials() returned ${typeof testimonials}, expected array`, 'fail');
+                }
+
+                // Test FAQ extraction
+                const faq = await window.adminApi.getFAQ();
+                if (Array.isArray(faq)) {
+                    addResult('extraction-results', `✓ getFAQ() returns array: [${faq.length} items]`, 'pass');
+                } else {
+                    addResult('extraction-results', `✗ getFAQ() returned ${typeof faq}, expected array`, 'fail');
+                }
+
+                // Test content blocks extraction
+                const blocks = await window.adminApi.getContentBlocks();
+                if (Array.isArray(blocks)) {
+                    addResult('extraction-results', `✓ getContentBlocks() returns array: [${blocks.length} items]`, 'pass');
+                } else {
+                    addResult('extraction-results', `✗ getContentBlocks() returned ${typeof blocks}, expected array`, 'fail');
+                }
+
+                // Test single item (should be object, not wrapped)
+                const order = await window.adminApi.getOrder('123');
+                if (typeof order === 'object' && !Array.isArray(order)) {
+                    addResult('extraction-results', `✓ getOrder(id) returns object`, 'pass');
+                } else {
+                    addResult('extraction-results', `✗ getOrder(id) returned ${typeof order}, expected object`, 'fail');
+                }
+
+                // Test settings (should be object)
+                const settings = await window.adminApi.getSettings();
+                if (typeof settings === 'object' && !Array.isArray(settings)) {
+                    addResult('extraction-results', `✓ getSettings() returns object`, 'pass');
+                } else {
+                    addResult('extraction-results', `✗ getSettings() returned ${typeof settings}, expected object`, 'fail');
+                }
+
+            } catch (error) {
+                addResult('extraction-results', `✗ Error: ${error.message}`, 'fail');
+            }
+        }
+
+        async function runCsrfTests() {
+            clearResults('csrf-results');
+
+            try {
+                // Test initial token
+                const initialToken = window.apiClient._cachedCsrfToken;
+                addResult('csrf-results', `Initial cached token: ${initialToken}`, 'info');
+
+                // Test token refresh
+                window.adminApi.refreshCsrfToken();
+                const refreshedToken = window.apiClient._cachedCsrfToken;
+                if (refreshedToken === window.ADMIN_SESSION.csrfToken) {
+                    addResult('csrf-results', `✓ Token refreshed from ADMIN_SESSION`, 'pass');
+                } else {
+                    addResult('csrf-results', `✗ Token refresh failed`, 'fail');
+                }
+
+                // Test token change detection
+                window.ADMIN_SESSION.csrfToken = 'new-token-67890';
+                window.adminApi.refreshCsrfToken();
+                const newToken = window.apiClient._cachedCsrfToken;
+                if (newToken === 'new-token-67890') {
+                    addResult('csrf-results', `✓ Token updated when ADMIN_SESSION changes`, 'pass');
+                } else {
+                    addResult('csrf-results', `✗ Token not updated (got ${newToken})`, 'fail');
+                }
+
+                // Restore original token
+                window.ADMIN_SESSION.csrfToken = 'test-token-12345';
+
+            } catch (error) {
+                addResult('csrf-results', `✗ Error: ${error.message}`, 'fail');
+            }
+        }
+
+        async function runIntegrationTests() {
+            clearResults('integration-results');
+
+            try {
+                // Test module-style usage
+                const orders = await window.adminApi.getOrders();
+                const totalOrders = orders.length;
+                addResult('integration-results', `✓ Module can call orders.length: ${totalOrders}`, 'pass');
+
+                const services = await window.adminApi.getServices();
+                const serviceNames = services.map(s => s.name);
+                addResult('integration-results', `✓ Module can call services.map(): [${serviceNames.join(', ')}]`, 'pass');
+
+                const portfolio = await window.adminApi.getPortfolio();
+                const sorted = portfolio.sort((a, b) => a.title.localeCompare(b.title));
+                addResult('integration-results', `✓ Module can call portfolio.sort()`, 'pass');
+
+                const settings = await window.adminApi.getSettings();
+                const entries = Object.entries(settings);
+                addResult('integration-results', `✓ Module can call Object.entries(settings): ${entries.length} entries`, 'pass');
+
+                // Test write operations return full response
+                const updateResult = await window.adminApi.updateOrder('123', { status: 'completed' });
+                if (updateResult.success) {
+                    addResult('integration-results', `✓ Write operation returns full response for status checking`, 'pass');
+                } else {
+                    addResult('integration-results', `✗ Write operation response missing success flag`, 'fail');
+                }
+
+            } catch (error) {
+                addResult('integration-results', `✗ Error: ${error.message}`, 'fail');
+            }
+        }
+
+        // Auto-run setup tests on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                runSetupTests();
+            }, 500);
+        });
+    </script>
+
+    <!-- Load the actual admin API client -->
+    <script src="js/api-client.js"></script>
+    <script src="admin/js/admin-api-client.js"></script>
+</body>
+</html>
