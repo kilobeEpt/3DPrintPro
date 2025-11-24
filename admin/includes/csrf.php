@@ -84,14 +84,24 @@ class CSRF {
      * @param string $fieldName The form field name (default: csrf_token)
      */
     public static function verifyPostToken($fieldName = 'csrf_token') {
-    $token = $_POST[$fieldName] ?? '';
-    
-    if (!self::validateToken($token)) {
-        $_SESSION['LOGIN_ERROR'] = 'Invalid CSRF token. Please refresh the page and try again.';
-        header('Location: /admin/login.php');
-        exit;
+        $token = $_POST[$fieldName] ?? '';
+        
+        // Debug logging
+        $debugLog = '/tmp/login-debug.log';
+        file_put_contents($debugLog, date('[Y-m-d H:i:s] ') . "CSRF::verifyPostToken called\n", FILE_APPEND);
+        file_put_contents($debugLog, date('[Y-m-d H:i:s] ') . "POST token: $token\n", FILE_APPEND);
+        file_put_contents($debugLog, date('[Y-m-d H:i:s] ') . "Session token: " . ($_SESSION['CSRF_TOKEN'] ?? 'NOT SET') . "\n", FILE_APPEND);
+        
+        if (!self::validateToken($token)) {
+            file_put_contents($debugLog, date('[Y-m-d H:i:s] ') . "CSRF validation FAILED\n", FILE_APPEND);
+            $_SESSION['LOGIN_ERROR'] = 'Invalid CSRF token. Please refresh the page and try again.';
+            session_write_close();
+            header('Location: /admin/login.php');
+            exit;
+        }
+        
+        file_put_contents($debugLog, date('[Y-m-d H:i:s] ') . "CSRF validation PASSED\n", FILE_APPEND);
     }
-}
     
     /**
      * Verify CSRF token from request headers (for AJAX)
