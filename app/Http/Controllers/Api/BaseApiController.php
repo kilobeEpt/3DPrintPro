@@ -384,4 +384,15 @@ abstract class BaseApiController
     {
         \ApiResponse::notFound($message);
     }
+    
+    /**
+     * Server error response (500)
+     * 
+     * @param string $message
+     * @return void
+     */
+    protected function serverError($message = 'Internal server error')
+    {
+        \ApiResponse::serverError($message);
+    }
 }

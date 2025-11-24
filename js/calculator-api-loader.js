@@ -74,10 +74,30 @@ class CalculatorConfigLoader {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const data = await response.json();
+        const text = await response.text();
+        
+        // Check if response is empty
+        if (!text || text.trim() === '') {
+            throw new Error('Empty API response');
+        }
+        
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('JSON parse error:', e);
+            console.error('Response text:', text.substring(0, 200));
+            throw new Error('Invalid JSON in API response');
+        }
         
         if (!data.success || !data.data) {
             throw new Error('Invalid API response format');
+        }
+        
+        // Validate that we have at least materials and services
+        if (!data.data.materials || !Array.isArray(data.data.materials) || data.data.materials.length === 0) {
+            console.warn('API returned empty materials, will use fallback');
+            throw new Error('No materials in API response');
         }
         
         return data.data;
