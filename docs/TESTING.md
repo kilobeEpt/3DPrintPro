@@ -10,8 +10,9 @@ Complete guide to running and maintaining the test suite for 3D Print Pro platfo
 4. [Test Structure](#test-structure)
 5. [Writing Tests](#writing-tests)
 6. [Smoke Tests](#smoke-tests)
-7. [Continuous Integration](#continuous-integration)
-8. [Troubleshooting](#troubleshooting)
+7. [Manual QA Testing](#manual-qa-testing)
+8. [Continuous Integration](#continuous-integration)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -447,6 +448,48 @@ php scripts/eloquent-smoke.php
 - Relationships
 - Query scopes
 - JSON casting
+
+---
+
+## Manual QA Testing
+
+### Database Sync Verification Checklist
+
+For comprehensive manual verification of frontend/admin/database synchronization, see:
+
+**[QA_DB_SYNC_CHECKLIST.md](QA_DB_SYNC_CHECKLIST.md)** - Complete manual QA guide covering:
+
+- **Step 1:** Database diagnostics with `db_audit.php`
+- **Step 2:** API health check with `api_smoke.php`
+- **Step 3:** Frontend data loading and IndexedDB caching verification
+- **Step 4:** SSE real-time sync validation using `test-sync-system.html`
+- **Step 5:** Public form submission testing with database persistence checks
+- **Step 6:** Browser console error checking across all pages
+- **Step 7:** Admin panel module testing (Services, Portfolio, Forms, Orders, Settings, Calculator, Audit, Users)
+- **Step 8:** Cross-module integration testing
+
+**Time estimate:** 45-60 minutes for full checklist
+
+**When to use:**
+- Before production deployment sign-off
+- After database schema changes or migrations
+- After major API or frontend refactoring
+- During periodic QA audits
+
+**Key verification points:**
+- ✅ Database schema complete (18 tables)
+- ✅ API endpoints 100% functional
+- ✅ Frontend caching with IndexedDB
+- ✅ SSE stream connected and broadcasting
+- ✅ Form submissions persist to database
+- ✅ Admin CRUD operations working
+- ✅ Real-time content sync operational
+- ✅ No critical console errors
+
+### Other Manual Testing Resources
+
+- **[QA_REGRESSION.md](QA_REGRESSION.md)** - Full regression test cases (2 hours)
+- **[TEST_CHECKLIST.md](TEST_CHECKLIST.md)** - Systematic testing procedures
 
 ---
 

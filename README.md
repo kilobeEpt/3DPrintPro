@@ -67,6 +67,7 @@
 ### Testing & QA
 
 - **[TESTING.md](docs/TESTING.md)** - Complete testing guide with PHPUnit and smoke tests
+- **[QA_DB_SYNC_CHECKLIST.md](docs/QA_DB_SYNC_CHECKLIST.md)** - Manual verification for frontend/admin/database sync
 - **[QA_REGRESSION.md](docs/QA_REGRESSION.md)** - Manual test cases for comprehensive QA
 - **[TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md)** - Testing procedures and checklist
 
@@ -427,6 +428,10 @@ php scripts/api_smoke.php
 **Full Regression Test (2 hours):**
 - See [docs/QA_REGRESSION.md](docs/QA_REGRESSION.md) for complete manual test cases
 - Covers admin panel, forms, orders, security, real-time sync, and more
+
+**Database Sync Verification (45-60 minutes):**
+- See [docs/QA_DB_SYNC_CHECKLIST.md](docs/QA_DB_SYNC_CHECKLIST.md) for frontend/admin/database sync validation
+- Essential before deployment sign-off
 
 **Testing Checklist:**
 - See [docs/TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md) for systematic testing procedures
