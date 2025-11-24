@@ -32,6 +32,12 @@ if ($loginError) {
 
 // Generate CSRF token
 $csrfToken = CSRF::getToken();
+
+// Debug logging
+$debugLog = '/tmp/login-debug.log';
+file_put_contents($debugLog, date('[Y-m-d H:i:s] ') . "Login page loaded. Session ID: " . session_id() . "\n", FILE_APPEND);
+file_put_contents($debugLog, date('[Y-m-d H:i:s] ') . "CSRF Token generated: $csrfToken\n", FILE_APPEND);
+file_put_contents($debugLog, date('[Y-m-d H:i:s] ') . "Session CSRF Token: " . ($_SESSION['CSRF_TOKEN'] ?? 'NOT SET') . "\n", FILE_APPEND);
 ?>
 <!DOCTYPE html>
 <html lang="ru">
