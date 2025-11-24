@@ -36,23 +36,42 @@ View audit history with the "История изменений" button.
 - **Test Telegram**: Sends a test message to verify bot configuration
 - **Test Email**: Sends a test email to verify SMTP configuration
 
-### 5. Public API Access
-Frontend pages can fetch settings via public API:
+### 5. Public API Access (No Authentication Required)
+Frontend pages can fetch settings via public API **WITHOUT authentication**.
+
+**Public Groups** (accessible without session):
+- `contact` - Phone, email, address, working hours, geolocation
+- `social` - Social media links (Telegram, VK, Instagram, etc.)
+- `seo` - SEO metadata, Open Graph, canonical URLs
+
+**Private Groups** (require admin authentication):
+- `smtp` - Email server configuration
+- `telegram` - Bot tokens and chat IDs
+- `logging` - Log levels and file settings
+- `cache` - Cache configuration
+- `rate_limit` - Rate limiting settings
+- `analytics` - Google Analytics, Yandex Metrika IDs
+- `notifications` - Notification preferences
+
+**Usage Examples:**
 ```javascript
-// Fetch contact settings
+// ✅ Public access - works without authentication
 fetch('/api/settings.php?group=contact')
   .then(r => r.json())
   .then(data => console.log(data.settings));
 
-// Fetch SEO settings
+fetch('/api/settings.php?group=social')
+  .then(r => r.json())
+  .then(data => console.log(data.settings));
+
 fetch('/api/settings.php?group=seo')
   .then(r => r.json())
   .then(data => console.log(data.settings));
 
-// Fetch social settings
-fetch('/api/settings.php?group=social')
-  .then(r => r.json())
-  .then(data => console.log(data.settings));
+// ❌ Private access - returns 401 without admin session
+fetch('/api/settings.php?group=smtp')  // Requires authentication
+fetch('/api/settings.php?group=telegram')  // Requires authentication
+fetch('/api/settings.php')  // Get all settings - requires authentication
 ```
 
 ### 6. Caching

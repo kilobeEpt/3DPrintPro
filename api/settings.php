@@ -20,18 +20,25 @@ $settingsService = new SettingsService();
 $method = $_SERVER['REQUEST_METHOD'];
 $rateLimiter = new RateLimiter();
 
-// Public read groups that don't require authentication
+// ========================================
+// Public Access Configuration
+// ========================================
+// These groups can be read WITHOUT authentication (public frontend access)
+// All other groups and write operations require admin authentication
 $publicGroups = ['contact', 'social', 'seo'];
 
 try {
     switch ($method) {
         case 'GET':
-            // Check if grouped read is for a public group
+            // Determine if this is a public group request (no auth required)
             $isPublicRead = isset($_GET['group']) && in_array($_GET['group'], $publicGroups);
             
-            // Require authentication for non-public reads
-            if (!$isPublicRead) {
-                requireAdminAuth();
+            // Log public access for monitoring
+            if ($isPublicRead) {
+                ApiLogger::info("Public settings access", [
+                    'group' => $_GET['group'],
+                    'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+                ]);
             }
             
             // Get settings with optional grouping or single key lookup
@@ -66,6 +73,11 @@ try {
                 
                 if (empty($group) || !is_string($group)) {
                     ApiResponse::validationError('Group name must be a non-empty string');
+                }
+                
+                // Require auth for non-public groups
+                if (!$isPublicRead) {
+                    requireAdminAuth();
                 }
                 
                 try {
