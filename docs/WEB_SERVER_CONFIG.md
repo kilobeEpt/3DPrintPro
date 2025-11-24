@@ -1047,6 +1047,8 @@ curl -I https://3dprint-omsk.ru/api/updates/stream.php
 # X-Accel-Buffering: no
 ```
 
+**Troubleshooting**: If you see `Content-Type: text/html` or `application/json` instead of `text/event-stream`, see [SSE Troubleshooting Guide](SSE_TROUBLESHOOTING.md) for detailed fixes.
+
 ### Automated Security Scanning
 
 #### Nikto Web Scanner

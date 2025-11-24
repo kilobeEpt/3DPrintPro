@@ -264,7 +264,16 @@ For high-traffic production sites:
 - Enable PHP OPcache (see [WEB_SERVER_CONFIG.md](../../docs/WEB_SERVER_CONFIG.md))
 - Consider Redis for session storage (see `.env.production.example`)
 
-## Support
+## Troubleshooting
+
+### SSE (Server-Sent Events) Issues
+
+If you encounter Content-Type header issues with the SSE endpoint:
+- See [docs/SSE_TROUBLESHOOTING.md](../../docs/SSE_TROUBLESHOOTING.md) for detailed fixes
+- Common symptom: EventSource fails with "MIME type mismatch" error
+- Fix: Ensure web server config doesn't override PHP's Content-Type header
+
+### General Support
 
 For issues or questions:
 
