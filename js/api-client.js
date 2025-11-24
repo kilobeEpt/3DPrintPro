@@ -247,7 +247,7 @@ class APIClient {
     // ========================================
     
     async getAllSettings() {
-        const result = await this.get('settings.php');
+        const result = await this.get('settings.php?group=contact');
         return result.data?.settings || result.settings || {};
     }
     
