@@ -248,6 +248,153 @@ class MyIntegrationTest extends TestCase
 
 Smoke tests are PHP scripts that perform end-to-end validation using real database operations.
 
+### API Smoke Test Suite (v2.0)
+
+Comprehensive end-to-end testing of all API endpoints with admin authentication and CRUD validation.
+
+**Basic Usage:**
+
+```bash
+# Test public endpoints only (no authentication)
+php scripts/api_smoke.php --url=https://3dprint-omsk.ru --readonly
+
+# Full CRUD test with admin authentication (development)
+php scripts/api_smoke.php \
+  --url=http://localhost:8000 \
+  --admin-email=admin@example.com \
+  --admin-password=SecurePass123
+
+# Production read-only check (authenticated)
+php scripts/api_smoke.php \
+  --url=https://3dprint-omsk.ru \
+  --admin-email=admin@example.com \
+  --admin-password=SecurePass123 \
+  --readonly
+```
+
+**Available Options:**
+
+- `--url=<base_url>` - Base URL of the application (required)
+- `--admin-email=<email>` - Admin email for authentication
+- `--admin-password=<pass>` - Admin password for authentication
+- `--readonly` - Run in read-only mode (safe for production, GET requests only)
+- `--verbose` - Show detailed output (default)
+- `--quiet` - Show minimal output
+- `--help` - Show help message
+
+**Test Modes:**
+
+1. **Read-Only Mode (`--readonly`)**
+   - Only performs GET requests
+   - Safe to run on production
+   - Tests public endpoints without auth
+   - Tests admin endpoints with auth (if credentials provided)
+   - No data modification
+   - Validates response structures
+
+2. **Full CRUD Mode (default)**
+   - Creates temporary test fixtures
+   - Tests POST, PUT, PATCH, DELETE operations
+   - Automatically cleans up all created resources
+   - Should only be run on development/staging environments
+   - Validates complete CRUD workflows
+
+**What it tests:**
+
+**Public Endpoints (no authentication):**
+- Health endpoint (`/api/test.php`)
+- Content endpoints (services, portfolio, testimonials, FAQ, content blocks)
+- Public settings endpoint (`/api/settings.php`)
+- Public calculator settings endpoint (`/api/calculator-settings.php`)
+
+**Authenticated Endpoints (requires admin credentials):**
+- Admin authentication flow (login with CSRF token)
+- Content CRUD (services, portfolio, testimonials, FAQ, content blocks)
+- Forms API (`/api/forms.php`) - create, read, update, delete forms
+- Form Fields API (`/api/form-fields.php`) - manage form fields
+- Form Submissions API (`/api/form-submissions.php`) - view submissions
+- Calculator Settings Admin (`/api/calculator-settings.php`) - admin operations
+- Settings Admin (`/api/settings.php`) - full settings access, audit history
+- Admin Users API (`/api/admin/users.php`) - user management
+- Audit Logs API (`/api/admin/audit-logs.php`) - view logs and stats
+- Orders API (`/api/orders.php`) - complete order lifecycle
+
+**Response Validation:**
+- HTTP status codes (200, 201, 204, 404, etc.)
+- Response structure (success/data/meta keys)
+- Data integrity and persistence
+- Authentication and authorization
+
+**Cleanup:**
+- Automatically deletes all created test resources
+- Respects foreign key constraints
+- Verifies successful cleanup
+- Reports any cleanup failures
+
+**Exit Codes:**
+- `0` - All tests passed
+- `1` - One or more tests failed
+
+**Example Output:**
+
+```
+🧪 API Smoke Test Suite v2.0
+Base URL: https://3dprint-omsk.ru
+Mode: READ-ONLY (safe for production)
+Auth: Enabled
+================================================================================
+
+📦 Testing: Admin Authentication
+--------------------------------------------------------------------------------
+  ✅ Admin login returns redirect
+  ✅ Admin authentication successful
+
+📦 Testing: Health/Test Endpoint
+--------------------------------------------------------------------------------
+  ✅ GET /api/test.php returns 200
+  ✅ Response has correct structure
+  ✅ Response has database_status
+
+[... more test groups ...]
+
+================================================================================
+📊 Test Summary
+================================================================================
+Total Tests:  127
+✅ Passed:    127
+❌ Failed:    0
+Success Rate: 100.0%
+
+✅ ALL SMOKE TESTS PASSED
+```
+
+**Pre-Deployment Checklist:**
+
+Before declaring the site synced with the database:
+
+1. Run full CRUD test on staging:
+   ```bash
+   php scripts/api_smoke.php \
+     --url=https://staging.3dprint-omsk.ru \
+     --admin-email=admin@example.com \
+     --admin-password=SecurePass123
+   ```
+
+2. Run read-only check on production:
+   ```bash
+   php scripts/api_smoke.php \
+     --url=https://3dprint-omsk.ru \
+     --admin-email=admin@example.com \
+     --admin-password=SecurePass123 \
+     --readonly
+   ```
+
+3. Verify all tests pass (100% success rate)
+
+4. Review any warnings or context messages
+
+5. Check that cleanup completed successfully
+
 ### Form API Smoke Test
 
 Tests the complete form submission workflow:
