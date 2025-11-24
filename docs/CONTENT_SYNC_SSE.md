@@ -446,8 +446,14 @@ const data = await cache.get('services:list');
 - **CSRF protection**: Not required for read-only SSE
 - **XSS prevention**: Sanitize all cached content before render
 
+## Troubleshooting
+
+If you encounter issues with SSE connections (MIME type errors, connection failures, etc.), see:
+- [SSE Troubleshooting Guide](SSE_TROUBLESHOOTING.md) - Detailed troubleshooting for Content-Type header issues and SSE configuration
+
 ## See Also
 
 - [API Reference](API_REFERENCE.md) - Complete API documentation
 - [Content API v2](CONTENT_API_V2.md) - Media upload & caching guide
 - [Testing Guide](TESTING.md) - Complete testing documentation
+- [SSE Troubleshooting](SSE_TROUBLESHOOTING.md) - SSE header and configuration issues

@@ -7,15 +7,18 @@
  * content (services, portfolio, testimonials, FAQ, etc.) is updated.
  */
 
-require_once __DIR__ . '/../bootstrap.php';
-
-use App\Services\ContentCacheService;
-use App\Services\SSEBroadcaster;
-
+// SSE headers MUST be set BEFORE any output or other headers
 header('Content-Type: text/event-stream');
 header('Cache-Control: no-cache');
 header('Connection: keep-alive');
 header('X-Accel-Buffering: no');
+
+// Load only necessary dependencies (skip bootstrap.php to avoid SecurityHeaders)
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../bootstrap/eloquent.php';
+
+use App\Services\ContentCacheService;
+use App\Services\SSEBroadcaster;
 
 // Disable output buffering for SSE
 if (ob_get_level()) {
