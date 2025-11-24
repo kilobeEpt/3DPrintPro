@@ -249,6 +249,249 @@ Expected output:
 
 ---
 
+## Demo Data Seeding
+
+### Overview
+
+The `seed-demo-data.php` script provides comprehensive demo data population for development, testing, and demonstration purposes. It orchestrates existing seeders and adds realistic sample data across all system surfaces.
+
+### What Gets Seeded
+
+The script populates:
+
+1. **Global Settings** (via `seed-global-settings.php`)
+2. **Calculator Settings** (via `seed-calculator-settings.php`)
+3. **Forms & Fields** (via `seed-forms.php`)
+4. **Services** - 8 service offerings (FDM, SLA, SLS, modeling, etc.)
+5. **Portfolio** - 8 project examples with categories and tags
+6. **Testimonials** - 10 customer reviews (5-star ratings)
+7. **FAQ** - 12 common questions about 3D printing
+8. **Content Blocks** - 7 blocks for homepage, about, services pages
+9. **Orders** - 8 sample orders with various statuses (new, processing, completed, cancelled)
+10. **Form Submissions** - Linked to orders
+11. **Order Status History** - Status change tracking for all orders
+12. **Order Notes** - Admin comments on orders
+13. **Admin Users** - 3 demo admin accounts (optional)
+
+### Basic Usage
+
+#### Full Demo Data Seeding
+
+Recommended for fresh installations or demo environments:
+
+```bash
+php scripts/seed-demo-data.php
+```
+
+This will:
+- ✅ Run existing seeders (settings, calculator, forms)
+- ✅ Create 8 services with realistic Russian descriptions
+- ✅ Create 8 portfolio items across categories
+- ✅ Create 10 customer testimonials
+- ✅ Create 12 FAQ entries
+- ✅ Create 7 content blocks
+- ✅ Create 8 orders with history and notes
+- ✅ Invalidate caches and broadcast SSE updates
+- ✅ Log all actions to `storage/logs/seed_demo_data.log`
+
+#### Force Reseed (Truncate & Recreate)
+
+⚠️ **DESTRUCTIVE** - Deletes existing data:
+
+```bash
+php scripts/seed-demo-data.php --force
+```
+
+Use case: Reset demo environment to clean state.
+
+#### Skip Specific Sections
+
+Skip sections you don't want to seed:
+
+```bash
+# Skip admin users
+php scripts/seed-demo-data.php --skip-admin-users
+
+# Skip orders and submissions
+php scripts/seed-demo-data.php --skip-orders
+
+# Multiple skips
+php scripts/seed-demo-data.php --skip-settings --skip-calculator
+```
+
+Available skip flags:
+- `--skip-settings` - Skip global settings
+- `--skip-calculator` - Skip calculator settings
+- `--skip-forms` - Skip forms and form fields
+- `--skip-services` - Skip services
+- `--skip-portfolio` - Skip portfolio
+- `--skip-testimonials` - Skip testimonials
+- `--skip-faq` - Skip FAQ
+- `--skip-content` - Skip content blocks
+- `--skip-orders` - Skip orders, submissions, history, notes
+- `--skip-admin-users` - Skip demo admin accounts
+
+#### Verbose Output
+
+Detailed logging to console:
+
+```bash
+php scripts/seed-demo-data.php --verbose
+```
+
+### Demo Admin Accounts
+
+When seeding admin users (`--skip-admin-users` NOT specified), creates:
+
+| Email | Password | Role | Purpose |
+|-------|----------|------|---------|
+| admin@3dprint-omsk.ru | admin123 | super_admin | Full system access |
+| manager@3dprint-omsk.ru | manager123 | admin | Standard admin |
+| editor@3dprint-omsk.ru | editor123 | editor | Limited editor |
+
+⚠️ **Security Warning**: Change these passwords immediately in production!
+
+### Integration with QA Workflow
+
+The demo seeder is designed to work with the QA checklist workflow:
+
+```bash
+# Step 1: Provision clean database
+php scripts/provision-database.php --seed
+
+# Step 2: Load comprehensive demo data
+php scripts/seed-demo-data.php
+
+# Step 3: Run QA verification checklist
+# See docs/QA_DB_SYNC_CHECKLIST.md (45-60 min)
+
+# Step 4: Run API smoke tests
+php scripts/api_smoke.php --url=http://localhost --readonly
+```
+
+### Workflow Examples
+
+#### Development Environment Setup
+
+```bash
+# Fresh development environment with all demo data
+php scripts/provision-database.php --seed
+php scripts/seed-demo-data.php
+php scripts/create-admin.php admin@local.test "Dev Admin" devpass123
+```
+
+#### Demo Environment Reset
+
+```bash
+# Reset demo environment to clean state
+php scripts/seed-demo-data.php --force
+```
+
+#### Testing Specific Features
+
+```bash
+# Test orders workflow only
+php scripts/seed-demo-data.php --skip-services --skip-portfolio \
+  --skip-testimonials --skip-faq --skip-content
+
+# Test content management only
+php scripts/seed-demo-data.php --skip-orders --skip-admin-users
+```
+
+### Cache Invalidation
+
+After seeding, the script automatically:
+
+1. **Invalidates ContentCacheService** for each resource type:
+   - `services`
+   - `portfolio`
+   - `testimonials`
+   - `faq`
+   - `content`
+   - `orders`
+
+2. **Broadcasts SSE events** via `SSEBroadcaster`:
+   - `cache.invalidated` events for each resource
+   - Notifies connected clients to refresh data
+
+This ensures frontend caches stay synchronized with seeded data.
+
+### Logging
+
+All seeding operations are logged to:
+
+```
+storage/logs/seed_demo_data.log
+```
+
+Log format:
+```
+[2025-01-19 14:30:45] [INFO] Starting demo data seeding process
+[2025-01-19 14:30:46] [SUCCESS] Created service: FDM печать
+[2025-01-19 14:30:47] [WARNING] Portfolio item 'xyz' already exists, skipping
+[2025-01-19 14:30:48] [ERROR] Failed to create testimonial: ...
+[2025-01-19 14:31:00] [STATS] {"services":8,"portfolio":8,...}
+```
+
+### Exit Codes
+
+- `0` - Success (all data seeded)
+- `1` - Failure (insert errors occurred)
+- `2` - Invalid usage (incorrect flags)
+
+### Troubleshooting
+
+#### Issue: "Forms not found" when seeding orders
+
+**Solution**: Ensure forms are seeded first:
+```bash
+php scripts/seed-forms.php
+php scripts/seed-demo-data.php --skip-forms
+```
+
+#### Issue: Foreign key constraint errors
+
+**Solution**: Seed in correct order or use `--force`:
+```bash
+# Force truncate in correct dependency order
+php scripts/seed-demo-data.php --force
+```
+
+#### Issue: "Already exists" warnings
+
+**Cause**: Data already present, script skips duplicates.
+
+**Solutions**:
+- Use `--force` to truncate and reseed
+- Check existing data: `SELECT COUNT(*) FROM services;`
+
+#### Issue: Admin user seeding errors
+
+**Solution**: Skip admin users if they already exist:
+```bash
+php scripts/seed-demo-data.php --skip-admin-users
+```
+
+### Performance Considerations
+
+- **Full seeding time**: ~5-10 seconds
+- **With --force**: ~10-15 seconds (includes truncation)
+- **Database size**: Adds ~500KB of sample data
+- **Cache invalidation**: ~100ms for all resources
+
+### Data Characteristics
+
+All demo data uses:
+
+- **Russian language** - Names, descriptions, testimonials
+- **Realistic scenarios** - 3D printing use cases in Omsk
+- **Various statuses** - Orders in different workflow stages
+- **Timestamp variety** - Created dates from 1 hour to 25 days ago
+- **Relationships** - Proper foreign key linkages
+- **Business context** - Relevant to Russian 3D printing market
+
+---
+
 ## Backup Management
 
 ### Overview

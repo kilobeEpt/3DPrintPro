@@ -50,6 +50,25 @@ Before starting, ensure you have:
 - [ ] Multiple browsers for cross-browser validation
 - [ ] Mobile device or responsive design mode for mobile testing
 
+### Quick Setup: Demo Data
+
+For testing environments, you can quickly populate the system with realistic demo data:
+
+```bash
+# Option 1: Full demo data (recommended for first-time setup)
+php scripts/seed-demo-data.php
+
+# Option 2: Reset to clean demo state
+php scripts/seed-demo-data.php --force
+```
+
+This creates:
+- 8 services, 8 portfolio items, 10 testimonials, 12 FAQ entries
+- 7 content blocks, 8 orders with history/notes
+- 3 demo admin users (optional)
+
+See [docs/DATABASE_OPERATIONS.md - Demo Data Seeding](DATABASE_OPERATIONS.md#demo-data-seeding) for details.
+
 ---
 
 ## Step 1: Database Diagnostics
