@@ -115,8 +115,33 @@ try {
     $_SESSION['CREATED'] = time();
     $_SESSION['LAST_ACTIVITY'] = time();
     $_SESSION['CSRF_TOKEN'] = $result['csrf_token'];
+    $_SESSION['AUTH_TOKEN'] = $sessionId; // Store session_id as auth token for Authorization header
     
     file_put_contents($debugLog, date('[Y-m-d H:i:s] ') . "Session vars set. Session ID: " . session_id() . "\n", FILE_APPEND);
+    
+    // Check if this is an AJAX request (for API-based login)
+    $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    
+    if ($isAjax) {
+        // For AJAX requests, return JSON with auth token
+        session_write_close();
+        ob_end_clean();
+        
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'auth_token' => $sessionId,
+            'csrf_token' => $result['csrf_token'],
+            'user' => [
+                'id' => $user->id,
+                'email' => $user->email,
+                'name' => $user->name,
+                'role' => $user->role
+            ],
+            'redirect_url' => $_SESSION['INTENDED_URL'] ?? '/admin/index.php'
+        ]);
+        exit;
+    }
     
     $redirectUrl = $_SESSION['INTENDED_URL'] ?? '/admin/index.php';
     unset($_SESSION['INTENDED_URL']);
