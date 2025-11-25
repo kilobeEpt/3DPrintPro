@@ -1,100 +1,55 @@
 # 3D Print Pro - Омск
 
-Профессиональный сервис 3D печати с интерактивным калькулятором, админ-панелью, PHP REST API и интеграцией с Telegram.
-
-[![PHP](https://img.shields.io/badge/PHP-7.4%2B-blue)](https://www.php.net/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0%2B-orange)](https://www.mysql.com/)
-[![License](https://img.shields.io/badge/License-Proprietary-red)]()
+Профессиональный статический веб-сайт для сервиса 3D печати с интерактивным калькулятором и интеграцией с Telegram.
 
 ---
 
 ## 🚀 Quick Start
 
-### For New Installations
+This is a **static website** that can be hosted on any web server (Apache, Nginx, etc.) or even deployed to static hosting platforms like GitHub Pages, Netlify, or Vercel.
 
-1. **Install Dependencies** → Run `composer install` in project root
-2. **Setup Database & Backend** → See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md)
-3. **Deploy to Production** → See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) or use `bash scripts/deploy.sh`
-4. **Configure Admin Panel** → See [docs/ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)
-5. **Production Operations** → See [docs/PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md)
-6. *(Optional)* **Use Eloquent ORM** → See [docs/ELOQUENT_SETUP.md](docs/ELOQUENT_SETUP.md)
+### For Local Development
 
-### For Existing Installations
+1. Open `index.html` in a web browser
+2. Or use a simple HTTP server:
+   ```bash
+   python3 -m http.server 8000
+   # OR
+   php -S localhost:8000
+   ```
+3. Navigate to `http://localhost:8000`
 
-1. **Access admin panel:** `https://your-domain.com/admin/login.php`
-2. **Configure Telegram:** Settings → Telegram Configuration
-3. **Manage content:** Edit services, portfolio, FAQ via admin panel
+### For Production Deployment
 
-**Total setup time:** ~10 minutes
+1. Upload all files to your web server's public directory
+2. Configure your web server (see `deploy/webserver/` for configuration templates)
+3. Ensure `.htaccess` or server config is properly configured for clean URLs (if desired)
+4. Test the site is accessible via your domain
 
----
-
-## 📚 Documentation
-
-### Core Guides
-
-| Document | Description |
-|----------|-------------|
-| **[SETUP_GUIDE.md](docs/SETUP_GUIDE.md)** | Complete installation and configuration guide |
-| **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** | Production deployment checklist and procedures |
-| **[CI_CD.md](docs/CI_CD.md)** | CI/CD pipeline, automated deployment, and rollback procedures |
-| **[PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md)** | End-to-end production deployment and operations guide |
-| **[HOSTING_AUDIT.md](docs/HOSTING_AUDIT.md)** | Hosting environment validation and readiness checks |
-| **[API_REFERENCE.md](docs/API_REFERENCE.md)** | REST API endpoints and usage documentation |
-| **[ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)** | Admin panel features and usage instructions |
-| **[DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)** | Database tables, columns, and relationships |
-| **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** | Common issues and solutions |
-
-### Feature Guides
-
-- **[FORMS_SYSTEM.md](docs/FORMS_SYSTEM.md)** - Complete form builder guide with field types and validation
-- **[REAL_TIME_SYNC_GUIDE.md](docs/REAL_TIME_SYNC_GUIDE.md)** - SSE and IndexedDB caching system
-- **[CALCULATOR_SETTINGS.md](docs/CALCULATOR_SETTINGS.md)** - Dynamic calculator configuration
-- **[GLOBAL_SETTINGS.md](docs/GLOBAL_SETTINGS.md)** - Centralized settings management
-- **[CONTENT_SYNC_SSE.md](docs/CONTENT_SYNC_SSE.md)** - Real-time content synchronization
-- **[ORDERS_API_V2.md](docs/ORDERS_API_V2.md)** - Enhanced orders with status history and notes
-- **[SECURITY.md](docs/SECURITY.md)** - Comprehensive security guide
-
-### Technical Documentation
-
-- **[ELOQUENT_SETUP.md](docs/ELOQUENT_SETUP.md)** - Eloquent ORM integration and usage guide
-- **[SETTINGS_SERVICE.md](docs/SETTINGS_SERVICE.md)** - Settings service with caching and audit logging
-- **[MIGRATION_GUIDE.md](docs/MIGRATION_GUIDE.md)** - Guide for migrating from legacy DB class to Eloquent
-- **[TELEGRAM_INTEGRATION.md](docs/TELEGRAM_INTEGRATION.md)** - Telegram bot setup and configuration
-- **[RBAC_AUTHENTICATION.md](docs/RBAC_AUTHENTICATION.md)** - Role-based access control system (v4.0)
-- **[RBAC_MIGRATION_GUIDE.md](docs/RBAC_MIGRATION_GUIDE.md)** - Migrate from old to new auth system
-
-### Testing & QA
-
-- **[TESTING.md](docs/TESTING.md)** - Complete testing guide with PHPUnit and smoke tests
-- **[QA_DB_SYNC_CHECKLIST.md](docs/QA_DB_SYNC_CHECKLIST.md)** - Manual verification for frontend/admin/database sync
-- **[QA_REGRESSION.md](docs/QA_REGRESSION.md)** - Manual test cases for comprehensive QA
-- **[TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md)** - Testing procedures and checklist
+**Deployment time:** ~5 minutes
 
 ---
 
 ## ✨ Features
 
 ### For Customers
-- ✅ Interactive price calculator with real-time updates
-- ✅ Responsive design (mobile, tablet, desktop)
-- ✅ Contact forms with validation
-- ✅ Service catalog with detailed descriptions
-- ✅ Portfolio showcase
-- ✅ Customer testimonials
-- ✅ FAQ section
+- ✅ **Interactive Price Calculator** - Real-time cost estimation for 3D printing projects
+- ✅ **Responsive Design** - Works seamlessly on mobile, tablet, and desktop
+- ✅ **Contact Forms** - Easy inquiry submission with validation
+- ✅ **Service Catalog** - Detailed descriptions of all 3D printing services
+- ✅ **Portfolio Showcase** - Gallery of completed projects
+- ✅ **Customer Testimonials** - Reviews and feedback from satisfied clients
+- ✅ **FAQ Section** - Answers to common questions
+- ✅ **Telegram Integration** - Direct messaging link for instant communication
+- ✅ **SEO Optimized** - Structured data, meta tags, and semantic HTML
+- ✅ **Multiple Pages** - Services, Portfolio, About, Contact, Blog, Districts
 
 ### For Business Owners
-- ✅ **Admin Panel** - Full-featured dashboard at `/admin`
-- ✅ **Order Management** - View, update, and track orders
-- ✅ **Content Management** - Edit services, portfolio, FAQ, testimonials
-- ✅ **Settings Service** - Centralized settings with caching and audit logging
-- ✅ **Telegram Notifications** - Instant notifications for new orders
-- ✅ **Database-Driven** - All data stored in MySQL
-- ✅ **RBAC Authentication** - Role-based access with database-backed sessions
-- ✅ **Audit Logging** - Complete trail of admin actions
-- ✅ **Statistics Dashboard** - Orders, revenue, and trends
-- ✅ **CSV Export** - Download orders as spreadsheet
+- ✅ **Static HTML** - No database or backend required, fast and secure
+- ✅ **Easy Maintenance** - Simple HTML/CSS/JS files that can be edited directly
+- ✅ **Telegram Bot Ready** - Prepared for integration with Telegram notifications
+- ✅ **Lightweight** - Fast loading times and minimal hosting requirements
+- ✅ **Future-Ready** - Prepared structure for adding backend endpoints if needed
 
 ---
 
@@ -106,495 +61,200 @@
 - HTML5, CSS3, Vanilla JavaScript (ES6+)
 - Responsive design with mobile-first approach
 - Font Awesome icons
-- Chart.js for statistics
+- No build tools or dependencies required
 
-**Backend:**
-- PHP 7.4+ with PDO and Eloquent ORM
-- MySQL 8.0+ database
-- RESTful API architecture
-- Composer for dependency management
-- Rate limiting (60 req/min)
-
-**Security:**
-- PDO prepared statements (SQL injection protection)
-- XSS protection (htmlspecialchars)
-- CSRF tokens on admin operations (session-bound)
-- Session security (HttpOnly, SameSite, Secure)
-- Login rate limiting (5 attempts, 15-min lockout)
-- Password hashing (bcrypt with PASSWORD_BCRYPT)
-- Role-based access control (super_admin/admin/editor)
-- Audit logging (all admin actions tracked)
+**Backend (Optional):**
+- Lightweight PHP endpoints for Telegram integration (to be added)
+- No database required for core functionality
+- Forms can be processed via PHP or third-party services (Formspree, Netlify Forms, etc.)
 
 ### Project Structure
 
 ```
 /
-├── admin/              # Admin panel (PHP session-based)
-│   ├── login.php       # Login page
-│   ├── index.php       # Dashboard
-│   ├── orders.php      # Order management
-│   ├── services.php    # Service management
-│   ├── settings.php    # Configuration
-│   ├── css/            # Admin styles
-│   ├── js/             # Admin JavaScript
-│   └── includes/       # Auth & session management
-│
-├── api/                # REST API endpoints
-│   ├── orders.php      # Orders CRUD
-│   ├── services.php    # Services CRUD
-│   ├── portfolio.php   # Portfolio CRUD
-│   ├── testimonials.php # Testimonials CRUD
-│   ├── faq.php         # FAQ CRUD
-│   ├── content.php     # Content blocks CRUD
-│   ├── settings.php    # Settings management
-│   ├── telegram-test.php # Telegram testing
-│   ├── test.php        # API health check
-│   ├── config.php      # Database credentials (not in git)
-│   └── helpers/        # Shared utilities
-│
-├── database/           # Database schema and utilities
-│   ├── schema.sql      # Complete database schema
-│   ├── seed-data.php   # Initial data
-│   ├── verify-schema.php # Schema validation
-│   └── backup.php      # Backup utility
-│
-├── scripts/            # Utility scripts
-│   ├── create-admin.php # Create admin users (RBAC)
-│   ├── setup-admin-credentials.php # Legacy admin setup
-│   ├── db_audit.php    # Database diagnostics
-│   └── api_smoke_test.php # API testing
-│
-├── docs/               # Documentation
-│   ├── SETUP_GUIDE.md
-│   ├── DEPLOYMENT.md
-│   ├── API_REFERENCE.md
-│   ├── ADMIN_GUIDE.md
-│   ├── DATABASE_SCHEMA.md
-│   └── TROUBLESHOOTING.md
+├── index.html          # Homepage
+├── about.html          # About page
+├── services.html       # Services catalog
+├── portfolio.html      # Portfolio showcase
+├── contact.html        # Contact page
+├── blog.html           # Blog page
+├── districts.html      # Delivery districts
+├── why-us.html         # Why choose us
 │
 ├── css/                # Stylesheets
-│   ├── style.css       # Base styles
-│   ├── responsive.css  # Responsive/mobile styles
-│   └── animations.css  # Animations
+│   ├── style.css       # Main styles
+│   ├── responsive.css  # Mobile responsive styles
+│   └── animations.css  # Animation effects
 │
-├── js/                 # JavaScript
-│   ├── api-client.js   # API wrapper with retry logic
-│   ├── database.js     # Database abstraction
-│   ├── calculator.js   # Price calculator
-│   ├── utils.js        # Shared utilities
-│   ├── status-indicator.js # Connectivity status
-│   └── main.js         # Main application
+├── js/                 # JavaScript files
+│   ├── main.js         # Core site functionality
+│   ├── calculator.js   # Price calculator logic
+│   ├── telegram.js     # Telegram integration
+│   ├── utils.js        # Utility functions
+│   └── validators.js   # Form validation
 │
-├── *.html              # Public pages
-│   ├── index.html      # Homepage
-│   ├── services.html   # Services
-│   ├── portfolio.html  # Portfolio
-│   ├── about.html      # About
-│   ├── contact.html    # Contact
-│   └── ...
+├── deploy/             # Web server configuration templates
+│   └── webserver/
+│       ├── nginx.3dprint-omsk.conf      # Nginx config
+│       ├── apache.3dprint-omsk.conf     # Apache config
+│       └── .htaccess.example            # Shared hosting config
 │
-├── config.js           # Frontend configuration
-├── robots.txt          # SEO: Robots
-└── sitemap.xml         # SEO: Sitemap
+├── storage/            # Reserved for future backend storage
+├── logs/               # Reserved for future logging
+│
+├── robots.txt          # Search engine directives
+├── sitemap.xml         # XML sitemap
+└── README.md           # This file
 ```
-
-### Database Schema
-
-16 tables storing all application data:
-
-**Content Management:**
-- `orders` - Customer orders and contact forms
-- `settings` - Application configuration
-- `services` - Service offerings
-- `portfolio` - Project showcase
-- `testimonials` - Customer reviews
-- `faq` - FAQ items
-- `content_blocks` - Dynamic page content
-
-**Forms System (v3.0):**
-- `forms` - Dynamic form definitions
-- `form_fields` - Form field configurations
-- `form_submissions` - Form submission records
-- `form_submission_values` - Individual field values
-- `settings_audit` - Settings change audit log
-
-**RBAC Authentication (v4.0):**
-- `admin_users` - Admin user accounts with roles
-- `admin_sessions` - Persistent session storage
-- `admin_login_attempts` - Login attempt tracking
-- `admin_action_logs` - Admin action audit trail
-
-See [docs/DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) for complete schema reference.
-
-### API Endpoints
-
-| Endpoint | Methods | Auth | Description |
-|----------|---------|------|-------------|
-| `/api/orders.php` | GET, POST, PUT, DELETE | POST=Public, Others=Admin | Order management |
-| `/api/services.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | Service management |
-| `/api/portfolio.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | Portfolio management |
-| `/api/testimonials.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | Testimonials management |
-| `/api/faq.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | FAQ management |
-| `/api/content.php` | GET, POST, PUT, DELETE | GET=Public, Others=Admin | Content blocks management |
-| `/api/settings.php` | GET, POST, PUT, DELETE | All=Admin | Settings management |
-| `/api/telegram-test.php` | POST | Admin | Telegram connection test |
-| `/api/test.php` | GET | Public | API health check |
-
-See [docs/API_REFERENCE.md](docs/API_REFERENCE.md) for complete API documentation.
 
 ---
 
-## 🔧 Requirements
+## 🎨 Customization
 
-- **Web Server:** Apache 2.4+ or Nginx 1.18+ with mod_rewrite/rewrite module
-- **PHP:** 7.4 or higher with extensions:
-  - PDO
-  - PDO_MySQL
-  - cURL
-  - mbstring
-  - JSON
-- **Database:** MySQL 8.0+ or MariaDB 10.5+
-- **HTTPS:** SSL certificate (required for secure sessions)
+### Updating Content
+
+All content is directly in the HTML files. To update:
+
+1. **Contact Information**: Edit the contact section in each HTML file
+2. **Services**: Edit `services.html` and the services section in `index.html`
+3. **Portfolio Items**: Edit `portfolio.html`
+4. **Calculator Prices**: Edit the `CONFIG` object in `js/calculator.js`
+5. **Telegram Link**: Update the Telegram link in all HTML files (search for `t.me/PrintPro_Omsk`)
+
+### Changing Styles
+
+- **Colors**: Edit CSS variables in `css/style.css`
+- **Layout**: Modify the HTML structure in individual pages
+- **Responsive Breakpoints**: Adjust `css/responsive.css`
+
+### Calculator Configuration
+
+The calculator prices and settings are configured in `js/calculator.js`:
+
+```javascript
+const CONFIG = {
+    materials: {
+        pla: { name: 'PLA', price: 150, technology: 'fdm' },
+        abs: { name: 'ABS', price: 180, technology: 'fdm' },
+        // ... more materials
+    },
+    services: {
+        modeling: { name: '3D моделирование', price: 500, unit: 'час' },
+        // ... more services
+    },
+    // ... other config
+};
+```
 
 ---
 
-## 📦 Installation
+## 🌐 Deployment
 
-### Automated Installation (5 Minutes)
+### Static Hosting Platforms
 
+#### GitHub Pages
 ```bash
-# 1. Upload files to server
-scp -r * user@your-server:/var/www/html/
+# Push to GitHub repository
+git add .
+git commit -m "Initial commit"
+git push origin main
 
-# 2. Run automated deployment
-bash scripts/deploy.sh
-
-# 3. Configure .env with your credentials
-nano .env
-
-# 4. Setup admin user
-php scripts/create-admin.php
-
-# 5. Seed initial data (if not done during deploy)
-php scripts/provision-database.php --seed
+# Enable GitHub Pages in repository settings
+# Choose "main" branch and "/" (root) as source
 ```
 
-### Manual Installation (10 Minutes)
+#### Netlify
+1. Drag and drop the project folder to Netlify
+2. Or connect your Git repository
+3. Deploy settings: Build command: (none), Publish directory: /
 
+#### Vercel
 ```bash
-# 1. Upload files to server
-scp -r * user@your-server:/var/www/html/
-
-# 2. Create database and import schema
-mysql -u root -p
-CREATE DATABASE your_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-exit
-mysql -u user -p your_db < database/schema.sql
-
-# 3. Configure backend
-cp .env.production.example .env
-nano .env  # Edit credentials
-
-# 4. Install dependencies
-composer install --no-dev --optimize-autoloader
-
-# 5. Setup admin user (RBAC v4.0)
-php scripts/create-admin.php
-
-# 6. Seed initial data
-php scripts/provision-database.php --seed
-
-# 7. Verify installation
-php scripts/api_smoke.php
+npm install -g vercel
+vercel
 ```
 
-See [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md) for detailed installation instructions or [docs/PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md) for production deployment.
+### Traditional Web Hosting
+
+1. **Upload Files**: Use FTP/SFTP to upload all files to your web server's public directory
+2. **Configure Web Server**: 
+   - For Nginx: Use `deploy/webserver/nginx.3dprint-omsk.conf` as template
+   - For Apache: Use `deploy/webserver/apache.3dprint-omsk.conf` as template
+   - For Shared Hosting: Copy `deploy/webserver/.htaccess.example` to `.htaccess`
+3. **Test**: Visit your domain and verify all pages load correctly
+
+### Web Server Configuration
+
+See the `deploy/webserver/` directory for:
+- **Nginx configuration template** with HTTPS, caching, and security headers
+- **Apache configuration template** with similar features
+- **.htaccess example** for shared hosting environments
+- **README** with detailed setup instructions
 
 ---
 
-## 🔐 Security
+## 📧 Contact Form Integration
 
-### Built-in Security Features
+The contact form (`contact.html`) is ready for integration with:
 
-- ✅ SQL injection protection via PDO prepared statements
-- ✅ XSS protection via htmlspecialchars()
-- ✅ CSRF token validation on all state-changing operations
-- ✅ Password hashing with bcrypt
-- ✅ Secure PHP sessions (HttpOnly, SameSite, Secure)
-- ✅ Login rate limiting (5 attempts, 15-minute lockout)
-- ✅ API rate limiting (60 requests/minute per IP)
-- ✅ Security headers (X-Frame-Options, X-Content-Type-Options, etc.)
-- ✅ Protected configuration files via .htaccess
+### Option 1: PHP Handler (requires PHP on server)
+Create a simple PHP endpoint to handle form submissions and send via Telegram or email.
 
-### Security Best Practices
+### Option 2: Third-Party Services
+- **Formspree**: `<form action="https://formspree.io/f/YOUR_ID" method="POST">`
+- **Netlify Forms**: Add `data-netlify="true"` attribute to form
+- **Google Forms**: Embed or redirect to Google Form
 
-1. **Change default credentials** immediately after installation
-2. **Use HTTPS** for all traffic (Let's Encrypt recommended)
-3. **Set strong admin passwords** (12+ characters, mixed case, numbers, symbols)
-4. **Keep backups** of database and files
-5. **Monitor logs** regularly for suspicious activity
-6. **Update PHP/MySQL** to latest stable versions
-7. **Restrict admin access** to specific IPs if possible
-
-See [docs/ADMIN_AUTHENTICATION.md](docs/ADMIN_AUTHENTICATION.md) for security details.
+### Option 3: Telegram Bot
+Forms can send messages directly to a Telegram bot (requires backend endpoint).
 
 ---
 
-## 🧪 Testing
+## 🔧 Future Enhancements
 
-### Automated Tests (PHPUnit)
+This static site is prepared for easy addition of backend features:
 
-```bash
-# Run all unit and integration tests
-composer test
-
-# Run specific test suites
-vendor/bin/phpunit --testsuite Unit
-vendor/bin/phpunit --testsuite Integration
-
-# Run with coverage (requires xdebug)
-composer test-coverage
-
-# Run specific test file
-vendor/bin/phpunit tests/Unit/SettingsServiceTest.php
-```
-
-**Unit Test Coverage:**
-- ✅ **Settings Service** - Typed casting, caching, audit logging, validation
-- ✅ **Form Validation** - Field types, rules, relationships, scopes
-- ✅ **Admin Auth Service** - Authentication, rate limiting, CSRF, session management
-- ✅ **Content Controllers** - Slug generation, featured content, media metadata
-- ✅ **CSRF Protection** - Token generation, validation, rotation
-- ✅ **Rate Limiter** - Profiles, limits, violations, cleanup
-- ✅ **Order Export** - CSV/PDF generation, signed URLs, field selection
-- ✅ **Formula Validator** - Calculator formula validation and security
-- ✅ **Media Upload** - File validation, size limits, MIME types
-
-**Integration Test Coverage:**
-- ✅ **Form Submission** - End-to-end submission flow, order linking, status updates
-- ✅ **Form Builder** - Field management, conditional logic, notifications
-- ✅ **Admin Auth** - Login/logout flow, lockout, audit logging
-- ✅ **Orders Flow** - Status history, notes, archiving, exports
-- ✅ **Content API** - CRUD operations, slugs, featured content, cache
-- ✅ **Calculator Settings** - Configuration management, validation, caching
-- ✅ **Base API Controller** - Pagination, validation, slug management
-
-### Smoke Tests
-
-```bash
-# Admin authentication smoke test
-php scripts/admin-auth-smoke.php
-
-# Content API smoke test (all content types)
-php scripts/content-api-smoke.php
-
-# Orders export service smoke test
-php scripts/orders-export-smoke.php
-
-# Form API smoke test
-php scripts/form-api-smoke.php
-
-# Orders domain smoke test
-php scripts/orders-smoke-test.php
-
-# Settings service smoke test
-php scripts/test-settings-service.php
-
-# Eloquent ORM smoke test
-php scripts/eloquent-smoke.php
-
-# General API smoke test
-php scripts/api_smoke.php
-```
-
-**Smoke Test Coverage:**
-- ✅ **Admin Auth** - Login, rate limiting, lockout, session management, CSRF
-- ✅ **Content API** - Services, portfolio, FAQ, testimonials, content blocks
-- ✅ **Orders Export** - CSV/PDF generation, signed URLs, filters, field selection
-- ✅ **Form API** - Form builder, validation, submission processing
-- ✅ **Orders Domain** - Status history, notes, archiving, filtering
-- ✅ **Settings** - Cache operations, type casting, validation, audit
-- ✅ **Eloquent** - Model CRUD, relationships, scopes
-
-### Manual Testing & QA
-
-**Quick Smoke Test (5 minutes):**
-1. Login to admin panel
-2. Create/edit a service
-3. Submit contact form on public site
-4. View new order in admin
-5. Export orders to CSV
-
-**Full Regression Test (2 hours):**
-- See [docs/QA_REGRESSION.md](docs/QA_REGRESSION.md) for complete manual test cases
-- Covers admin panel, forms, orders, security, real-time sync, and more
-
-**Database Sync Verification (45-60 minutes):**
-- See [docs/QA_DB_SYNC_CHECKLIST.md](docs/QA_DB_SYNC_CHECKLIST.md) for frontend/admin/database sync validation
-- Essential before deployment sign-off
-
-**Testing Checklist:**
-- See [docs/TEST_CHECKLIST.md](docs/TEST_CHECKLIST.md) for systematic testing procedures
+- **Telegram Bot Integration**: Add lightweight PHP endpoints for order notifications
+- **Form Processing**: Add PHP handlers for contact/order forms
+- **Analytics**: Google Analytics, Yandex Metrica (already structured data ready)
+- **Dynamic Content**: Add API endpoints for managing content (optional)
 
 ---
 
-## 🐛 Troubleshooting
+## 📱 Browser Support
 
-### Quick Fixes
-
-| Issue | Solution |
-|-------|----------|
-| Database connection failed | Check credentials in `api/config.php` |
-| Tables not found | Run `mysql -u user -p db < database/schema.sql` |
-| No data showing | Run `https://your-domain.com/api/init-database.php` |
-| Cannot login to admin | Run `php scripts/create-admin.php` to create user |
-| API loses session | Run `php test-api-session.php` - see [ADMIN_API_SESSION_COMPREHENSIVE_FIX.md](ADMIN_API_SESSION_COMPREHENSIVE_FIX.md) |
-| Telegram test fails | Check bot token and chat ID in settings |
-| Forms not submitting | Check browser console for errors |
-| Session expired immediately | Use HTTPS and enable cookies |
-| Account locked out | Wait 15 min or manual unlock in `admin_users` table |
-
-See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for detailed troubleshooting guide.
+- ✅ Chrome (latest)
+- ✅ Firefox (latest)
+- ✅ Safari (latest)
+- ✅ Edge (latest)
+- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
 
 ---
 
-## 📊 Production Deployment
+## 📄 License
 
-### Automated Deployment
-
-```bash
-# Validate hosting environment
-php scripts/hosting-audit.php --strict
-
-# Deploy to production (dry run first)
-bash scripts/deploy.sh --dry-run
-
-# Actual deployment
-bash scripts/deploy.sh
-
-# Review deployment log
-cat storage/logs/deploy_*.log
-```
-
-### Pre-Deployment Checklist
-
-- [ ] Hosting environment validated (`php scripts/hosting-audit.php --strict`)
-- [ ] Database provisioned (`php scripts/provision-database.php --seed`)
-- [ ] `.env` configured with production credentials
-- [ ] Admin credentials set (`php scripts/create-admin.php`)
-- [ ] HTTPS enabled and SSL certificate valid
-- [ ] Telegram bot configured and tested
-- [ ] SMTP configured and tested
-- [ ] Forms tested
-- [ ] Mobile responsive verified
-- [ ] SEO tags configured
-
-### Deployment Steps
-
-Use the automated deployment script:
-
-```bash
-bash scripts/deploy.sh
-```
-
-Or follow manual steps:
-
-1. Validate hosting → `php scripts/hosting-audit.php --strict`
-2. Upload files via SFTP/rsync
-3. Install dependencies → `composer install --no-dev`
-4. Configure `.env` from `.env.production.example`
-5. Set permissions → `chmod 600 .env`, `chmod 755 storage logs`
-6. Verify database → `php database/verify-schema.php`
-7. Run smoke tests → `php scripts/api_smoke.php`
-8. Go live!
-
-**See [docs/PRODUCTION_RUNBOOK.md](docs/PRODUCTION_RUNBOOK.md) for complete end-to-end production deployment guide.**
-
-**See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment procedures.**
-
----
-
-## 🔄 Maintenance
-
-### Regular Tasks
-
-**Daily:**
-- Check new orders in admin panel
-- Monitor Telegram notifications
-
-**Weekly:**
-- Review error logs: `tail -f logs/api.log`
-- Update content via admin panel
-- Check database backups
-
-**Monthly:**
-- Change admin password
-- Optimize database tables
-- Review security logs
-- Update services/pricing
-
-### Backup
-
-```bash
-# Database backup
-php database/backup.php
-
-# Or manual backup
-mysqldump -u user -p database > backup_$(date +%Y%m%d).sql
-```
+Proprietary - © 2025 3D Print Pro, Омск, Россия
 
 ---
 
 ## 📞 Support
 
-### Documentation
-
-- [Setup Guide](docs/SETUP_GUIDE.md) - Installation and configuration
-- [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment
-- [API Reference](docs/API_REFERENCE.md) - API documentation
-- [Admin Guide](docs/ADMIN_GUIDE.md) - Admin panel usage
-- [Database Schema](docs/DATABASE_SCHEMA.md) - Database reference
-- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues
-
-### Diagnostics
-
-```bash
-# Full database audit
-php scripts/db_audit.php
-
-# Session configuration test
-php test-api-session.php
-
-# API health check
-curl https://your-domain.com/api/test.php?audit=full
-
-# Check logs
-tail -f logs/api.log
-```
+For questions or support:
+- **Email**: info@3dprint-omsk.ru
+- **Phone**: +7 (999) 123-45-67
+- **Telegram**: [@PrintPro_Omsk](https://t.me/PrintPro_Omsk)
 
 ---
 
-## 📝 License
+## 🎯 Performance
 
-Proprietary. All rights reserved.
-
----
-
-## 🎉 Credits
-
-**Version:** 4.0 (January 2025)  
-**Architecture:** Complete rewrite with MySQL + PHP REST API  
-**Status:** Production Ready ✅
-
-**Features:**
-- 16-table database architecture (content + forms + RBAC)
-- 8 REST API endpoints with rate limiting
-- Role-based access control with audit logging
-- Admin panel with modular JavaScript
-- Telegram integration with database-driven config
-- PHPUnit test suite with 40+ tests
-- Complete documentation suite
+This static site is optimized for performance:
+- ⚡ **Fast Loading**: No database queries or backend processing
+- 🔒 **Secure**: No server-side vulnerabilities
+- 📦 **Small Size**: Minimal JavaScript, optimized assets
+- 🌍 **CDN-Ready**: Can be served from CDN for global performance
+- 📱 **Mobile-First**: Optimized for mobile devices
 
 ---
 
-**Made with ❤️ for 3D printing enthusiasts in Omsk**
+**Built with ❤️ in Омск, Россия**
