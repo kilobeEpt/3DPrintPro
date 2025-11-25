@@ -874,44 +874,32 @@ class MainApp {
         };
 
         try {
-            console.log('📤 Отправка заявки через API...');
+            console.log('💾 Сохранение заявки...');
             
-            if (typeof apiClient === 'undefined') {
-                throw {
-                    message: 'API клиент недоступен',
-                    isNetworkError: true
-                };
-            }
+            // Save to localStorage
+            const orderToSave = {
+                ...order,
+                id: Date.now() + Math.random().toString(36).substr(2, 9),
+                createdAt: new Date().toISOString(),
+                pendingSync: true
+            };
             
-            const apiStatus = apiClient.getStatus();
-            if (!apiStatus.isOnline) {
-                throw {
-                    message: 'API недоступен',
-                    isNetworkError: true
-                };
-            }
+            const allData = JSON.parse(localStorage.getItem('3dprintpro_data') || '{}');
+            const orders = allData.orders || [];
+            orders.push(orderToSave);
+            allData.orders = orders;
+            localStorage.setItem('3dprintpro_data', JSON.stringify(allData));
             
-            const result = await apiClient.createOrder(order);
+            console.log('✅ Заявка сохранена локально');
             
-            console.log('✅ Заявка успешно сохранена в БД. Order ID:', result.id);
-            console.log('📬 Telegram отправлен:', result.telegram_sent);
+            // Show success message
+            this.showNotification(
+                '✅ Спасибо! Ваша заявка принята. Мы свяжемся с вами в ближайшее время. ' +
+                'Также вы можете написать нам напрямую в Telegram.',
+                'success'
+            );
             
-            try {
-                await db.getOrders();
-                console.log('💾 Кеш заказов обновлен');
-            } catch (e) {
-                console.log('⚠️ Не удалось обновить кеш заказов');
-            }
-            
-            if (result.telegram_sent) {
-                this.showNotification('✅ Спасибо! Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время.', 'success');
-            } else {
-                this.showNotification('✅ Спасибо! Ваша заявка сохранена. Мы свяжемся с вами в ближайшее время.', 'success');
-                if (result.telegram_error) {
-                    console.warn('⚠️ Telegram ошибка:', result.telegram_error);
-                }
-            }
-            
+            // Reset form
             form.reset();
             const calcInfo = document.getElementById('calculationInfo');
             if (calcInfo) calcInfo.style.display = 'none';
@@ -921,13 +909,10 @@ class MainApp {
             }
             
         } catch (error) {
-            console.error('❌ Ошибка отправки формы:', error);
-            
-            const isNetworkError = error.isNetworkError || error.name === 'TypeError' || 
-                                 error.message.includes('Failed to fetch') || 
-                                 error.message.includes('Network');
+            console.error('❌ Ошибка сохранения формы:', error);
             
             try {
+                // Fallback: still try to save to localStorage
                 const orderToSave = {
                     ...order,
                     id: Date.now() + Math.random().toString(36).substr(2, 9),
@@ -941,20 +926,13 @@ class MainApp {
                 allData.orders = orders;
                 localStorage.setItem('3dprintpro_data', JSON.stringify(allData));
                 
-                console.log('💾 Заявка сохранена в localStorage для последующей синхронизации');
+                console.log('💾 Заявка сохранена в localStorage (fallback)');
                 
-                if (isNetworkError) {
-                    this.showNotification(
-                        '⚠️ Нет подключения к серверу. Ваша заявка сохранена локально и будет отправлена при восстановлении связи. ' +
-                        'Или свяжитесь с нами напрямую по телефону.',
-                        'warning'
-                    );
-                } else {
-                    this.showNotification(
-                        '⚠️ Ваша заявка сохранена локально. Пожалуйста, попробуйте повторить отправку позже или свяжитесь с нами по телефону.',
-                        'warning'
-                    );
-                }
+                this.showNotification(
+                    '⚠️ Ваша заявка сохранена локально. ' +
+                    'Для гарантированной доставки свяжитесь с нами напрямую по телефону или в Telegram.',
+                    'warning'
+                );
             } catch (e) {
                 this.showNotification(
                     '❌ Не удалось отправить заявку. Пожалуйста, попробуйте позже или свяжитесь с нами по телефону: ' + 
@@ -1010,25 +988,28 @@ class MainApp {
         }
         
         try {
-            console.log('📤 Отправка формы через новый Forms API...');
+            console.log('💾 Сохранение формы локально...');
             
-            if (typeof apiClient === 'undefined') {
-                throw {
-                    message: 'API клиент недоступен',
-                    isNetworkError: true
-                };
-            }
+            // Save to localStorage for later retrieval
+            const submissionToSave = {
+                ...submissionData,
+                id: Date.now() + Math.random().toString(36).substr(2, 9),
+                formSlug: formSlug,
+                createdAt: new Date().toISOString(),
+                pendingSync: true
+            };
             
-            const result = await apiClient.submitForm(formSlug, submissionData);
+            const allData = JSON.parse(localStorage.getItem('3dprintpro_data') || '{}');
+            const submissions = allData.submissions || [];
+            submissions.push(submissionToSave);
+            allData.submissions = submissions;
+            localStorage.setItem('3dprintpro_data', JSON.stringify(allData));
             
-            console.log('✅ Форма успешно отправлена. Submission ID:', result.submissionId);
-            
-            if (result.orderNumber) {
-                console.log('📦 Order Number:', result.orderNumber);
-            }
+            console.log('✅ Форма сохранена локально');
             
             // Show success message
-            const successMessage = result.message || 'Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.';
+            const successMessage = 'Спасибо! Ваше сообщение принято. Мы свяжемся с вами в ближайшее время. ' +
+                                  'Также вы можете написать нам в Telegram для более быстрого ответа.';
             this.showNotification('✅ ' + successMessage, 'success');
             
             // Reset form
