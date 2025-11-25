@@ -41,3 +41,11 @@ test_*.html
 .env.test
 .env.local
 .env.production
+
+# Order form storage
+storage/uploads/orders/*
+!storage/uploads/orders/.gitkeep
+storage/cache/order_rate_limit/*
+!storage/cache/order_rate_limit/.gitkeep
+storage/cache/order_queue.json
+storage/logs/orders.log

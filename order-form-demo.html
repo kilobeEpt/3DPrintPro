@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Form Demo - 3D Print Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h1 i {
+            color: #667eea;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #f5f5f5;
+            border: 2px dashed #d0d0d0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-input-label:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        input.error,
+        select.error,
+        textarea.error {
+            border-color: #e74c3c;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .info-box h3 {
+            color: #1976d2;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .info-box li {
+            color: #555;
+            font-size: 13px;
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .info-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #2196f3;
+            font-weight: bold;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <i class="fas fa-cube"></i>
+            Форма заказа 3D печати
+        </h1>
+        <p class="subtitle">Заполните форму, и мы свяжемся с вами в ближайшее время</p>
+        
+        <div class="info-box">
+            <h3><i class="fas fa-info-circle"></i> Реализованные функции:</h3>
+            <ul>
+                <li>Валидация всех полей (клиент + сервер)</li>
+                <li>Защита от ботов (honeypot)</li>
+                <li>Rate limiting: 5 заказов/час с IP</li>
+                <li>Загрузка файлов до 50 MB</li>
+                <li>Отправка в Telegram всем авторизованным</li>
+                <li>Очередь при сбое Telegram API</li>
+                <li>Детальное логирование</li>
+            </ul>
+        </div>
+        
+        <form id="orderForm" class="order-form">
+            <div class="form-group">
+                <label for="name">Ваше имя *</label>
+                <input type="text" id="name" name="name" required placeholder="Иван Петров">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required placeholder="ivan@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Телефон *</label>
+                <input type="tel" id="phone" name="phone" required placeholder="+7 999 123-45-67">
+            </div>
+            
+            <div class="form-group">
+                <label for="service">Услуга *</label>
+                <select id="service" name="service" required>
+                    <option value="">Выберите услугу</option>
+                    <option value="FDM печать">FDM печать</option>
+                    <option value="SLA печать">SLA печать</option>
+                    <option value="SLS печать">SLS печать</option>
+                    <option value="3D моделирование">3D моделирование</option>
+                    <option value="Постобработка">Постобработка</option>
+                    <option value="Проектирование">Проектирование</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Описание проекта *</label>
+                <textarea id="description" name="description" required 
+                          placeholder="Расскажите подробнее о вашем проекте: что нужно напечатать, какие требования к материалу, качеству, срокам..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Файлы модели (необязательно)</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="files" name="files[]" multiple 
+                           accept=".stl,.obj,.gcode,.step,.stp,.3mf,.amf,.ply">
+                    <div class="file-input-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Выберите файлы или перетащите сюда</span>
+                    </div>
+                </div>
+                <div class="file-info" id="fileInfo">
+                    Допустимые форматы: STL, OBJ, GCODE, STEP, 3MF, AMF, PLY (макс. 50 МБ)
+                </div>
+            </div>
+            
+            <button type="submit" class="btn">
+                <i class="fas fa-paper-plane"></i>
+                <span>Отправить заявку</span>
+            </button>
+        </form>
+    </div>
+    
+    <script src="js/order-form.js"></script>
+    <script>
+        // Initialize form handler
+        const handler = new OrderFormHandler('orderForm');
+        
+        // File input feedback
+        const fileInput = document.getElementById('files');
+        const fileInfo = document.getElementById('fileInfo');
+        
+        fileInput.addEventListener('change', (e) => {
+            const files = e.target.files;
+            
+            if (files.length > 0) {
+                let html = '<strong>Выбрано файлов: ' + files.length + '</strong><br>';
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const size = (file.size / 1024 / 1024).toFixed(2);
+                    html += `<i class="fas fa-file"></i> ${file.name} (${size} MB)<br>`;
+                }
+                
+                fileInfo.innerHTML = html;
+            } else {
+                fileInfo.innerHTML = 'Допустимые форматы: STL, OBJ, GCODE, STEP, 3MF, AMF, PLY (макс. 50 МБ)';
+            }
+        });
+        
+        // Drag and drop support
+        const fileLabel = document.querySelector('.file-input-label');
+        
+        fileLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = '#667eea';
+            fileLabel.style.background = '#e8e8f8';
+        });
+        
+        fileLabel.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = '#d0d0d0';
+            fileLabel.style.background = '#f5f5f5';
+        });
+        
+        fileLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = '#d0d0d0';
+            fileLabel.style.background = '#f5f5f5';
+            
+            fileInput.files = e.dataTransfer.files;
+            fileInput.dispatchEvent(new Event('change'));
+        });
+    </script>
+</body>
+</html>
