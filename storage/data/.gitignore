@@ -1,0 +1,5 @@
+# Ignore all files in data directory (contains sensitive user data)
+*
+
+# But keep the directory structure
+!.gitignore
