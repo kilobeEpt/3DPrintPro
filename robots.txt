@@ -1,25 +1,60 @@
+# Robots.txt for 3D Print Pro - https://3dprint-omsk.ru
+# Updated: 2025-01-20
+
 User-agent: *
 Allow: /
 
-# Disallow admin panel
+# Disallow admin panel and backend
+Disallow: /admin/
 Disallow: /admin.html
-Disallow: /admin
+Disallow: /api/
+Disallow: /includes/
+Disallow: /vendor/
 
-# Allow all pages
+# Disallow temporary and system files
+Disallow: /storage/cache/
+Disallow: /storage/logs/
+Disallow: /*.log
+Disallow: /*?*session*
+Disallow: /*?*token*
+
+# Allow CSS, JS, images for rendering
+Allow: /css/
+Allow: /js/
+Allow: /assets/
+Allow: /images/
+Allow: /storage/uploads/
+
+# Allow main pages
 Allow: /index.php
-Allow: /index.html
 Allow: /services.php
 Allow: /portfolio.php
-Allow: /about.html
 Allow: /contact.php
+Allow: /about.html
 Allow: /blog.html
 Allow: /districts.html
 Allow: /why-us.html
 
-# Allow CSS and JS
-Allow: /css/
-Allow: /js/
-Allow: /assets/
-
-# Sitemap
+# Sitemap location
 Sitemap: https://3dprint-omsk.ru/sitemap.xml
+
+# Crawl-delay for polite bots (optional)
+# Crawl-delay: 1
+
+# Yandex-specific directives
+User-agent: Yandex
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Host: 3dprint-omsk.ru
+
+# Google-specific directives
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Prevent indexing of duplicate content
+User-agent: *
+Disallow: /*?page=*
+Disallow: /*&page=*

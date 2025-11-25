@@ -37,7 +37,7 @@ $stats = $CONTENT['stats'];
                     <span class="title-line gradient-text" id="heroTitle">3D печать в <?= $site['city'] ?></span>
                 </h1>
                 <p class="hero-description" id="heroDescription">
-                    FDM, SLA, SLS технологии. Печать от 1 часа. 15+ материалов. <?= $stats['years'] ?> лет опыта.
+                    <strong>FDM от 150₽/ч, SLA от 300₽/ч, SLS от 500₽/ч.</strong> Печать от 1 часа. 15+ материалов (PLA, ABS, PETG, Nylon, фотополимер). Точность до 0.05 мм. <?= $stats['years'] ?> лет опыта, <?= number_format($stats['projects'], 0, ',', ' ') ?>+ проектов. Постобработка, покраска, доставка по Омску.
                 </p>
                 <div class="hero-buttons">
                     <a href="#calculator" class="btn btn-primary">
@@ -108,9 +108,9 @@ $stats = $CONTENT['stats'];
         <div class="container">
             <div class="section-header">
                 <span class="section-label">Наши услуги</span>
-                <h2 class="section-title">Услуги 3D печати в <?= $site['city'] ?></h2>
+                <h2 class="section-title">Услуги 3D печати в <?= $site['city'] ?> — FDM, SLA, SLS</h2>
                 <p class="section-description">
-                    FDM, SLA, SLS технологии. От прототипов до функциональных изделий.
+                    Полный спектр услуг промышленной и прототипной 3D печати: <strong>FDM</strong> (пластик PLA/ABS/PETG, точность ±0.2 мм), <strong>SLA</strong> (фотополимер, точность ±0.05 мм, высота слоя от 0.025 мм), <strong>SLS</strong> (нейлон PA12, прочность 48 МПа, без поддержек). 3D моделирование в CAD, реверс-инжиниринг, постобработка (шлифовка, покраска, полировка). Изготовление от единичных прототипов до малых серий 1000 шт.
                 </p>
             </div>
             <div class="services-grid" id="servicesGrid">
