@@ -37,31 +37,52 @@ class AdminApiClient {
     }
     
     /**
-     * Generic request wrapper that ensures CSRF token is current
+     * Get auth token from localStorage or session
+     */
+    getAuthToken() {
+        // Try localStorage first
+        let token = localStorage.getItem('admin_auth_token');
+        
+        // Fall back to window.ADMIN_SESSION
+        if (!token && window.ADMIN_SESSION && window.ADMIN_SESSION.authToken) {
+            token = window.ADMIN_SESSION.authToken;
+            // Store for future requests
+            localStorage.setItem('admin_auth_token', token);
+        }
+        
+        return token;
+    }
+    
+    /**
+     * Generic request wrapper that ensures CSRF token is current and adds Authorization header
      */
     async request(endpoint, method = 'GET', data = null, options = {}) {
         this.refreshCsrfToken();
+        
+        // Add Authorization header with Bearer token
+        const authToken = this.getAuthToken();
+        if (authToken) {
+            options.headers = options.headers || {};
+            options.headers['Authorization'] = `Bearer ${authToken}`;
+        }
+        
         return this.client.request(endpoint, method, data, options);
     }
     
     async get(endpoint) {
-        this.refreshCsrfToken();
-        return this.client.get(endpoint);
+        return this.request(endpoint, 'GET');
     }
     
     async post(endpoint, data) {
-        this.refreshCsrfToken();
-        return this.client.post(endpoint, data);
+        return this.request(endpoint, 'POST', data);
     }
     
     async put(endpoint, data) {
-        this.refreshCsrfToken();
-        return this.client.put(endpoint, data);
+        return this.request(endpoint, 'PUT', data);
     }
     
     async delete(endpoint, data = null) {
-        this.refreshCsrfToken();
-        return this.client.delete(endpoint, data);
+        return this.request(endpoint, 'DELETE', data);
     }
     
     // ========================================

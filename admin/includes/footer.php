@@ -36,8 +36,15 @@ if (!defined('ADMIN_INIT')) {
         window.ADMIN_SESSION = {
             authenticated: true,
             login: <?php echo json_encode(Auth::user()); ?>,
-            csrfToken: <?php echo json_encode(CSRF::getToken()); ?>
+            csrfToken: <?php echo json_encode(CSRF::getToken()); ?>,
+            authToken: <?php echo json_encode($_SESSION['AUTH_TOKEN'] ?? session_id()); ?>
         };
+        
+        // Store auth token in localStorage for API requests
+        if (window.ADMIN_SESSION.authToken) {
+            localStorage.setItem('admin_auth_token', window.ADMIN_SESSION.authToken);
+            localStorage.setItem('admin_csrf_token', window.ADMIN_SESSION.csrfToken);
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="/config.js"></script>

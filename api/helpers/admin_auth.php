@@ -15,6 +15,53 @@ if (!defined('ADMIN_SESSION_NAME')) {
 use App\Services\AdminAuthService;
 
 function requireAdminAuth() {
+    // Check for Authorization header first
+    $authToken = null;
+    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    
+    if (!empty($authHeader) && preg_match('/Bearer\s+(.+)/', $authHeader, $matches)) {
+        $authToken = $matches[1];
+    }
+    
+    // If Authorization header is present, use token-based auth
+    if ($authToken) {
+        $authService = new AdminAuthService();
+        $validation = $authService->validateSession($authToken);
+        
+        if (!$validation['valid']) {
+            http_response_code(401);
+            echo json_encode([
+                'success' => false,
+                'error' => $validation['error'] ?? 'Authentication required. Please log in.'
+            ]);
+            exit;
+        }
+        
+        $user = $validation['user'];
+        $session = $validation['session'];
+        
+        // Start session if not already started (for backward compatibility)
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Populate session variables for backward compatibility
+        $_SESSION['ADMIN_AUTHENTICATED'] = true;
+        $_SESSION['ADMIN_USER_ID'] = $user->id;
+        $_SESSION['ADMIN_LOGIN'] = $user->email;
+        $_SESSION['ADMIN_USER_NAME'] = $user->name;
+        $_SESSION['ADMIN_USER_ROLE'] = $user->role;
+        $_SESSION['LAST_ACTIVITY'] = time();
+        $_SESSION['AUTH_TOKEN'] = $authToken;
+        
+        if (!empty($session->csrf_token)) {
+            $_SESSION['CSRF_TOKEN'] = $session->csrf_token;
+        }
+        
+        return;
+    }
+    
+    // Fallback to session-based authentication
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
