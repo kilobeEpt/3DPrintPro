@@ -184,6 +184,31 @@ $meta = $CONTENT['meta'][$page_meta_key] ?? $CONTENT['meta']['home'];
 }
 </script>
 
+<?php if (in_array($page_meta_key, ['home', 'contact']) && isset($CONTENT['faq'])): ?>
+<!-- JSON-LD Structured Data: FAQPage -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    <?php 
+    $faqCount = count($CONTENT['faq']);
+    foreach ($CONTENT['faq'] as $index => $item): 
+    ?>
+    {
+      "@type": "Question",
+      "name": "<?= htmlspecialchars($item['question'], ENT_QUOTES, 'UTF-8') ?>",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "<?= htmlspecialchars($item['answer'], ENT_QUOTES, 'UTF-8') ?>"
+      }
+    }<?= $index < $faqCount - 1 ? ',' : '' ?>
+    <?php endforeach; ?>
+  ]
+}
+</script>
+<?php endif; ?>
+
 <!-- Быстрое скрытие прелоадера -->
 <style>
     .preloader {

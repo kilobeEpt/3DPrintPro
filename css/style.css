@@ -2443,3 +2443,60 @@ body.dark-theme .about-badge {
         max-width: 1600px;
     }
 }
+
+/* ========================================
+   ADVANTAGES SECTION
+   ======================================== */
+
+.advantages {
+    padding: var(--section-padding) 0;
+    background: var(--bg);
+}
+
+.advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.advantage-card {
+    padding: var(--card-padding);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 2px solid transparent;
+    transition: var(--transition);
+}
+
+.advantage-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.advantage-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.advantage-icon i {
+    font-size: 36px;
+    color: white;
+}
+
+.advantage-card h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 15px;
+}
+
+.advantage-card p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}

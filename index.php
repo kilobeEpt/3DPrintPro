@@ -12,6 +12,7 @@ $portfolio = $CONTENT['portfolio'];
 $testimonials = $CONTENT['testimonials'];
 $faq = $CONTENT['faq'];
 $stats = $CONTENT['stats'];
+$advantages = $CONTENT['advantages'];
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -102,6 +103,29 @@ $stats = $CONTENT['stats'];
         </div>
     </section>
 
+    <!-- Advantages Section -->
+    <section class="advantages">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Преимущества</span>
+                <h2 class="section-title">Почему выбирают нас</h2>
+                <p class="section-description">
+                    Профессиональная 3D печать в Омске с гарантией качества и быстрыми сроками
+                </p>
+            </div>
+            <div class="advantages-grid">
+                <?php foreach ($CONTENT['advantages'] as $advantage): ?>
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="fas <?= $advantage['icon'] ?>"></i>
+                    </div>
+                    <h3><?= htmlspecialchars($advantage['title']) ?></h3>
+                    <p><?= htmlspecialchars($advantage['description']) ?></p>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
 
     <!-- Services Section -->
     <section class="services omsk-services" id="services">

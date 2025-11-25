@@ -4,7 +4,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://3dprint-omsk.ru/</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2025-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,7 +12,7 @@
   <!-- Services Page -->
   <url>
     <loc>https://3dprint-omsk.ru/services.php</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2025-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -20,7 +20,7 @@
   <!-- Portfolio Page -->
   <url>
     <loc>https://3dprint-omsk.ru/portfolio.php</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2025-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -28,7 +28,7 @@
   <!-- About Page -->
   <url>
     <loc>https://3dprint-omsk.ru/about.html</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2025-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -36,7 +36,7 @@
   <!-- Contact Page -->
   <url>
     <loc>https://3dprint-omsk.ru/contact.php</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2025-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -44,7 +44,7 @@
   <!-- Districts Page -->
   <url>
     <loc>https://3dprint-omsk.ru/districts.html</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2025-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -52,7 +52,7 @@
   <!-- Why Us Page -->
   <url>
     <loc>https://3dprint-omsk.ru/why-us.html</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2025-11-25</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -60,7 +60,7 @@
   <!-- Blog Page -->
   <url>
     <loc>https://3dprint-omsk.ru/blog.html</loc>
-    <lastmod>2025-01-15</lastmod>
+    <lastmod>2025-11-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
