@@ -10,14 +10,13 @@ This is a **static website** that can be hosted on any web server (Apache, Nginx
 
 ### For Local Development
 
-1. Open `index.html` in a web browser
-2. Or use a simple HTTP server:
+1. Use a web server with PHP support (PHP 7.4+):
    ```bash
-   python3 -m http.server 8000
-   # OR
    php -S localhost:8000
    ```
-3. Navigate to `http://localhost:8000`
+2. Navigate to `http://localhost:8000/index.php`
+
+**Note:** The site uses PHP templates for shared includes and static content data. PHP 7.4+ is required.
 
 ### For Production Deployment
 
@@ -45,10 +44,10 @@ This is a **static website** that can be hosted on any web server (Apache, Nginx
 - ✅ **Multiple Pages** - Services, Portfolio, About, Contact, Blog, Districts
 
 ### For Business Owners
-- ✅ **Static HTML** - No database or backend required, fast and secure
-- ✅ **Easy Maintenance** - Simple HTML/CSS/JS files that can be edited directly
+- ✅ **Static PHP Templates** - No database required, content in PHP arrays for easy management
+- ✅ **Easy Maintenance** - Centralized content in `data/content.php`, shared includes for headers/footers
 - ✅ **Telegram Bot Ready** - Prepared for integration with Telegram notifications
-- ✅ **Lightweight** - Fast loading times and minimal hosting requirements
+- ✅ **Lightweight** - Fast loading times and minimal hosting requirements (PHP 7.4+)
 - ✅ **Future-Ready** - Prepared structure for adding backend endpoints if needed
 
 ---
@@ -72,14 +71,22 @@ This is a **static website** that can be hosted on any web server (Apache, Nginx
 
 ```
 /
-├── index.html          # Homepage
-├── about.html          # About page
-├── services.html       # Services catalog
-├── portfolio.html      # Portfolio showcase
-├── contact.html        # Contact page
-├── blog.html           # Blog page
-├── districts.html      # Delivery districts
-├── why-us.html         # Why choose us
+├── index.php           # Homepage (PHP template)
+├── services.php        # Services catalog (PHP template)
+├── portfolio.php       # Portfolio showcase (PHP template)
+├── contact.php         # Contact page (PHP template)
+├── about.html          # About page (static)
+├── blog.html           # Blog page (static)
+├── districts.html      # Delivery districts (static)
+├── why-us.html         # Why choose us (static)
+│
+├── includes/           # PHP template includes
+│   ├── head.php        # Head tags, meta, structured data
+│   ├── header.php      # Header and navigation
+│   └── footer.php      # Footer and scripts
+│
+├── data/               # Static content data
+│   └── content.php     # PHP arrays with all content
 │
 ├── css/                # Stylesheets
 │   ├── style.css       # Main styles
@@ -87,7 +94,7 @@ This is a **static website** that can be hosted on any web server (Apache, Nginx
 │   └── animations.css  # Animation effects
 │
 ├── js/                 # JavaScript files
-│   ├── main.js         # Core site functionality
+│   ├── main.js         # Core UI interactions only
 │   ├── calculator.js   # Price calculator logic
 │   ├── telegram.js     # Telegram integration
 │   ├── utils.js        # Utility functions
@@ -113,18 +120,42 @@ This is a **static website** that can be hosted on any web server (Apache, Nginx
 
 ### Updating Content
 
-All content is directly in the HTML files. To update:
+All content is centralized in `data/content.php`. To update:
 
-1. **Contact Information**: Edit the contact section in each HTML file
-2. **Services**: Edit `services.html` and the services section in `index.html`
-3. **Portfolio Items**: Edit `portfolio.html`
-4. **Calculator Prices**: Edit the `CONFIG` object in `js/calculator.js`
-5. **Telegram Link**: Update the Telegram link in all HTML files (search for `t.me/PrintPro_Omsk`)
+1. **Site Information**: Edit the `site` array (name, phone, email, address, etc.)
+2. **Services**: Edit the `services` array with service details, prices, features
+3. **Portfolio Items**: Edit the `portfolio` array with project details
+4. **FAQ Entries**: Edit the `faq` array with questions and answers
+5. **Testimonials**: Edit the `testimonials` array with customer reviews
+6. **Technologies & Materials**: Edit `technologies` and `materials` arrays
+7. **SEO Meta Tags**: Edit the `meta` array for each page
+
+Example from `data/content.php`:
+
+```php
+'services' => [
+    [
+        'id' => 'fdm-printing',
+        'name' => 'FDM 3D печать',
+        'icon' => 'fa-print',
+        'description' => 'Печать методом послойного наплавления...',
+        'price' => 'от 150 ₽/час',
+        'features' => [
+            'Широкий выбор материалов',
+            'Размеры печати до 300×300×400 мм',
+            // ...
+        ],
+        'featured' => true
+    ],
+    // ... more services
+]
+```
 
 ### Changing Styles
 
 - **Colors**: Edit CSS variables in `css/style.css`
-- **Layout**: Modify the HTML structure in individual pages
+- **Layout**: Modify the PHP templates in `*.php` files
+- **Shared Components**: Edit `includes/head.php`, `includes/header.php`, `includes/footer.php`
 - **Responsive Breakpoints**: Adjust `css/responsive.css`
 
 ### Calculator Configuration

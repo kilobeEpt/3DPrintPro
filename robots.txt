@@ -6,11 +6,12 @@ Disallow: /admin.html
 Disallow: /admin
 
 # Allow all pages
+Allow: /index.php
 Allow: /index.html
-Allow: /services.html
-Allow: /portfolio.html
+Allow: /services.php
+Allow: /portfolio.php
 Allow: /about.html
-Allow: /contact.html
+Allow: /contact.php
 Allow: /blog.html
 Allow: /districts.html
 Allow: /why-us.html

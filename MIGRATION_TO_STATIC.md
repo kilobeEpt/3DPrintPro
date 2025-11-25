@@ -1,11 +1,11 @@
 # Migration to Static Site - Summary
 
 **Date**: November 25, 2024  
-**Branch**: `remove-admin-stack`
+**Branch**: `feature/static-php-templates-content-data-ui-js-cleanup`
 
 ## Overview
 
-This document summarizes the migration from a full-stack PHP application with admin panel to a lightweight static website with optional future backend endpoints for Telegram integration.
+This document summarizes the migration from a full-stack PHP application with admin panel to a lightweight static website using PHP templates with shared includes and centralized content data.
 
 ---
 
@@ -300,26 +300,93 @@ Then visit `http://localhost:8000`
 - No session management issues
 
 ### Hosting 💰
-- Can use free static hosting
-- Lower server requirements
-- No PHP or MySQL needed
+- Requires PHP 7.4+ web hosting
+- Lower server requirements (no database)
+- No MySQL needed
 - Minimal bandwidth usage
 
 ### Maintenance 🛠️
-- Easy to update (edit HTML directly)
+- Easy to update (edit `data/content.php` for all content)
+- Shared includes reduce code duplication
 - No dependency updates needed
 - No database maintenance
-- No security patches
+
+---
+
+## New PHP Template Structure (v2.0)
+
+### Architecture
+
+The site now uses **PHP templates** with:
+- **Shared Includes** (`includes/head.php`, `includes/header.php`, `includes/footer.php`)
+- **Centralized Content Data** (`data/content.php`)
+- **Template Pages** (`index.php`, `services.php`, `portfolio.php`, `contact.php`)
+
+### Benefits
+
+1. **DRY Principle**: Header, footer, and meta tags defined once in `includes/`
+2. **Content Management**: All content (services, portfolio, FAQ, etc.) in one file: `data/content.php`
+3. **Easy Updates**: Change site name, phone, address in one place
+4. **SEO Consistency**: Meta tags and structured data auto-generated from content arrays
+5. **Simplified JavaScript**: `js/main.js` now only handles UI interactions (no API/database loading)
+
+### Content Structure
+
+```php
+// data/content.php
+return [
+    'site' => [...],              // Site info (name, phone, email, address)
+    'services' => [...],          // Services array (FDM, SLA, SLS, modeling, etc.)
+    'portfolio' => [...],         // Portfolio items
+    'faq' => [...],               // FAQ entries
+    'testimonials' => [...],      // Customer reviews
+    'stats' => [...],             // Statistics (projects, clients, years)
+    'technologies' => [...],      // Technology comparisons
+    'materials' => [...],         // Material details
+    'meta' => [...]               // SEO meta tags per page
+];
+```
+
+### Template Usage
+
+```php
+// index.php
+<?php
+$page_meta_key = 'home';
+$canonical_url = '';
+$active_page = 'home';
+$CONTENT = require __DIR__ . '/data/content.php';
+?>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <?php include __DIR__ . '/includes/head.php'; ?>
+</head>
+<body>
+    <?php include __DIR__ . '/includes/header.php'; ?>
+    <!-- Page content here -->
+    <?php include __DIR__ . '/includes/footer.php'; ?>
+</body>
+</html>
+```
+
+### JavaScript Cleanup
+
+- **Removed**: `MainApp` class, API/database loading, `CONFIG` dependency
+- **Kept**: UI interactions (menu toggle, smooth scroll, phone masks, form handling)
+- **Simplified**: Content now embedded in PHP, not fetched via JavaScript
 
 ---
 
 ## Notes
 
 - All removed code is preserved in Git history
-- Can restore backend functionality if needed by reverting this commit
-- Calculator configuration is now hardcoded in `js/calculator.js` (line ~10)
-- Contact information is hardcoded in HTML files (can be updated with find/replace)
-- Portfolio and testimonials sections are placeholders (add content directly to HTML)
+- Can restore backend functionality if needed by reverting previous commits
+- Calculator configuration remains in `js/calculator.js`
+- **NEW**: All site content centralized in `data/content.php`
+- **NEW**: Shared includes in `includes/` for header/footer/meta tags
+- **NEW**: Navigation updated to reference `.php` files
+- **NEW**: Sitemap and robots.txt updated with `.php` URLs
 
 ---
 
