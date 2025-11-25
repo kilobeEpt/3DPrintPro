@@ -448,6 +448,7 @@ php scripts/api_smoke.php
 | Tables not found | Run `mysql -u user -p db < database/schema.sql` |
 | No data showing | Run `https://your-domain.com/api/init-database.php` |
 | Cannot login to admin | Run `php scripts/create-admin.php` to create user |
+| API loses session | Run `php test-api-session.php` - see [ADMIN_API_SESSION_COMPREHENSIVE_FIX.md](ADMIN_API_SESSION_COMPREHENSIVE_FIX.md) |
 | Telegram test fails | Check bot token and chat ID in settings |
 | Forms not submitting | Check browser console for errors |
 | Session expired immediately | Use HTTPS and enable cookies |
@@ -560,6 +561,9 @@ mysqldump -u user -p database > backup_$(date +%Y%m%d).sql
 ```bash
 # Full database audit
 php scripts/db_audit.php
+
+# Session configuration test
+php test-api-session.php
 
 # API health check
 curl https://your-domain.com/api/test.php?audit=full

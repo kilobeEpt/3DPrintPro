@@ -27,6 +27,12 @@ function bootstrapAdminSession() {
         // Session name (custom to avoid default PHPSESSID)
         ini_set('session.name', ADMIN_SESSION_NAME);
         
+        // Cookie path - CRITICAL: Must be '/' to work across /admin/ and /api/ endpoints
+        ini_set('session.cookie_path', '/');
+        
+        // Cookie domain - Empty means current domain only (no subdomains)
+        ini_set('session.cookie_domain', '');
+        
         // HttpOnly - JavaScript cannot access session cookie
         ini_set('session.cookie_httponly', 1);
         
