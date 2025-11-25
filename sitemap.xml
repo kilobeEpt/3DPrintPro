@@ -11,7 +11,7 @@
   
   <!-- Services Page -->
   <url>
-    <loc>https://3dprint-omsk.ru/services.html</loc>
+    <loc>https://3dprint-omsk.ru/services.php</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -19,7 +19,7 @@
   
   <!-- Portfolio Page -->
   <url>
-    <loc>https://3dprint-omsk.ru/portfolio.html</loc>
+    <loc>https://3dprint-omsk.ru/portfolio.php</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -35,7 +35,7 @@
   
   <!-- Contact Page -->
   <url>
-    <loc>https://3dprint-omsk.ru/contact.html</loc>
+    <loc>https://3dprint-omsk.ru/contact.php</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

@@ -1,1351 +1,583 @@
 // ========================================
-// MAIN APPLICATION
+// LIGHTWEIGHT MAIN.JS - UI INTERACTIONS ONLY
 // ========================================
 
-class MainApp {
+class SiteUI {
     constructor() {
+        this.mobileBreakpoint = 768;
         this.currentTestimonial = 0;
         this.currentFilter = 'all';
-        this.autoSlideInterval = null;
-        this.dataLoaded = false;
     }
 
-    async init() {
+    init() {
         this.initPreloader();
         this.initNavigation();
         this.initThemeToggle();
         this.initPhoneMasks();
-        
-        // Wait for CONFIG to load from database
-        await this.waitForConfigLoad();
-        
-        await this.loadContent();
-        this.initStats();
-        await this.loadServices();
-        await this.loadPortfolio();
-        await this.loadTestimonials();
-        await this.loadFAQ();
-        this.initForms();
-        this.renderDynamicFormFields();
         this.initScrollAnimations();
-        this.initCalculator();
-        this.dataLoaded = true;
+        this.initStats();
+        this.initTestimonials();
+        this.initForms();
+        this.initPortfolioFilter();
+        
+        console.log('✅ SiteUI initialized');
     }
-    
-    async waitForConfigLoad() {
-        return new Promise((resolve) => {
-            if (window.CONFIG && window.CONFIG._loaded) {
-                resolve();
-                return;
+
+    // ========================================
+    // PRELOADER
+    // ========================================
+
+    initPreloader() {
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 300);
             }
-            
-            const checkConfig = () => {
-                if (window.CONFIG && window.CONFIG._loaded) {
-                    resolve();
-                } else {
-                    setTimeout(checkConfig, 50);
-                }
-            };
-            
-            window.addEventListener('configLoaded', () => {
-                window.CONFIG._loaded = true;
-                resolve();
-            }, { once: true });
-            
-            // Start checking in case event already fired
-            setTimeout(checkConfig, 100);
         });
     }
-    
-    async reloadData() {
-        console.log('🔄 Reloading all data from API...');
-        try {
-            await this.loadContent();
-            await this.loadServices();
-            await this.loadPortfolio();
-            await this.loadTestimonials();
-            await this.loadFAQ();
-            console.log('✅ Data reloaded successfully');
-            this.showNotification('✅ Данные обновлены', 'success');
-        } catch (error) {
-            console.error('❌ Failed to reload data:', error);
-            this.showNotification('❌ Не удалось обновить данные', 'error');
+
+    // ========================================
+    // NAVIGATION
+    // ========================================
+
+    initNavigation() {
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('navMenu');
+        const header = document.getElementById('header');
+
+        // Mobile menu toggle
+        if (hamburger && navMenu) {
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+                document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
+            });
+
+            // Close menu when clicking on a link
+            const navLinks = navMenu.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= this.mobileBreakpoint) {
+                        hamburger.classList.remove('active');
+                        navMenu.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= this.mobileBreakpoint &&
+                    navMenu.classList.contains('active') &&
+                    !navMenu.contains(e.target) &&
+                    !hamburger.contains(e.target)) {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href === '#' || href === '') return;
+                
+                const target = document.querySelector(href);
+                if (target) {
+                    e.preventDefault();
+                    const headerHeight = header ? header.offsetHeight : 80;
+                    const targetPosition = target.offsetTop - headerHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Header scroll behavior
+        if (header) {
+            let lastScroll = 0;
+            window.addEventListener('scroll', () => {
+                const currentScroll = window.pageYOffset;
+                
+                if (currentScroll > 100) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+                
+                lastScroll = currentScroll;
+            });
         }
     }
 
-    initPreloader() {
-        setTimeout(() => {
-            const preloader = document.getElementById('preloader');
-            if (preloader) {
-                preloader.classList.add('hidden');
-            }
-        }, 800);
+    // ========================================
+    // THEME TOGGLE
+    // ========================================
+
+    initThemeToggle() {
+        const themeToggle = document.getElementById('themeToggle');
+        if (!themeToggle) return;
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        this.updateThemeIcon(themeToggle, savedTheme);
+
+        // Toggle theme
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            this.updateThemeIcon(themeToggle, newTheme);
+        });
     }
+
+    updateThemeIcon(button, theme) {
+        const icon = button.querySelector('i');
+        if (icon) {
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+    }
+
+    // ========================================
+    // PHONE MASKS
+    // ========================================
 
     initPhoneMasks() {
         const phoneInputs = document.querySelectorAll('input[type="tel"]');
         phoneInputs.forEach(input => {
-            if (typeof Utils !== 'undefined') {
-                Utils.initPhoneMask(input);
-            } else {
-                input.addEventListener('input', (e) => this.formatPhone(e.target));
-                input.addEventListener('focus', (e) => {
-                    if (!e.target.value) {
-                        e.target.value = '+7 ';
-                    }
-                });
-                input.addEventListener('blur', (e) => {
-                    if (e.target.value === '+7 ') {
-                        e.target.value = '';
-                    }
-                });
-            }
-        });
-    }
-
-    formatPhone(input) {
-        if (typeof Utils !== 'undefined') {
-            Utils.formatPhone(input);
-            return;
-        }
-        
-        let value = input.value.replace(/\D/g, '');
-
-        if (value.length > 0 && value[0] === '8') {
-            value = '7' + value.slice(1);
-        }
-
-        if (value.length > 0 && value[0] !== '7') {
-            value = '7' + value;
-        }
-
-        let formatted = '';
-        if (value.length > 0) {
-            formatted = '+7';
-            if (value.length > 1) {
-                formatted += ' (' + value.slice(1, 4);
-            }
-            if (value.length >= 5) {
-                formatted += ') ' + value.slice(4, 7);
-            }
-            if (value.length >= 8) {
-                formatted += '-' + value.slice(7, 9);
-            }
-            if (value.length >= 10) {
-                formatted += '-' + value.slice(9, 11);
-            }
-        }
-
-        input.value = formatted;
-    }
-
-    initNavigation() {
-        const header = document.getElementById('header');
-        const hamburger = document.getElementById('hamburger');
-        const navMenu = document.getElementById('navMenu');
-        const navLinks = document.querySelectorAll('.nav-link');
-
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 100) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
-        });
-
-        hamburger?.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-            
-            if (navMenu.classList.contains('active')) {
-                document.body.classList.add('nav-open');
-            } else {
-                document.body.classList.remove('nav-open');
-            }
-        });
-
-        const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-        const isHomePage = currentPath === 'index.html' || currentPath === '';
-        
-        navLinks.forEach(link => {
-            const linkHref = link.getAttribute('href');
-            const linkPage = link.getAttribute('data-page');
-            
-            if (linkPage) {
-                const isCurrentPage = 
-                    (isHomePage && linkPage === 'home') ||
-                    (currentPath === linkPage + '.html');
+            input.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
                 
-                if (isCurrentPage && !linkHref.startsWith('#')) {
-                    link.classList.add('active');
+                if (value.length > 0) {
+                    if (value[0] === '8') value = '7' + value.slice(1);
+                    if (value[0] !== '7') value = '7' + value;
                 }
-            }
-        });
-
-        const sections = document.querySelectorAll('section[id]');
-        if (sections.length > 0 && isHomePage) {
-            window.addEventListener('scroll', () => {
-                let current = '';
-
-                sections.forEach(section => {
-                    const sectionTop = section.offsetTop;
-                    const sectionHeight = section.clientHeight;
-                    if (scrollY >= (sectionTop - 200)) {
-                        current = section.getAttribute('id');
-                    }
-                });
-
-                navLinks.forEach(link => {
-                    const linkHref = link.getAttribute('href');
-                    if (linkHref.startsWith('#')) {
-                        if (linkHref === '#' + current) {
-                            link.classList.add('active');
-                        } else {
-                            link.classList.remove('active');
-                        }
-                    }
-                });
-            });
-        }
-
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                const targetHref = link.getAttribute('href');
                 
-                if (targetHref.startsWith('#')) {
-                    const targetId = targetHref;
-                    const targetSection = document.querySelector(targetId);
+                let formatted = '';
+                if (value.length > 0) {
+                    formatted = '+7';
+                    if (value.length > 1) formatted += ' (' + value.slice(1, 4);
+                    if (value.length > 4) formatted += ') ' + value.slice(4, 7);
+                    if (value.length > 7) formatted += '-' + value.slice(7, 9);
+                    if (value.length > 9) formatted += '-' + value.slice(9, 11);
+                }
+                
+                e.target.value = formatted;
+            });
 
-                    if (targetSection) {
-                        e.preventDefault();
-                        
-                        navMenu.classList.remove('active');
-                        hamburger.classList.remove('active');
-                        document.body.classList.remove('nav-open');
-
-                        window.scrollTo({
-                            top: targetSection.offsetTop - 80,
-                            behavior: 'smooth'
-                        });
-                    }
-                } else {
-                    navMenu.classList.remove('active');
-                    hamburger.classList.remove('active');
-                    document.body.classList.remove('nav-open');
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value === '+7 (') {
+                    e.target.value = '';
                 }
             });
         });
     }
 
-    initThemeToggle() {
-        const themeToggle = document.getElementById('themeToggle');
-        const savedTheme = localStorage.getItem('theme') || 'light';
-
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark-theme');
-            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-        }
-
-        themeToggle?.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-
-            if (document.body.classList.contains('dark-theme')) {
-                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-                localStorage.setItem('theme', 'light');
-            }
-        });
-    }
-
-    async loadContent() {
-        try {
-            const content = db.getDefaultContent();
-            const settings = await db.getOrCreateSettings() || db.getDefaultSettings();
-            const stats = db.getDefaultStats();
-
-            if (content.hero) {
-                const heroTitle = document.getElementById('heroTitle');
-                if (heroTitle) heroTitle.textContent = content.hero.title || 'идеи в реальность';
-
-                const heroDescription = document.getElementById('heroDescription');
-                if (heroDescription) heroDescription.textContent = content.hero.subtitle || '';
-            }
-
-            const contactAddress = document.getElementById('contactAddress');
-            if (contactAddress) contactAddress.textContent = settings.address || settings.company_address || '';
-
-            const contactPhone = document.getElementById('contactPhone');
-            if (contactPhone) contactPhone.textContent = settings.contactPhone || settings.company_phone || '';
-
-            const contactEmail = document.getElementById('contactEmail');
-            if (contactEmail) contactEmail.textContent = settings.contactEmail || settings.company_email || '';
-
-            const contactHours = document.getElementById('contactHours');
-            if (contactHours) contactHours.innerHTML = (settings.workingHours || settings.company_hours || '').replace(/\n/g, '<br>');
-
-            const siteName = document.getElementById('siteName');
-            if (siteName && (settings.siteName || settings.site_name)) {
-                const name = settings.siteName || settings.site_name;
-                siteName.innerHTML = name.replace('Pro', '<strong>Pro</strong>');
-            }
-
-            this.loadSocialLinks(settings.socialLinks || {});
-            this.updateStatsTargets(stats);
-        } catch (error) {
-            console.error('❌ Failed to load content:', error);
-            const settings = db.getDefaultSettings();
-            const stats = db.getDefaultStats();
-            this.loadSocialLinks(settings.socialLinks || {});
-            this.updateStatsTargets(stats);
-        }
-    }
-
-    loadSocialLinks(links) {
-        const container = document.getElementById('socialLinks');
-        if (!container) return;
-
-        const socialIcons = {
-            vk: 'fab fa-vk',
-            telegram: 'fab fa-telegram',
-            whatsapp: 'fab fa-whatsapp',
-            youtube: 'fab fa-youtube'
-        };
-
-        if (!links.telegram) {
-            links.telegram = CONFIG.telegram.contactUrl;
-        }
-
-        let html = '';
-        Object.entries(links).forEach(([key, url]) => {
-            if (url) {
-                html += `<a href="${url}" class="social-link" target="_blank" rel="noopener">
-                    <i class="${socialIcons[key]}"></i>
-                </a>`;
-            }
-        });
-
-        container.innerHTML = html;
-    }
-
-    updateStatsTargets(stats) {
-        const statNumbers = document.querySelectorAll('.stat-number');
-        if (statNumbers[0]) statNumbers[0].setAttribute('data-target', stats.totalProjects || 1500);
-        if (statNumbers[1]) statNumbers[1].setAttribute('data-target', stats.happyClients || 850);
-        if (statNumbers[2]) statNumbers[2].setAttribute('data-target', stats.yearsExperience || 12);
-        if (statNumbers[3]) statNumbers[3].setAttribute('data-target', stats.awards || 25);
-    }
-
-    initStats() {
-        const statNumbers = document.querySelectorAll('.stat-number');
-        let animated = false;
-
-        const animateStats = () => {
-            if (animated) return;
-
-            const statsSection = document.querySelector('.stats');
-            if (!statsSection) return;
-
-            const rect = statsSection.getBoundingClientRect();
-
-            if (rect.top < window.innerHeight && rect.bottom > 0) {
-                animated = true;
-
-                statNumbers.forEach(stat => {
-                    const target = parseInt(stat.getAttribute('data-target'));
-                    const duration = 2000;
-                    const increment = target / (duration / 16);
-                    let current = 0;
-
-                    const updateCounter = () => {
-                        current += increment;
-                        if (current < target) {
-                            stat.textContent = Math.floor(current);
-                            requestAnimationFrame(updateCounter);
-                        } else {
-                            stat.textContent = target;
-                        }
-                    };
-
-                    updateCounter();
-                });
-            }
-        };
-
-        window.addEventListener('scroll', animateStats);
-        animateStats();
-    }
-
-    async loadServices() {
-        try {
-            let services = await db.getServices();
-            services = services.filter(s => s.active !== false);
-            
-            const grid = document.getElementById('servicesGrid');
-            if (!grid) return;
-
-            const isHomepage = document.body.getAttribute('data-page') === 'home';
-            if (isHomepage && services.length > 4) {
-                services = services.slice(0, 4);
-            }
-
-            grid.innerHTML = services.map(service => `
-                <a href="index.html#calculator" class="service-card ${service.featured ? 'featured' : ''}" style="text-decoration: none; color: inherit; display: block;">
-                    ${service.featured ? '<div class="featured-badge">Популярное</div>' : ''}
-                    <div class="service-icon">
-                        <i class="fas ${service.icon}"></i>
-                    </div>
-                    <h3>${service.name}</h3>
-                    <p>${service.description}</p>
-                    <ul class="service-features">
-                        ${(service.features || []).map(f => `
-                            <li><i class="fas fa-check"></i> ${f}</i>
-                        `).join('')}
-                    </ul>
-                </a>
-            `).join('');
-            
-            const syncInfo = db.getSyncInfo('services');
-            if (syncInfo.source === 'cache' && this.dataLoaded) {
-                console.log('⚠️ Services loaded from cache');
-            }
-        } catch (error) {
-            console.error('❌ Failed to load services:', error);
-            if (this.dataLoaded) {
-                this.showNotification('⚠️ Не удалось загрузить услуги. Используются сохранённые данные.', 'warning');
-            }
-        }
-    }
-
-    async openServiceModal(slug) {
-        try {
-            const services = await db.getServices();
-            const service = services.find(s => s.slug === slug);
-            if (!service) return;
-
-            const modal = document.getElementById('serviceModal');
-            const content = document.getElementById('serviceModalContent');
-
-            content.innerHTML = `
-                <h2>${service.name}</h2>
-                <p style="color: var(--text-secondary); margin: 20px 0;">${service.description}</p>
-                <h3 style="margin: 25px 0 15px;">Преимущества:</h3>
-                <ul style="list-style: none; padding: 0;">
-                    ${(service.features || []).map(f => `
-                        <li style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
-                            <span>${f}</span>
-                        </li>
-                    `).join('')}
-                </ul>
-                <div style="margin-top: 30px; padding: 20px; background: var(--bg-secondary); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 18px; font-weight: 600;">Стоимость:</span>
-                    <span style="font-size: 24px; color: var(--primary); font-weight: 700;">${service.price}</span>
-                </div>
-                <div style="display: flex; gap: 15px; margin-top: 25px; flex-wrap: wrap;">
-                    <button class="btn btn-primary" onclick="window.location.href='#calculator'">
-                        <i class="fas fa-calculator"></i>
-                        Рассчитать стоимость
-                    </button>
-                    <a href="${CONFIG.telegram.contactUrl}" target="_blank" class="btn btn-outline" style="text-decoration: none;">
-                        <i class="fab fa-telegram"></i>
-                        Написать в Telegram
-                    </a>
-                </div>
-            `;
-
-            modal.classList.add('active');
-        } catch (error) {
-            console.error('❌ Failed to open service modal:', error);
-        }
-    }
-
-    async loadPortfolio() {
-        try {
-            const items = await db.getPortfolio();
-            this.portfolioItems = items;
-            this.renderPortfolio(items);
-            this.initPortfolioFilters();
-        } catch (error) {
-            console.error('❌ Failed to load portfolio:', error);
-        }
-    }
-
-    renderPortfolio(items = null) {
-        if (!items) {
-            items = this.portfolioItems || [];
-        }
-
-        const grid = document.getElementById('portfolioGrid');
-        if (!grid) return;
-
-        let filtered = this.currentFilter === 'all'
-            ? items
-            : items.filter(item => item.category === this.currentFilter);
-
-        const isHomepage = document.body.getAttribute('data-page') === 'home';
-        if (isHomepage && filtered.length > 6) {
-            filtered = filtered.slice(0, 6);
-        }
-
-        if (filtered.length === 0) {
-            grid.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary); grid-column: 1/-1;">Работ не найдено</p>';
-            return;
-        }
-
-        grid.innerHTML = filtered.map(item => `
-            <div class="portfolio-item" data-category="${item.category}" onclick="app.openPortfolioModal('${item.id}')">
-                <img src="${item.image_url || item.image}" alt="${item.title}" class="portfolio-image" loading="lazy">
-                <span class="portfolio-category">${this.getCategoryName(item.category)}</span>
-                <div class="portfolio-overlay">
-                    <h3>${item.title}</h3>
-                    <p>${item.description}</p>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    initPortfolioFilters() {
-        const filterBtns = document.querySelectorAll('.filter-btn');
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                this.currentFilter = btn.getAttribute('data-filter');
-                this.renderPortfolio();
-            });
-        });
-    }
-
-    getCategoryName(category) {
-        const names = {
-            'prototype': 'Прототипы',
-            'functional': 'Функциональные',
-            'art': 'Художественные',
-            'industrial': 'Промышленные'
-        };
-        return names[category] || category;
-    }
-
-    openPortfolioModal(id) {
-        const item = (this.portfolioItems || []).find(i => i.id == id);
-        if (!item) return;
-
-        const modal = document.getElementById('portfolioModal');
-        const content = document.getElementById('portfolioModalContent');
-
-        content.innerHTML = `
-            <img src="${item.image_url || item.image}" alt="${item.title}" style="width: 100%; border-radius: 12px; margin-bottom: 20px;">
-            <h2>${item.title}</h2>
-            <p style="color: var(--text-secondary); margin: 15px 0;">${item.description}</p>
-            ${item.details ? `
-            <div style="padding: 20px; background: var(--bg-secondary); border-radius: 12px; margin-top: 20px;">
-                <h3 style="margin-bottom: 10px;">Детали проекта:</h3>
-                <p style="color: var(--text-secondary);">${item.details}</p>
-            </div>
-            ` : ''}
-            <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="window.location.href='#calculator'">
-                    <i class="fas fa-calculator"></i>
-                    Заказать похожее
-                </button>
-                <a href="${CONFIG.telegram.contactUrl}" target="_blank" class="btn btn-outline" style="text-decoration: none;">
-                    <i class="fab fa-telegram"></i>
-                    Написать в Telegram
-                </a>
-            </div>
-        `;
-
-        modal.classList.add('active');
-    }
-
-    async loadTestimonials() {
-        try {
-            let testimonials = await db.getTestimonials();
-            testimonials = testimonials.filter(t => t.approved !== false);
-            
-            const slider = document.getElementById('testimonialsSlider');
-            if (!slider) return;
-
-            const isHomepage = document.body.getAttribute('data-page') === 'home';
-            if (isHomepage && testimonials.length > 3) {
-                testimonials = testimonials.slice(0, 3);
-            }
-
-            if (testimonials.length === 0) {
-                slider.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Отзывов пока нет</p>';
-                return;
-            }
-
-            slider.innerHTML = testimonials.map((item, index) => `
-                <div class="testimonial-card ${index === 0 ? 'active' : ''}">
-                    <img src="${item.avatar}" alt="${item.name}" class="testimonial-avatar">
-                    <div class="testimonial-rating">
-                        ${'★'.repeat(item.rating || 5)}
-                    </div>
-                    <p class="testimonial-text">"${item.text}"</p>
-                    <h4 class="testimonial-author">${item.name}</h4>
-                    <p class="testimonial-position">${item.position}</p>
-                </div>
-            `).join('');
-
-            this.initTestimonialsSlider(testimonials.length);
-        } catch (error) {
-            console.error('❌ Failed to load testimonials:', error);
-        }
-    }
-
-    initTestimonialsSlider(count) {
-        const prevBtn = document.getElementById('prevTestimonial');
-        const nextBtn = document.getElementById('nextTestimonial');
-
-        prevBtn?.addEventListener('click', () => {
-            this.currentTestimonial = (this.currentTestimonial - 1 + count) % count;
-            this.updateTestimonials();
-        });
-
-        nextBtn?.addEventListener('click', () => {
-            this.currentTestimonial = (this.currentTestimonial + 1) % count;
-            this.updateTestimonials();
-        });
-
-        this.autoSlideInterval = setInterval(() => {
-            this.currentTestimonial = (this.currentTestimonial + 1) % count;
-            this.updateTestimonials();
-        }, 5000);
-    }
-
-    updateTestimonials() {
-        const cards = document.querySelectorAll('.testimonial-card');
-        cards.forEach((card, index) => {
-            card.classList.toggle('active', index === this.currentTestimonial);
-        });
-    }
-
-    async loadFAQ() {
-        try {
-            let faqs = await db.getFAQ();
-            faqs = faqs.filter(f => f.active !== false);
-            
-            const list = document.getElementById('faqList');
-            if (!list) return;
-
-            const isHomepage = document.body.getAttribute('data-page') === 'home';
-            if (isHomepage && faqs.length > 5) {
-                faqs = faqs.slice(0, 5);
-            }
-
-            list.innerHTML = faqs.map((faq, index) => `
-                <div class="faq-item" id="faq-${index}">
-                    <button class="faq-question" onclick="app.toggleFAQ(${index})">
-                        <span>${faq.question}</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">${faq.answer}</div>
-                    </div>
-                </div>
-            `).join('');
-        } catch (error) {
-            console.error('❌ Failed to load FAQ:', error);
-        }
-    }
-
-    toggleFAQ(index) {
-        const item = document.getElementById(`faq-${index}`);
-        const answer = item.querySelector('.faq-answer');
-        const isActive = item.classList.contains('active');
-
-        document.querySelectorAll('.faq-item').forEach(faq => {
-            faq.classList.remove('active');
-            faq.querySelector('.faq-answer').style.maxHeight = null;
-        });
-
-        if (!isActive) {
-            item.classList.add('active');
-            answer.style.maxHeight = answer.scrollHeight + 'px';
-        }
-    }
-
-    renderDynamicFormFields() {
-        const container = document.getElementById('dynamicFormFields');
-        if (!container) return;
-        
-        // Show loading placeholder initially
-        container.innerHTML = '<div class="form-loading"><i class="fas fa-spinner fa-spin"></i> Загрузка формы...</div>';
-        
-        const fields = CONFIG.formFields.contact || [];
-        const activeFields = fields.filter(f => f.enabled !== false);
-        
-        if (activeFields.length === 0) {
-            console.warn('⚠️ No active form fields configured');
-            return;
-        }
-        
-        // Sort by order
-        activeFields.sort((a, b) => (a.order || 0) - (b.order || 0));
-        
-        const html = activeFields.map(field => this.renderFormField(field)).join('');
-        container.innerHTML = html;
-        
-        // Re-init phone masks for dynamically created fields
-        this.initPhoneMasks();
-        
-        console.log('✅ Динамические поля формы отрисованы:', activeFields.length);
-    }
-    
-    renderFormField(field) {
-        const requiredAttr = field.required ? 'required' : '';
-        const requiredStar = field.required ? '<span style="color: var(--danger);">*</span>' : '';
-        
-        let fieldHtml = '';
-        
-        switch (field.type) {
-            case 'text':
-            case 'email':
-            case 'tel':
-                fieldHtml = `
-                    <div class="form-group">
-                        <label for="${field.name}">
-                            ${field.label} ${requiredStar}
-                        </label>
-                        <input 
-                            type="${field.type}" 
-                            id="${field.name}" 
-                            name="${field.name}" 
-                            class="form-control" 
-                            placeholder="${field.placeholder || ''}"
-                            ${requiredAttr}
-                        >
-                        ${field.helpText ? `<small class="form-help">${field.helpText}</small>` : ''}
-                        <div class="field-error"></div>
-                    </div>
-                `;
-                break;
-                
-            case 'textarea':
-                fieldHtml = `
-                    <div class="form-group">
-                        <label for="${field.name}">
-                            ${field.label} ${requiredStar}
-                        </label>
-                        <textarea 
-                            id="${field.name}" 
-                            name="${field.name}" 
-                            class="form-control" 
-                            rows="4"
-                            placeholder="${field.placeholder || ''}"
-                            ${requiredAttr}
-                        ></textarea>
-                        ${field.helpText ? `<small class="form-help">${field.helpText}</small>` : ''}
-                        <div class="field-error"></div>
-                    </div>
-                `;
-                break;
-                
-            case 'select':
-                const options = field.options || [];
-                fieldHtml = `
-                    <div class="form-group">
-                        <label for="${field.name}">
-                            ${field.label} ${requiredStar}
-                        </label>
-                        <select 
-                            id="${field.name}" 
-                            name="${field.name}" 
-                            class="form-control"
-                            ${requiredAttr}
-                        >
-                            <option value="">${field.placeholder || 'Выберите...'}</option>
-                            ${options.map(opt => {
-                                const value = typeof opt === 'string' ? opt : opt.value;
-                                const label = typeof opt === 'string' ? opt : opt.label;
-                                return `<option value="${value}">${label}</option>`;
-                            }).join('')}
-                        </select>
-                        ${field.helpText ? `<small class="form-help">${field.helpText}</small>` : ''}
-                        <div class="field-error"></div>
-                    </div>
-                `;
-                break;
-                
-            default:
-                console.warn('Unknown field type:', field.type);
-                return '';
-        }
-        
-        return fieldHtml;
-    }
-    
-    initForms() {
-        const contactForm = document.getElementById('contactForm');
-        if (contactForm) {
-            contactForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleFormSubmit(e.target, 'contact');
-            });
-        }
-
-        const subscribeForm = document.getElementById('subscribeForm');
-        if (subscribeForm) {
-            subscribeForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleSubscribe(e.target);
-            });
-        }
-    }
-
-    async handleUniversalForm(form) {
-        const validator = new Validator();
-        const formData = new FormData(form);
-
-        // ИСПРАВЛЕНО: Валидируем только активные поля из CONFIG
-        const activeFields = CONFIG.formFields.contact.filter(f => f.enabled);
-
-        let isValid = true;
-
-        // Валидация активных полей
-        activeFields.forEach(field => {
-            const value = formData.get(field.name);
-
-            // Проверка обязательных полей
-            if (field.required) {
-                if (!validator.required(value, field.label)) {
-                    isValid = false;
-                }
-            }
-
-            // Проверка типов (только если поле заполнено)
-            if (value && value.trim() !== '') {
-                switch (field.type) {
-                    case 'email':
-                        if (!validator.email(value, field.label)) {
-                            isValid = false;
-                        }
-                        break;
-                    case 'tel':
-                        if (!validator.phone(value, field.label)) {
-                            isValid = false;
-                        }
-                        break;
-                }
-            }
-        });
-
-        if (!isValid) {
-            validator.showErrors(form);
-            this.showNotification('Пожалуйста, исправьте ошибки в форме', 'error');
-            return;
-        }
-
-        // Disable submit button and show loading state
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
-        }
-
-        // Получаем данные калькулятора
-        const calculatorData = window.calculator && window.calculator.calculation ? window.calculator.calculation : null;
-
-        // Формируем заказ
-        const order = {
-            type: calculatorData ? 'order' : 'contact',
-            clientName: formData.get('name') || '',
-            name: formData.get('name') || '',
-            email: formData.get('email') || '',
-            clientEmail: formData.get('email') || '',
-            phone: formData.get('phone') || '',
-            clientPhone: formData.get('phone') || '',
-            telegram: formData.get('telegram') || '',
-            subject: formData.get('subject') || (calculatorData ? 'Заказ из калькулятора' : 'Обращение с сайта'),
-            message: formData.get('message') || '',
-            details: formData.get('message') || '',
-            service: calculatorData ? calculatorData.service : (formData.get('subject') || 'Обращение'),
-            amount: calculatorData ? calculatorData.total : 0,
-            calculatorData: calculatorData,
-            status: 'new',
-            orderNumber: this.generateOrderNumber(),
-            telegramSent: false
-        };
-
-        try {
-            console.log('💾 Сохранение заявки...');
-            
-            // Save to localStorage
-            const orderToSave = {
-                ...order,
-                id: Date.now() + Math.random().toString(36).substr(2, 9),
-                createdAt: new Date().toISOString(),
-                pendingSync: true
-            };
-            
-            const allData = JSON.parse(localStorage.getItem('3dprintpro_data') || '{}');
-            const orders = allData.orders || [];
-            orders.push(orderToSave);
-            allData.orders = orders;
-            localStorage.setItem('3dprintpro_data', JSON.stringify(allData));
-            
-            console.log('✅ Заявка сохранена локально');
-            
-            // Show success message
-            this.showNotification(
-                '✅ Спасибо! Ваша заявка принята. Мы свяжемся с вами в ближайшее время. ' +
-                'Также вы можете написать нам напрямую в Telegram.',
-                'success'
-            );
-            
-            // Reset form
-            form.reset();
-            const calcInfo = document.getElementById('calculationInfo');
-            if (calcInfo) calcInfo.style.display = 'none';
-            const formTitle = document.getElementById('formTitle');
-            if (formTitle) {
-                formTitle.innerHTML = '<i class="fas fa-envelope"></i> Свяжитесь с нами';
-            }
-            
-        } catch (error) {
-            console.error('❌ Ошибка сохранения формы:', error);
-            
-            try {
-                // Fallback: still try to save to localStorage
-                const orderToSave = {
-                    ...order,
-                    id: Date.now() + Math.random().toString(36).substr(2, 9),
-                    createdAt: new Date().toISOString(),
-                    pendingSync: true
-                };
-                
-                const allData = JSON.parse(localStorage.getItem('3dprintpro_data') || '{}');
-                const orders = allData.orders || [];
-                orders.push(orderToSave);
-                allData.orders = orders;
-                localStorage.setItem('3dprintpro_data', JSON.stringify(allData));
-                
-                console.log('💾 Заявка сохранена в localStorage (fallback)');
-                
-                this.showNotification(
-                    '⚠️ Ваша заявка сохранена локально. ' +
-                    'Для гарантированной доставки свяжитесь с нами напрямую по телефону или в Telegram.',
-                    'warning'
-                );
-            } catch (e) {
-                this.showNotification(
-                    '❌ Не удалось отправить заявку. Пожалуйста, попробуйте позже или свяжитесь с нами по телефону: ' + 
-                    (typeof CONFIG !== 'undefined' && CONFIG.phone ? CONFIG.phone : '+7 (999) 123-45-67'),
-                    'error'
-                );
-            }
-        } finally {
-            // Re-enable submit button
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnText;
-            }
-        }
-    }
-    
-    async handleFormSubmit(form, formSlug = 'contact') {
-        // Clear previous errors
-        this.clearFormErrors(form);
-        
-        const formData = new FormData(form);
-        const activeFields = CONFIG.formFields[formSlug]?.filter(f => f.enabled !== false) || [];
-        
-        // Client-side validation
-        const validation = this.validateFormData(formData, activeFields);
-        if (!validation.valid) {
-            this.displayFormErrors(form, validation.errors);
-            this.showNotification('Пожалуйста, исправьте ошибки в форме', 'error');
-            return;
-        }
-        
-        // Disable submit button and show loading state
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn ? submitBtn.innerHTML : '';
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
-        }
-        
-        // Build submission data object
-        const submissionData = {};
-        for (const [key, value] of formData.entries()) {
-            if (key !== 'privacy') {
-                submissionData[key] = value;
-            }
-        }
-        
-        // Add calculator data if available
-        const calculatorData = window.calculator?.calculation;
-        if (calculatorData) {
-            submissionData.calculator_data = calculatorData;
-            submissionData.amount = calculatorData.total;
-        }
-        
-        try {
-            console.log('💾 Сохранение формы локально...');
-            
-            // Save to localStorage for later retrieval
-            const submissionToSave = {
-                ...submissionData,
-                id: Date.now() + Math.random().toString(36).substr(2, 9),
-                formSlug: formSlug,
-                createdAt: new Date().toISOString(),
-                pendingSync: true
-            };
-            
-            const allData = JSON.parse(localStorage.getItem('3dprintpro_data') || '{}');
-            const submissions = allData.submissions || [];
-            submissions.push(submissionToSave);
-            allData.submissions = submissions;
-            localStorage.setItem('3dprintpro_data', JSON.stringify(allData));
-            
-            console.log('✅ Форма сохранена локально');
-            
-            // Show success message
-            const successMessage = 'Спасибо! Ваше сообщение принято. Мы свяжемся с вами в ближайшее время. ' +
-                                  'Также вы можете написать нам в Telegram для более быстрого ответа.';
-            this.showNotification('✅ ' + successMessage, 'success');
-            
-            // Reset form
-            form.reset();
-            
-            // Hide calculator info if present
-            const calcInfo = document.getElementById('calculationInfo');
-            if (calcInfo) calcInfo.style.display = 'none';
-            
-            const formTitle = document.getElementById('formTitle');
-            if (formTitle) {
-                formTitle.innerHTML = '<i class="fas fa-envelope"></i> Свяжитесь с нами';
-            }
-            
-            // Redirect if specified
-            if (result.redirectUrl) {
-                setTimeout(() => {
-                    window.location.href = result.redirectUrl;
-                }, 2000);
-            }
-            
-        } catch (error) {
-            console.error('❌ Ошибка отправки формы:', error);
-            
-            // Handle validation errors from server
-            if (error.errors && Object.keys(error.errors).length > 0) {
-                this.displayFormErrors(form, error.errors);
-                this.showNotification('Пожалуйста, исправьте ошибки в форме', 'error');
-            } else {
-                // Generic error message
-                const errorMessage = error.message || 'Произошла ошибка при отправке формы';
-                this.showNotification('❌ ' + errorMessage + '. Пожалуйста, попробуйте позже или свяжитесь с нами по телефону.', 'error');
-            }
-        } finally {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnText;
-            }
-        }
-    }
-    
-    validateFormData(formData, fields) {
-        const errors = {};
-        let valid = true;
-        
-        fields.forEach(field => {
-            const value = formData.get(field.name);
-            const trimmedValue = value ? value.trim() : '';
-            
-            // Required validation
-            if (field.required && !trimmedValue) {
-                errors[field.name] = `${field.label} обязательно для заполнения`;
-                valid = false;
-                return;
-            }
-            
-            // Skip further validation if field is empty and not required
-            if (!trimmedValue) return;
-            
-            // Type-specific validation
-            switch (field.type) {
-                case 'email':
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(trimmedValue)) {
-                        errors[field.name] = 'Введите корректный email адрес';
-                        valid = false;
-                    }
-                    break;
-                    
-                case 'tel':
-                    const phoneRegex = /^[\+]?[(]?[0-9]{1,3}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/;
-                    if (!phoneRegex.test(trimmedValue.replace(/[\s\(\)\-]/g, ''))) {
-                        errors[field.name] = 'Введите корректный номер телефона';
-                        valid = false;
-                    }
-                    break;
-            }
-            
-            // Custom validation rules from config
-            if (field.validation) {
-                if (field.validation.minLength && trimmedValue.length < field.validation.minLength) {
-                    errors[field.name] = `Минимальная длина: ${field.validation.minLength} символов`;
-                    valid = false;
-                }
-                if (field.validation.maxLength && trimmedValue.length > field.validation.maxLength) {
-                    errors[field.name] = `Максимальная длина: ${field.validation.maxLength} символов`;
-                    valid = false;
-                }
-                if (field.validation.pattern) {
-                    const regex = new RegExp(field.validation.pattern);
-                    if (!regex.test(trimmedValue)) {
-                        errors[field.name] = field.validation.message || 'Неверный формат';
-                        valid = false;
-                    }
-                }
-            }
-        });
-        
-        return { valid, errors };
-    }
-    
-    clearFormErrors(form) {
-        form.querySelectorAll('.field-error').forEach(el => {
-            el.textContent = '';
-            el.style.display = 'none';
-        });
-        form.querySelectorAll('.form-control').forEach(el => {
-            el.classList.remove('error');
-        });
-    }
-    
-    displayFormErrors(form, errors) {
-        Object.entries(errors).forEach(([fieldName, errorMessage]) => {
-            const field = form.querySelector(`[name="${fieldName}"]`);
-            if (field) {
-                field.classList.add('error');
-                const errorDiv = field.parentElement.querySelector('.field-error');
-                if (errorDiv) {
-                    errorDiv.textContent = errorMessage;
-                    errorDiv.style.display = 'block';
-                    errorDiv.style.color = 'var(--danger, #e74c3c)';
-                    errorDiv.style.fontSize = '0.875rem';
-                    errorDiv.style.marginTop = '0.5rem';
-                }
-            }
-        });
-    }
-
-    handleSubscribe(form) {
-        const validator = new Validator();
-        const email = new FormData(form).get('email');
-
-        if (!validator.email(email, 'Email')) {
-            this.showNotification('Пожалуйста, введите корректный email', 'error');
-            return;
-        }
-
-        this.showNotification('Спасибо за подписку!', 'success');
-        form.reset();
-    }
-
-    async generateOrderNumber() {
-        if (typeof Utils !== 'undefined' && Utils.generateOrderNumber) {
-            return await Utils.generateOrderNumber();
-        }
-        
-        try {
-            const orders = await db.getOrders();
-            const maxNumber = orders.reduce((max, o) => {
-                const num = parseInt(o.order_number || o.orderNumber) || 0;
-                return num > max ? num : max;
-            }, 1000);
-            return (maxNumber + 1).toString();
-        } catch (error) {
-            console.error('❌ Failed to generate order number:', error);
-            return Date.now().toString();
-        }
-    }
-
-    initCalculator() {
-        // Calculator инициализируется автоматически
-    }
+    // ========================================
+    // SCROLL ANIMATIONS
+    // ========================================
 
     initScrollAnimations() {
         const observerOptions = {
             threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
+            rootMargin: '0px 0px -50px 0px'
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
-                    observer.unobserve(entry.target);
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
                 }
             });
         }, observerOptions);
 
-        const animatedElements = document.querySelectorAll('.service-card, .portfolio-item, .stat-card, .about-feature');
-        animatedElements.forEach(el => {
+        // Observe all cards and sections
+        const elements = document.querySelectorAll('.service-card, .portfolio-card, .why-us-card, .faq-item, .contact-card');
+        elements.forEach((el, index) => {
             el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
             observer.observe(el);
         });
     }
 
-    closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('active');
+    // ========================================
+    // STATS COUNTER
+    // ========================================
+
+    initStats() {
+        const stats = document.querySelectorAll('.stat-number');
+        if (stats.length === 0) return;
+
+        const animateStats = () => {
+            stats.forEach(stat => {
+                const target = parseInt(stat.getAttribute('data-target'));
+                const duration = 2000;
+                const increment = target / (duration / 16);
+                let current = 0;
+
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        stat.textContent = Math.floor(current);
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        stat.textContent = target;
+                    }
+                };
+
+                updateCounter();
+            });
+        };
+
+        // Trigger animation when stats section is visible
+        const statsSection = document.querySelector('.stats');
+        if (statsSection) {
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    animateStats();
+                    observer.disconnect();
+                }
+            }, { threshold: 0.5 });
+            observer.observe(statsSection);
         }
     }
 
-    showNotification(message, type = 'info', duration = 5000) {
-        if (typeof Utils !== 'undefined' && Utils.showNotification) {
-            Utils.showNotification(message, type, duration);
-            return;
+    // ========================================
+    // TESTIMONIALS SLIDER
+    // ========================================
+
+    initTestimonials() {
+        const slider = document.getElementById('testimonialsSlider');
+        if (!slider) return;
+
+        const cards = slider.querySelectorAll('.testimonial-card');
+        if (cards.length === 0) return;
+
+        const prevBtn = document.getElementById('prevTestimonial');
+        const nextBtn = document.getElementById('nextTestimonial');
+
+        const showTestimonial = (index) => {
+            cards.forEach((card, i) => {
+                card.classList.toggle('active', i === index);
+            });
+            this.currentTestimonial = index;
+        };
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                const newIndex = (this.currentTestimonial - 1 + cards.length) % cards.length;
+                showTestimonial(newIndex);
+            });
         }
-        
-        const colors = {
-            success: '#10b981',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#6366f1'
-        };
 
-        const icons = {
-            success: 'fa-check-circle',
-            error: 'fa-times-circle',
-            warning: 'fa-exclamation-triangle',
-            info: 'fa-info-circle'
-        };
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const newIndex = (this.currentTestimonial + 1) % cards.length;
+                showTestimonial(newIndex);
+            });
+        }
 
+        // Auto-advance every 5 seconds
+        setInterval(() => {
+            const newIndex = (this.currentTestimonial + 1) % cards.length;
+            showTestimonial(newIndex);
+        }, 5000);
+    }
+
+    // ========================================
+    // FORMS
+    // ========================================
+
+    initForms() {
+        // Contact form
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.handleFormSubmit(contactForm, 'contact');
+            });
+        }
+
+        // Subscribe form
+        const subscribeForm = document.getElementById('subscribeForm');
+        if (subscribeForm) {
+            subscribeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.handleFormSubmit(subscribeForm, 'subscribe');
+            });
+        }
+    }
+
+    async handleFormSubmit(form, type) {
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+
+        try {
+            // Check if Telegram integration is available
+            if (typeof sendToTelegram === 'function') {
+                const message = this.formatTelegramMessage(data, type);
+                const result = await sendToTelegram(message);
+                
+                if (result.success) {
+                    this.showNotification('Сообщение успешно отправлено!', 'success');
+                    form.reset();
+                } else {
+                    throw new Error(result.error || 'Ошибка отправки');
+                }
+            } else {
+                // Fallback: show success message (for static demo)
+                this.showNotification('Форма заполнена корректно. Для реальной отправки настройте Telegram бота.', 'info');
+                form.reset();
+            }
+        } catch (error) {
+            console.error('Form submission error:', error);
+            this.showNotification('Ошибка при отправке. Попробуйте позже или свяжитесь с нами по телефону.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+
+    formatTelegramMessage(data, type) {
+        if (type === 'contact') {
+            return `🔔 Новое сообщение с сайта\n\n` +
+                   `👤 Имя: ${data.name || 'Не указано'}\n` +
+                   `📞 Телефон: ${data.phone || 'Не указан'}\n` +
+                   `📧 Email: ${data.email || 'Не указан'}\n` +
+                   `📝 Тема: ${data.subject || 'Общий вопрос'}\n` +
+                   `💬 Сообщение:\n${data.message || 'Нет текста'}`;
+        } else if (type === 'subscribe') {
+            return `📬 Новая подписка на рассылку\n\n📧 Email: ${data.email}`;
+        }
+        return '';
+    }
+
+    showNotification(message, type = 'info') {
+        // Create notification element
         const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            padding: 20px 30px;
-            background: ${colors[type]};
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 10000;
-            animation: slideInRight 0.3s ease;
-            max-width: 400px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-        `;
-
+        notification.className = `notification notification-${type}`;
         notification.innerHTML = `
-            <i class="fas ${icons[type]}" style="font-size: 20px;"></i>
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
             <span>${message}</span>
         `;
 
+        // Add to page
         document.body.appendChild(notification);
 
+        // Animate in
+        setTimeout(() => notification.classList.add('show'), 10);
+
+        // Remove after 5 seconds
         setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease';
+            notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);
-        }, duration);
+        }, 5000);
+    }
+
+    // ========================================
+    // PORTFOLIO FILTER
+    // ========================================
+
+    initPortfolioFilter() {
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const portfolioCards = document.querySelectorAll('[data-category]');
+
+        if (filterBtns.length === 0 || portfolioCards.length === 0) return;
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const filter = btn.getAttribute('data-filter');
+                
+                // Update active button
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Filter cards
+                portfolioCards.forEach(card => {
+                    const category = card.getAttribute('data-category');
+                    if (filter === 'all' || category === filter) {
+                        card.style.display = '';
+                        card.style.opacity = '0';
+                        setTimeout(() => card.style.opacity = '1', 10);
+                    } else {
+                        card.style.opacity = '0';
+                        setTimeout(() => card.style.display = 'none', 300);
+                    }
+                });
+
+                this.currentFilter = filter;
+            });
+        });
     }
 }
 
 // ========================================
-// GLOBAL APP INSTANCE
+// GLOBAL HELPER FUNCTIONS
 // ========================================
 
-const app = new MainApp();
-
-// ========================================
-// GLOBAL FUNCTIONS
-// ========================================
-
-function scrollToContactForm() {
-    const calc = window.calculator && window.calculator.calculation ? window.calculator.calculation : null;
-
-    const calcInfo = document.getElementById('calculationInfo');
-    const formTitle = document.getElementById('formTitle');
-    const subjectSelect = document.getElementById('formSubject'); // ИСПРАВЛЕНО: было subjectInput
-
-    if (calc) {
-        // Показываем расчёт
-        document.getElementById('calcService').textContent = calc.service || '-';
-        document.getElementById('calcMaterial').textContent = calc.material || '-';
-        document.getElementById('calcWeight').textContent = (calc.weight || 0) + 'г';
-        document.getElementById('calcQuantity').textContent = (calc.quantity || 0) + ' шт';
-        document.getElementById('calcTotal').textContent = (calc.total || 0).toLocaleString('ru-RU') + '₽';
-
-        if (calcInfo) calcInfo.style.display = 'block';
-        if (formTitle) formTitle.innerHTML = '<i class="fas fa-shopping-cart"></i> Оформление заказа';
-        if (subjectSelect) subjectSelect.value = 'Расчет стоимости';
-
-        app.showNotification('📝 Заполните форму для оформления заказа', 'info');
+// Calculator price calculation
+function calculatePrice() {
+    if (typeof window.calculator !== 'undefined' && window.calculator.calculate) {
+        const result = window.calculator.calculate();
+        if (result) {
+            // Display result
+            document.getElementById('materialCost').textContent = Math.round(result.materialCost) + '₽';
+            document.getElementById('laborCost').textContent = Math.round(result.laborCost) + '₽';
+            document.getElementById('additionalCost').textContent = Math.round(result.additionalCost) + '₽';
+            document.getElementById('totalPrice').textContent = Math.round(result.total) + '₽';
+            document.getElementById('estimateTime').textContent = result.estimateTime;
+            
+            if (result.discount > 0) {
+                document.getElementById('discountAmount').textContent = '-' + Math.round(result.discount) + '₽';
+                document.getElementById('discountItem').style.display = 'flex';
+            } else {
+                document.getElementById('discountItem').style.display = 'none';
+            }
+        }
     } else {
-        // Обычная форма
-        if (calcInfo) calcInfo.style.display = 'none';
-        if (formTitle) formTitle.innerHTML = '<i class="fas fa-envelope"></i> Запрос на 3D печать';
-        if (subjectSelect) subjectSelect.value = '';
-
-        app.showNotification('💡 Укажите детали заказа в форме', 'info');
+        console.warn('Calculator not initialized');
     }
+}
 
+// Scroll to contact form
+function scrollToContactForm() {
     const contactSection = document.getElementById('contact');
     if (contactSection) {
-        contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const header = document.getElementById('header');
+        const headerHeight = header ? header.offsetHeight : 80;
+        const targetPosition = contactSection.offsetTop - headerHeight;
+        
+        window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+        });
+    }
+}
 
-        const form = document.getElementById('contactForm');
-        if (form) {
-            form.style.animation = 'pulse 0.5s ease 2';
-            setTimeout(() => {
-                form.style.animation = '';
-            }, 1000);
-        }
+// Toggle FAQ item
+function toggleFAQ(button) {
+    const faqItem = button.parentElement;
+    const answer = faqItem.querySelector('.faq-answer');
+    const icon = button.querySelector('i');
+    
+    faqItem.classList.toggle('active');
+    
+    if (faqItem.classList.contains('active')) {
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        answer.style.maxHeight = '0';
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Show portfolio details
+function showPortfolioDetails(id) {
+    if (typeof window.PORTFOLIO_DATA === 'undefined') {
+        console.warn('Portfolio data not loaded');
+        return;
+    }
+
+    const item = window.PORTFOLIO_DATA.find(p => p.id === id);
+    if (!item) return;
+
+    const modal = document.getElementById('portfolioModal');
+    const content = document.getElementById('portfolioModalContent');
+    
+    if (!modal || !content) return;
+
+    content.innerHTML = `
+        <div class="portfolio-modal-content">
+            <img src="${item.image}" alt="${item.title}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22800%22 height=%22600%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2224%22 text-anchor=%22middle%22 fill=%22%23999%22%3E${item.title}%3C/text%3E%3C/svg%3E'">
+            <h2>${item.title}</h2>
+            <div class="portfolio-modal-meta">
+                <span><i class="fas fa-print"></i> ${item.technology}</span>
+                <span><i class="fas fa-clock"></i> ${item.duration}</span>
+                <span><i class="fas fa-calendar"></i> ${item.year}</span>
+            </div>
+            <p>${item.description}</p>
+            <div class="portfolio-modal-details">
+                <div>
+                    <h4><i class="fas fa-layer-group"></i> Материалы</h4>
+                    <p>${item.materials.join(', ')}</p>
+                </div>
+                <div>
+                    <h4><i class="fas fa-user"></i> Клиент</h4>
+                    <p>${item.client}</p>
+                </div>
+            </div>
+            <div class="portfolio-modal-tags">
+                ${item.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            </div>
+        </div>
+    `;
+    
+    openModal('portfolioModal');
+}
+
+// Modal functions
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
     }
 }
 
 function closeModal(modalId) {
-    app.closeModal(modalId);
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
 }
 
-function toggleFAQ(index) {
-    app.toggleFAQ(index);
-}
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+        closeModal(e.target.id);
+    }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.active').forEach(modal => {
+            closeModal(modal.id);
+        });
+    }
+});
 
 // ========================================
 // INITIALIZATION
 // ========================================
 
+const app = new SiteUI();
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Инициализация приложения...');
     app.init();
-    console.log('✅ Приложение запущено');
-    console.log('✅ scrollToContactForm доступна:', typeof scrollToContactForm === 'function');
-});
-
-window.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal')) {
-        e.target.classList.remove('active');
+    
+    // Initialize calculator if on page with calculator
+    if (typeof Calculator !== 'undefined' && document.getElementById('printTechnology')) {
+        window.calculator = new Calculator();
+        window.calculator.init();
     }
 });
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        document.querySelectorAll('.modal.active').forEach(modal => {
-            modal.classList.remove('active');
-        });
-    }
-});
-
-window.reloadForm = function () {
-    if (typeof app !== 'undefined' && app.renderDynamicFormFields) {
-        CONFIG.loadFromDatabase();
-        app.renderDynamicFormFields();
-        app.showNotification('✅ Форма обновлена из настроек', 'success');
-    }
-}

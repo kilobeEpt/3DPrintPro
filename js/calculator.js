@@ -26,18 +26,17 @@ class Calculator {
 
     async init() {
         this.initInputs();
-        await this.loadConfigFromApi();
+        this.loadConfigFromEmbedded();
         this.loadPricesFromConfig();
     }
     
-    async loadConfigFromApi() {
-        try {
-            if (window.calculatorConfigLoader) {
-                this.apiConfig = await window.calculatorConfigLoader.getConfig();
-                console.log('✅ API config loaded:', this.apiConfig);
-            }
-        } catch (error) {
-            console.warn('⚠️ Failed to load API config:', error);
+    loadConfigFromEmbedded() {
+        // Load from embedded window.CALCULATOR_CONFIG (set by PHP)
+        if (window.CALCULATOR_CONFIG) {
+            this.apiConfig = window.CALCULATOR_CONFIG;
+            console.log('✅ Calculator config loaded from embedded data');
+        } else {
+            console.warn('⚠️ No calculator config found');
         }
     }
 
@@ -196,13 +195,8 @@ class Calculator {
         let materials = [];
         
         if (this.apiConfig && this.apiConfig.materials) {
-            // Use API config
-            materials = this.apiConfig.materials
-                .filter(mat => mat.technology === this.data.technology && mat.active)
-                .map(mat => [mat.key, mat]);
-        } else if (typeof CONFIG !== 'undefined') {
-            // Fallback to CONFIG
-            materials = Object.entries(CONFIG.materialPrices)
+            // Use embedded config (from PHP) - materials is an object
+            materials = Object.entries(this.apiConfig.materials)
                 .filter(([key, mat]) => mat.technology === this.data.technology);
         }
         
@@ -225,15 +219,9 @@ class Calculator {
             const serviceKey = el.getAttribute('data-service');
             let price = null;
             
-            if (this.apiConfig && this.apiConfig.services) {
-                // Use API config
-                const service = this.apiConfig.services.find(s => s.key === serviceKey);
-                if (service) {
-                    price = service.price;
-                }
-            } else if (typeof CONFIG !== 'undefined' && CONFIG.servicePrices[serviceKey]) {
-                // Fallback to CONFIG
-                price = CONFIG.servicePrices[serviceKey].price;
+            if (this.apiConfig && this.apiConfig.services && this.apiConfig.services[serviceKey]) {
+                // Use embedded config (from PHP) - services is an object
+                price = this.apiConfig.services[serviceKey].price;
             }
             
             if (price !== null) {
@@ -273,12 +261,10 @@ class Calculator {
             return null;
         }
         
-        // Get material price from API config or CONFIG
+        // Get material price from embedded config
         let materialInfo = null;
-        if (this.apiConfig && this.apiConfig.materials) {
-            materialInfo = this.apiConfig.materials.find(m => m.key === this.data.material);
-        } else if (typeof CONFIG !== 'undefined') {
-            materialInfo = CONFIG.materialPrices[this.data.material];
+        if (this.apiConfig && this.apiConfig.materials && this.apiConfig.materials[this.data.material]) {
+            materialInfo = this.apiConfig.materials[this.data.material];
         }
         
         if (!materialInfo) {
@@ -298,10 +284,8 @@ class Calculator {
         
         // Quality multiplier
         let qualityInfo = null;
-        if (this.apiConfig && this.apiConfig.quality_multipliers) {
-            qualityInfo = this.apiConfig.quality_multipliers[quality];
-        } else if (typeof CONFIG !== 'undefined') {
-            qualityInfo = CONFIG.qualityMultipliers[quality];
+        if (this.apiConfig && this.apiConfig.quality && this.apiConfig.quality[quality]) {
+            qualityInfo = this.apiConfig.quality[quality];
         }
         const qualityMultiplier = qualityInfo ? qualityInfo.multiplier : 1;
         laborCost = laborCost * qualityMultiplier;
@@ -315,21 +299,16 @@ class Calculator {
             if (!enabled) return;
             
             let serviceInfo = null;
-            if (this.apiConfig && this.apiConfig.services) {
-                serviceInfo = this.apiConfig.services.find(s => s.key === serviceKey);
-            } else if (typeof CONFIG !== 'undefined' && CONFIG.servicePrices[serviceKey]) {
-                serviceInfo = CONFIG.servicePrices[serviceKey];
+            if (this.apiConfig && this.apiConfig.services && this.apiConfig.services[serviceKey]) {
+                serviceInfo = this.apiConfig.services[serviceKey];
             }
             
             if (serviceInfo) {
                 const price = serviceInfo.price;
                 const unit = serviceInfo.unit;
                 
-                if (unit === 'шт') {
-                    additionalCost += price * quantity;
-                } else {
-                    additionalCost += price;
-                }
+                // Count per item
+                additionalCost += price * quantity;
             }
         });
         
@@ -396,11 +375,8 @@ class Calculator {
         const tech = this.data.technology.toUpperCase();
         let materialName = this.data.material;
         
-        if (this.apiConfig && this.apiConfig.materials) {
-            const mat = this.apiConfig.materials.find(m => m.key === this.data.material);
-            materialName = mat?.name || materialName;
-        } else if (typeof CONFIG !== 'undefined') {
-            materialName = CONFIG.materialPrices[this.data.material]?.name || materialName;
+        if (this.apiConfig && this.apiConfig.materials && this.apiConfig.materials[this.data.material]) {
+            materialName = this.apiConfig.materials[this.data.material].name;
         }
         
         return `${tech} печать (${materialName})`;
@@ -411,16 +387,12 @@ class Calculator {
         let qualityName = this.data.quality;
         
         if (this.apiConfig) {
-            if (this.apiConfig.materials) {
-                const mat = this.apiConfig.materials.find(m => m.key === this.data.material);
-                materialName = mat?.name || materialName;
+            if (this.apiConfig.materials && this.apiConfig.materials[this.data.material]) {
+                materialName = this.apiConfig.materials[this.data.material].name;
             }
-            if (this.apiConfig.quality_multipliers && this.apiConfig.quality_multipliers[this.data.quality]) {
-                qualityName = this.apiConfig.quality_multipliers[this.data.quality].name;
+            if (this.apiConfig.quality && this.apiConfig.quality[this.data.quality]) {
+                qualityName = this.apiConfig.quality[this.data.quality].name;
             }
-        } else if (typeof CONFIG !== 'undefined') {
-            materialName = CONFIG.materialPrices[this.data.material]?.name || materialName;
-            qualityName = CONFIG.qualityMultipliers[this.data.quality]?.name || qualityName;
         }
         
         const details = [
