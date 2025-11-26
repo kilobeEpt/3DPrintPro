@@ -198,6 +198,16 @@ $meta = $CONTENT['meta'][$page_meta_key] ?? $CONTENT['meta']['home'];
     }
 </style>
 
+<!-- Theme initialization - Prevents FOUC -->
+<script>
+(function() {
+    const savedTheme = localStorage.getItem('theme');
+    const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const theme = savedTheme || systemPreference;
+    document.documentElement.setAttribute('data-theme', theme);
+})();
+</script>
+
 <!-- Styles -->
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/responsive.css">

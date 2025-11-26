@@ -155,15 +155,21 @@ class StaticApp {
 
     initThemeToggle() {
         const themeToggle = document.getElementById('themeToggle');
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('theme');
+        const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const currentTheme = savedTheme || systemPreference;
         
-        document.body.setAttribute('data-theme', savedTheme);
-        this.updateThemeIcon(savedTheme);
+        // Apply theme to both html and body
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        document.body.setAttribute('data-theme', currentTheme);
+        this.updateThemeIcon(currentTheme);
 
         themeToggle?.addEventListener('click', () => {
-            const currentTheme = document.body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            const theme = document.body.getAttribute('data-theme');
+            const newTheme = theme === 'light' ? 'dark' : 'light';
             
+            // Apply to both html and body
+            document.documentElement.setAttribute('data-theme', newTheme);
             document.body.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             this.updateThemeIcon(newTheme);

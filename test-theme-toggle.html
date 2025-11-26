@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Toggle Test</title>
+    
+    <!-- Theme initialization - Prevents FOUC -->
+    <script>
+    (function() {
+        const savedTheme = localStorage.getItem('theme');
+        const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const theme = savedTheme || systemPreference;
+        document.documentElement.setAttribute('data-theme', theme);
+        console.log('✅ Initial theme applied:', theme);
+    })();
+    </script>
+    
+    <style>
+        /* Light theme variables */
+        :root {
+            --bg: #ffffff;
+            --bg-secondary: #f9fafb;
+            --text: #111827;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --primary: #6366f1;
+        }
+        
+        /* Dark theme variables */
+        body[data-theme="dark"] {
+            --bg: #0f172a;
+            --bg-secondary: #1e293b;
+            --text: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border: #334155;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            background: var(--bg);
+            transition: background-color 0.3s ease;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 40px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            margin-bottom: 30px;
+            color: var(--text);
+        }
+        
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .test-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: var(--text);
+            margin-bottom: 15px;
+        }
+        
+        .test-section p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .status {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin-top: 20px;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 8px;
+            margin: 5px 0;
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--primary);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌙 Theme Toggle Test</h1>
+        
+        <button class="theme-toggle" id="themeToggle">
+            <span id="themeIcon">🌙</span>
+            <span id="themeText">Toggle Dark Mode</span>
+        </button>
+        
+        <div class="test-section">
+            <h2>Current Status</h2>
+            <div class="status" id="status">
+                <div>Theme: <strong id="currentTheme">-</strong></div>
+                <div>Storage: <strong id="storageValue">-</strong></div>
+                <div>HTML attribute: <strong id="htmlAttr">-</strong></div>
+                <div>Body attribute: <strong id="bodyAttr">-</strong></div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Visual Test</h2>
+            <p>This paragraph should be readable in both light and dark themes. The background should be clearly different between themes.</p>
+            <input type="text" placeholder="Type something here to test input fields...">
+            <textarea rows="3" placeholder="Test textarea..."></textarea>
+        </div>
+        
+        <div class="test-section">
+            <h2>Success Criteria</h2>
+            <ul class="checklist">
+                <li>✅ Theme toggles between light and dark on button click</li>
+                <li>✅ Theme persists after page reload</li>
+                <li>✅ All text is readable in both themes</li>
+                <li>✅ Input fields have proper contrast</li>
+                <li>✅ Transitions are smooth (no jarring changes)</li>
+                <li>✅ localStorage contains theme value</li>
+                <li>✅ No FOUC (Flash of Unstyled Content)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        
+        function updateStatus() {
+            const theme = document.body.getAttribute('data-theme');
+            document.getElementById('currentTheme').textContent = theme || 'not set';
+            document.getElementById('storageValue').textContent = localStorage.getItem('theme') || 'not set';
+            document.getElementById('htmlAttr').textContent = document.documentElement.getAttribute('data-theme') || 'not set';
+            document.getElementById('bodyAttr').textContent = document.body.getAttribute('data-theme') || 'not set';
+        }
+        
+        function updateIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Toggle Light Mode';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Toggle Dark Mode';
+            }
+        }
+        
+        // Initialize
+        const savedTheme = localStorage.getItem('theme');
+        const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const currentTheme = savedTheme || systemPreference;
+        
+        document.body.setAttribute('data-theme', currentTheme);
+        updateIcon(currentTheme);
+        updateStatus();
+        
+        // Toggle handler
+        themeToggle.addEventListener('click', () => {
+            const theme = document.body.getAttribute('data-theme');
+            const newTheme = theme === 'light' ? 'dark' : 'light';
+            
+            // Apply to both html and body
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            updateIcon(newTheme);
+            updateStatus();
+            
+            console.log('✅ Theme changed to:', newTheme);
+        });
+        
+        // Log initial state
+        console.log('✅ Theme test page loaded');
+        console.log('Current theme:', currentTheme);
+        console.log('Saved theme:', savedTheme);
+        console.log('System preference:', systemPreference);
+    </script>
+</body>
+</html>
