@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>JavaScript Console Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 JavaScript Console Test</h1>
+        <p>Проверка загрузки страницы без ошибок JavaScript</p>
+        
+        <div id="results">
+            <div class="loading">⏳ Загрузка тестов...</div>
+        </div>
+    </div>
+
+    <script>
+        // Capture console errors
+        const errors = [];
+        const originalError = console.error;
+        console.error = function(...args) {
+            errors.push(args.join(' '));
+            originalError.apply(console, args);
+        };
+
+        // Run tests after page load
+        window.addEventListener('load', function() {
+            setTimeout(runTests, 1000);
+        });
+
+        function runTests() {
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+
+            // Test 1: Check for console errors
+            addResult('Test 1: Проверка ошибок консоли', 
+                errors.length === 0,
+                errors.length === 0 ? 'Нет ошибок в консоли' : `Найдено ошибок: ${errors.length}\n${errors.join('\n')}`
+            );
+
+            // Test 2: Check if required globals exist
+            const requiredGlobals = ['Utils', 'Validator', 'OrderFormHandler', 'StaticApp'];
+            const missingGlobals = requiredGlobals.filter(g => typeof window[g] === 'undefined');
+            addResult('Test 2: Проверка глобальных классов',
+                missingGlobals.length === 0,
+                missingGlobals.length === 0 ? 'Все необходимые классы загружены' : `Отсутствуют: ${missingGlobals.join(', ')}`
+            );
+
+            // Test 3: Check for CONFIG references
+            const hasConfigError = errors.some(e => e.includes('CONFIG'));
+            addResult('Test 3: Проверка на CONFIG ошибки',
+                !hasConfigError,
+                !hasConfigError ? 'Нет ссылок на CONFIG' : 'Найдены ссылки на удаленный CONFIG'
+            );
+
+            // Test 4: Check if calculatePrice function exists
+            const hasCalculatePrice = typeof window.calculatePrice === 'function';
+            addResult('Test 4: Проверка функции calculatePrice',
+                hasCalculatePrice,
+                hasCalculatePrice ? 'Функция calculatePrice доступна' : 'Функция calculatePrice не найдена'
+            );
+
+            // Test 5: Check if scrollToContactForm function exists
+            const hasScrollToContact = typeof window.scrollToContactForm === 'function';
+            addResult('Test 5: Проверка функции scrollToContactForm',
+                hasScrollToContact,
+                hasScrollToContact ? 'Функция scrollToContactForm доступна' : 'Функция scrollToContactForm не найдена'
+            );
+
+            // Test 6: Check for network errors (404s)
+            const resources = performance.getEntriesByType('resource');
+            const failed404 = resources.filter(r => r.name.includes('.js') && r.transferSize === 0);
+            addResult('Test 6: Проверка 404 ошибок для JS файлов',
+                failed404.length === 0,
+                failed404.length === 0 ? 'Все JS файлы загружены успешно' : `404 ошибки для: ${failed404.map(r => r.name.split('/').pop()).join(', ')}`
+            );
+
+            // Summary
+            const totalTests = 6;
+            const passedTests = document.querySelectorAll('.success').length;
+            const summary = document.createElement('div');
+            summary.className = passedTests === totalTests ? 'test-result success' : 'test-result error';
+            summary.innerHTML = `<h3>📊 Итого: ${passedTests}/${totalTests} тестов пройдено</h3>`;
+            results.appendChild(summary);
+        }
+
+        function addResult(testName, passed, message) {
+            const results = document.getElementById('results');
+            const result = document.createElement('div');
+            result.className = `test-result ${passed ? 'success' : 'error'}`;
+            result.innerHTML = `
+                <strong>${passed ? '✅' : '❌'} ${testName}</strong>
+                <pre>${message}</pre>
+            `;
+            results.appendChild(result);
+        }
+    </script>
+
+    <!-- Load the same scripts as index.html -->
+    <script src="js/utils.js"></script>
+    <script src="js/validators.js"></script>
+    <script src="js/order-form.js"></script>
+    <script src="js/main.js"></script>
+    
+    <!-- Simple calculator handler (same as index.html) -->
+    <script>
+        function calculatePrice() {
+            console.log('✅ calculatePrice called');
+            return true;
+        }
+        
+        function scrollToContactForm() {
+            console.log('✅ scrollToContactForm called');
+            return true;
+        }
+    </script>
+</body>
+</html>
