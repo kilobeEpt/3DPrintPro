@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Order Form</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            padding: 50px 0;
+            min-height: 100vh;
+        }
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+        .test-header h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        .test-header p {
+            color: var(--text-secondary);
+        }
+        .test-checklist {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+        .test-checklist h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .test-checklist ul {
+            list-style: none;
+            padding: 0;
+        }
+        .test-checklist li {
+            padding: 8px 0;
+            color: var(--text-secondary);
+        }
+        .test-checklist li::before {
+            content: '☐ ';
+            margin-right: 8px;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="test-header">
+            <h1>🧪 Order Form Test Page</h1>
+            <p>Test the complete order form with Telegram integration</p>
+        </div>
+
+        <!-- Order Form Section -->
+        <section id="order-form-section" class="order-form-container">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-label">Заказать</span>
+                    <h2 class="section-title">Заказать 3D печать</h2>
+                    <p class="section-description">
+                        Заполните форму, и мы свяжемся с вами в ближайшее время
+                    </p>
+                </div>
+                <div class="order-form-wrapper">
+                    <form id="order-form" method="POST" action="/order-submit.php" enctype="multipart/form-data">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orderFio">
+                                    <i class="fas fa-user"></i>
+                                    ФИО*
+                                </label>
+                                <input type="text" id="orderFio" name="fio" class="form-control" placeholder="Ваше полное имя" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="orderEmail">
+                                    <i class="fas fa-envelope"></i>
+                                    Email*
+                                </label>
+                                <input type="email" id="orderEmail" name="email" class="form-control" placeholder="your@email.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orderPhone">
+                                    <i class="fas fa-phone"></i>
+                                    Телефон*
+                                </label>
+                                <input type="tel" id="orderPhone" name="phone" class="form-control" placeholder="+7 (___) ___-__-__" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="orderTelegram">
+                                    <i class="fab fa-telegram"></i>
+                                    Telegram username*
+                                </label>
+                                <input type="text" id="orderTelegram" name="telegram" class="form-control" placeholder="username (без @)" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="orderService">
+                                <i class="fas fa-cogs"></i>
+                                Услуга*
+                            </label>
+                            <select id="orderService" name="service" class="form-control" required>
+                                <option value="">Выберите услугу</option>
+                                <option value="FDM печать">FDM печать</option>
+                                <option value="SLA печать">SLA печать</option>
+                                <option value="SLS печать">SLS печать</option>
+                                <option value="Цветная печать">Цветная печать</option>
+                                <option value="Постобработка">Постобработка</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="orderDescription">
+                                <i class="fas fa-comment-alt"></i>
+                                Описание проекта*
+                            </label>
+                            <textarea id="orderDescription" name="description" class="form-control" rows="5" placeholder="Опишите ваш проект подробно (минимум 10 символов)" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="orderFiles">
+                                <i class="fas fa-paperclip"></i>
+                                Загрузить файл (опционально)
+                            </label>
+                            <input type="file" id="orderFiles" name="files" class="form-control" accept=".stl,.obj,.gcode,.step,.stp,.3mf,.amf,.ply">
+                            <small class="form-text">Допустимые форматы: STL, OBJ, GCODE, STEP, 3MF, AMF, PLY (макс. 50 МБ)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="privacy" required>
+                                <span>Согласен на обработку персональных данных</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-submit">
+                            <i class="fas fa-paper-plane"></i>
+                            Отправить заказ
+                        </button>
+
+                        <div class="order-form-info">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Мы свяжемся с вами в течение 15 минут для уточнения деталей заказа</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Test Checklist -->
+        <div class="test-checklist">
+            <h3>✅ Testing Checklist</h3>
+            <ul>
+                <li>Form is visible and styled correctly</li>
+                <li>All 7 fields are present (fio, email, phone, telegram, service, description, files)</li>
+                <li>Form validates required fields</li>
+                <li>Telegram field validates format (no @, alphanumeric + underscore)</li>
+                <li>Submit button shows loading state</li>
+                <li>Success message appears after submission</li>
+                <li>Error messages show for validation failures</li>
+                <li>Honeypot field is hidden</li>
+                <li>Form resets after successful submission</li>
+                <li>Telegram notification is sent to authorized users</li>
+                <li>Console has no JavaScript errors</li>
+                <li>Network tab shows 200 OK for POST /order-submit.php</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="/js/order-form.js"></script>
+    <script>
+        console.log('🧪 Order Form Test Page Loaded');
+        console.log('📋 Check the checklist above for testing steps');
+        
+        // Additional debug logging
+        window.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('order-form');
+            if (form) {
+                console.log('✅ Order form found:', form);
+                console.log('📝 Form fields:', Array.from(form.elements).map(e => e.name).filter(Boolean));
+            } else {
+                console.error('❌ Order form not found!');
+            }
+        });
+    </script>
+</body>
+</html>

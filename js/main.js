@@ -426,8 +426,13 @@ function changeTestimonial(direction) {
 }
 
 function scrollToContactForm() {
+    // Try order form first (preferred), fallback to contact form
+    const orderForm = document.getElementById('order-form-section');
     const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
+    
+    if (orderForm) {
+        orderForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (contactForm) {
         contactForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
