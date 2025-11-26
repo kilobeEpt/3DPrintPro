@@ -40,8 +40,8 @@ $stats = $CONTENT['stats'];
                     FDM, SLA, SLS технологии. Печать от 1 часа. 15+ материалов. <?= $stats['years'] ?> лет опыта.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#calculator" class="btn btn-primary">
-                        <span>Рассчитать стоимость</span>
+                    <a href="#order-form-section" class="btn btn-primary">
+                        <span>Заказать 3D печать</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                     <a href="portfolio.php" class="btn btn-outline">
@@ -121,7 +121,7 @@ $stats = $CONTENT['stats'];
                 }
                 foreach ($displayServices as $service):
                 ?>
-                <a href="index.php#calculator" class="service-card <?= $service['featured'] ? 'featured' : '' ?>" style="text-decoration: none; color: inherit; display: block;">
+                <a href="index.php#order-form-section" class="service-card <?= $service['featured'] ? 'featured' : '' ?>" style="text-decoration: none; color: inherit; display: block;">
                     <?php if ($service['featured']): ?>
                     <div class="featured-badge">Популярное</div>
                     <?php endif; ?>
@@ -143,162 +143,6 @@ $stats = $CONTENT['stats'];
                     <span>Все услуги</span>
                     <i class="fas fa-arrow-right"></i>
                 </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Calculator Section -->
-    <section class="calculator-section" id="calculator">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Калькулятор</span>
-                <h2 class="section-title">Рассчитайте стоимость</h2>
-                <p class="section-description">
-                    Моментальный расчет стоимости вашего заказа
-                </p>
-            </div>
-            <div class="calculator-wrapper">
-                <div class="calculator-form">
-                    <div class="form-group">
-                        <label for="printTechnology">
-                            <i class="fas fa-print"></i>
-                            Технология печати
-                        </label>
-                        <select id="printTechnology" class="form-control">
-                            <option value="fdm">FDM (послойное наплавление)</option>
-                            <option value="sla">SLA (фотополимерная)</option>
-                            <option value="sls">SLS (лазерное спекание)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="material">
-                            <i class="fas fa-layer-group"></i>
-                            Материал
-                        </label>
-                        <select id="material" class="form-control">
-                            <!-- Options will be loaded dynamically -->
-                        </select>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="weight">
-                                <i class="fas fa-weight"></i>
-                                Вес модели (г)
-                            </label>
-                            <input type="number" id="weight" class="form-control" value="100" min="1" max="10000">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="quantity">
-                                <i class="fas fa-copy"></i>
-                                Количество (шт)
-                            </label>
-                            <input type="number" id="quantity" class="form-control" value="1" min="1" max="1000">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="infill">
-                            <i class="fas fa-percentage"></i>
-                            Заполнение: <span id="infillValue">20</span>%
-                        </label>
-                        <input type="range" id="infill" class="range-slider" min="0" max="100" value="20">
-                        <div class="range-labels">
-                            <span>0%</span>
-                            <span>50%</span>
-                            <span>100%</span>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="quality">
-                            <i class="fas fa-sliders-h"></i>
-                            Качество печати
-                        </label>
-                        <select id="quality" class="form-control">
-                            <option value="draft">Черновое (быстро)</option>
-                            <option value="normal" selected>Нормальное</option>
-                            <option value="high">Высокое</option>
-                            <option value="ultra">Ультра (медленно)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-plus-circle"></i>
-                            Дополнительные услуги
-                        </label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="modeling">
-                                <span>3D моделирование (<span class="service-price" data-service="modeling">500</span>₽/час)</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="postProcessing">
-                                <span>Постобработка (<span class="service-price" data-service="postProcessing">300</span>₽)</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="painting">
-                                <span>Покраска (<span class="service-price" data-service="painting">500</span>₽)</span>
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" id="express">
-                                <span>Срочное изготовление (<span class="service-price" data-service="express">1000</span>₽)</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary btn-block" onclick="calculatePrice()">
-                        <i class="fas fa-calculator"></i>
-                        Рассчитать стоимость
-                    </button>
-                </div>
-
-                <div class="calculator-result">
-                    <div class="result-card">
-                        <h3>Расчет стоимости</h3>
-                        <div class="price-breakdown" id="priceBreakdown">
-                            <div class="price-item">
-                                <span>Материалы:</span>
-                                <span id="materialCost">0₽</span>
-                            </div>
-                            <div class="price-item">
-                                <span>Работа:</span>
-                                <span id="laborCost">0₽</span>
-                            </div>
-                            <div class="price-item">
-                                <span>Доп. услуги:</span>
-                                <span id="additionalCost">0₽</span>
-                            </div>
-                            <div class="price-item discount" id="discountItem" style="display: none;">
-                                <span>Скидка:</span>
-                                <span id="discountAmount">-0₽</span>
-                            </div>
-                        </div>
-                        <div class="total-price">
-                            <span>Итого:</span>
-                            <span class="price" id="totalPrice">0₽</span>
-                        </div>
-                        <div class="estimate-time">
-                            <i class="fas fa-clock"></i>
-                            <span>Срок изготовления: <strong id="estimateTime">-</strong></span>
-                        </div>
-                        <button class="btn btn-success btn-block" onclick="scrollToContactForm()">
-                            <i class="fas fa-paper-plane"></i>
-                            Отправить заявку
-                        </button>
-                        <a href="<?= $site['telegram'] ?>" target="_blank" class="btn btn-outline btn-block" style="margin-top: 10px; text-decoration: none;">
-                            <i class="fab fa-telegram"></i>
-                            Написать в Telegram
-                        </a>
-                        <div class="result-info">
-                            <i class="fas fa-info-circle"></i>
-                            <p>Расчет является предварительным. Точная стоимость определяется после анализа модели.</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>

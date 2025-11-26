@@ -143,7 +143,7 @@ return [
             'category' => 'Промышленность',
             'technology' => 'FDM (PETG)',
             'description' => 'Рабочий прототип механизма с подвижными частями для тестирования конструкции.',
-            'image' => '/storage/uploads/portfolio/prototype-mechanism.jpg',
+            'image' => 'https://via.placeholder.com/600x400/4F46E5/FFFFFF?text=Prototype+Mechanism',
             'completion_time' => '3 дня'
         ],
         [
@@ -152,7 +152,7 @@ return [
             'category' => 'Ювелирные изделия',
             'technology' => 'SLA (Castable Resin)',
             'description' => 'Высокодетализированная модель кольца для последующего литья в металл.',
-            'image' => '/storage/uploads/portfolio/jewelry-wax.jpg',
+            'image' => 'https://via.placeholder.com/600x400/10B981/FFFFFF?text=Jewelry+Wax',
             'completion_time' => '1 день'
         ],
         [
@@ -161,7 +161,7 @@ return [
             'category' => 'Электроника',
             'technology' => 'FDM (ABS)',
             'description' => 'Прочный корпус для устройства с точными посадочными местами под компоненты.',
-            'image' => '/storage/uploads/portfolio/electronics-case.jpg',
+            'image' => 'https://via.placeholder.com/600x400/F59E0B/FFFFFF?text=Electronics+Case',
             'completion_time' => '2 дня'
         ],
         [
@@ -170,7 +170,7 @@ return [
             'category' => 'Архитектура',
             'technology' => 'SLA (Standard Resin)',
             'description' => 'Детальный макет многоэтажного здания с ландшафтом.',
-            'image' => '/storage/uploads/portfolio/architecture-model.jpg',
+            'image' => 'https://via.placeholder.com/600x400/3B82F6/FFFFFF?text=Architecture+Model',
             'completion_time' => '5 дней'
         ],
         [
@@ -179,7 +179,7 @@ return [
             'category' => 'Медицина',
             'technology' => 'SLA (Dental Resin)',
             'description' => 'Точная анатомическая модель для медицинского обучения.',
-            'image' => '/storage/uploads/portfolio/medical-model.jpg',
+            'image' => 'https://via.placeholder.com/600x400/EF4444/FFFFFF?text=Medical+Model',
             'completion_time' => '2 дня'
         ],
         [
@@ -188,7 +188,7 @@ return [
             'category' => 'Хобби и игры',
             'technology' => 'SLA + покраска',
             'description' => 'Детализированная фигурка с профессиональной покраской.',
-            'image' => '/storage/uploads/portfolio/character-figurine.jpg',
+            'image' => 'https://via.placeholder.com/600x400/8B5CF6/FFFFFF?text=Character+Figurine',
             'completion_time' => '4 дня'
         ]
     ],

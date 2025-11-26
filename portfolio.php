@@ -103,9 +103,9 @@ $categories = array_unique(array_map(fn($item) => $item['category'], $portfolio)
                 <h2>Хотите увидеть свой проект здесь?</h2>
                 <p>Закажите 3D печать прямо сейчас и станьте частью нашего портфолио</p>
                 <div class="cta-buttons">
-                    <a href="index.php#calculator" class="btn btn-primary btn-lg">
-                        <i class="fas fa-calculator"></i>
-                        Рассчитать стоимость
+                    <a href="index.php#order-form-section" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane"></i>
+                        Заказать 3D печать
                     </a>
                     <a href="contact.php" class="btn btn-outline btn-lg">
                         <i class="fas fa-phone"></i>
