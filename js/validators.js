@@ -95,8 +95,8 @@ class Validator {
     // File validation
     file(file, options = {}) {
         const {
-            maxSize = CONFIG.maxFileSize,
-            allowedTypes = CONFIG.allowedFileTypes,
+            maxSize = 52428800, // 50 MB default
+            allowedTypes = ['.stl', '.obj', '.gcode', '.step', '.stp', '.3mf', '.amf', '.ply'],
             fieldName = 'Файл'
         } = options;
         

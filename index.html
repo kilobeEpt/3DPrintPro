@@ -796,9 +796,40 @@
     <!-- Scripts -->
     <script src="js/utils.js"></script>
     <script src="js/validators.js"></script>
-    <script src="js/calculator.js"></script>
-    <script src="js/telegram.js"></script>
     <script src="js/order-form.js"></script>
     <script src="js/main.js"></script>
+    
+    <!-- Simple calculator handler -->
+    <script>
+        function calculatePrice() {
+            // Show message in calculator result
+            document.getElementById('priceBreakdown').innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-info-circle" style="font-size: 48px; color: var(--primary); margin-bottom: 15px;"></i>
+                    <p style="margin: 10px 0; color: var(--text);">Для точного расчета стоимости, пожалуйста, свяжитесь с нами.</p>
+                </div>
+            `;
+            document.getElementById('materialCost').textContent = '-';
+            document.getElementById('laborCost').textContent = '-';
+            document.getElementById('additionalCost').textContent = '-';
+            document.getElementById('totalPrice').textContent = 'Рассчитаем индивидуально';
+            document.getElementById('estimateTime').textContent = 'Уточним при обсуждении';
+            
+            // Optionally scroll to contact form after a moment
+            setTimeout(() => {
+                const contactSection = document.getElementById('contact');
+                if (contactSection) {
+                    contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 1000);
+        }
+        
+        function scrollToContactForm() {
+            const contactSection = document.getElementById('contact');
+            if (contactSection) {
+                contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    </script>
 </body>
 </html>
