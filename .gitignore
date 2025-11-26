@@ -49,3 +49,7 @@ storage/cache/order_rate_limit/*
 !storage/cache/order_rate_limit/.gitkeep
 storage/cache/order_queue.json
 storage/logs/orders.log
+
+# Telegram bot storage
+storage/data/telegram_users.json
+storage/logs/telegram.log
