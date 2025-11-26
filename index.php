@@ -285,7 +285,7 @@ $stats = $CONTENT['stats'];
                             <i class="fas fa-clock"></i>
                             <span>Срок изготовления: <strong id="estimateTime">-</strong></span>
                         </div>
-                        <button class="btn btn-success btn-block" onclick="scrollToContactForm()">
+                        <button class="btn btn-success btn-block" onclick="document.getElementById('order').scrollIntoView({ behavior: 'smooth', block: 'start' })">
                             <i class="fas fa-paper-plane"></i>
                             Отправить заявку
                         </button>
@@ -299,6 +299,149 @@ $stats = $CONTENT['stats'];
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Form Section -->
+    <section class="order-form-section" id="order">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Оформить заказ</span>
+                <h2 class="section-title">Закажите 3D печать прямо сейчас</h2>
+                <p class="section-description">
+                    Заполните форму, и мы свяжемся с вами в течение 15 минут
+                </p>
+            </div>
+            
+            <div class="order-form-wrapper">
+                <form class="order-form" id="order-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="orderFio">
+                                <i class="fas fa-user"></i>
+                                ФИО*
+                            </label>
+                            <input 
+                                type="text" 
+                                id="orderFio" 
+                                name="fio" 
+                                class="form-control" 
+                                placeholder="Иванов Иван Иванович"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="orderEmail">
+                                <i class="fas fa-envelope"></i>
+                                Email*
+                            </label>
+                            <input 
+                                type="email" 
+                                id="orderEmail" 
+                                name="email" 
+                                class="form-control" 
+                                placeholder="example@mail.com"
+                                required
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="orderPhone">
+                                <i class="fas fa-phone"></i>
+                                Телефон*
+                            </label>
+                            <input 
+                                type="tel" 
+                                id="orderPhone" 
+                                name="phone" 
+                                class="form-control" 
+                                placeholder="+7 (900) 123-45-67"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="orderTelegram">
+                                <i class="fab fa-telegram"></i>
+                                Telegram username*
+                            </label>
+                            <input 
+                                type="text" 
+                                id="orderTelegram" 
+                                name="telegram" 
+                                class="form-control" 
+                                placeholder="username (без @)"
+                                required
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="orderService">
+                            <i class="fas fa-cogs"></i>
+                            Услуга*
+                        </label>
+                        <select id="orderService" name="service" class="form-control" required>
+                            <option value="">Выберите услугу</option>
+                            <option value="FDM печать">FDM печать</option>
+                            <option value="SLA печать">SLA печать</option>
+                            <option value="SLS печать">SLS печать</option>
+                            <option value="Цветная печать">Цветная печать</option>
+                            <option value="Постобработка">Постобработка</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="orderDescription">
+                            <i class="fas fa-comment-alt"></i>
+                            Описание проекта*
+                        </label>
+                        <textarea 
+                            id="orderDescription" 
+                            name="description" 
+                            class="form-control" 
+                            rows="5" 
+                            placeholder="Расскажите о вашем проекте (минимум 10 символов)"
+                            required
+                        ></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="orderFiles">
+                            <i class="fas fa-file-upload"></i>
+                            Загрузить файл (опционально)
+                        </label>
+                        <input 
+                            type="file" 
+                            id="orderFiles" 
+                            name="files" 
+                            class="form-control" 
+                            accept=".stl,.obj,.gcode,.step,.stp,.3mf,.amf,.ply"
+                        >
+                        <small style="color: var(--text-secondary); display: block; margin-top: 5px;">
+                            Допустимые форматы: STL, OBJ, GCODE, STEP, 3MF, AMF, PLY. Максимум 50 МБ
+                        </small>
+                        <div id="file-info" style="display: none; color: var(--accent); margin-top: 5px; font-size: 14px;"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="privacy" required>
+                            <span>Согласен на обработку персональных данных</span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-paper-plane"></i>
+                        Отправить заказ
+                    </button>
+                </form>
+                
+                <div id="form-message" class="form-message" style="display: none;"></div>
             </div>
         </div>
     </section>
