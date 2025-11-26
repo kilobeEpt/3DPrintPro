@@ -281,6 +281,11 @@ try {
         exit;
     }
     
+    // Support both 'name' and 'fio' fields
+    if (!empty($data['fio']) && empty($data['name'])) {
+        $data['name'] = $data['fio'];
+    }
+    
     // Validate required fields
     $requiredFields = ['name', 'email', 'phone', 'service', 'description'];
     $errors = [];
@@ -396,6 +401,7 @@ try {
         'name' => trim($data['name']),
         'email' => trim($data['email']),
         'phone' => trim($data['phone']),
+        'telegram' => !empty($data['telegram']) ? trim($data['telegram']) : null,
         'service' => trim($data['service']),
         'description' => trim($data['description']),
         'files' => $uploadedFiles,
@@ -408,8 +414,13 @@ try {
     $message = "📋 <b>Новый заказ с сайта!</b>\n\n";
     $message .= "👤 <b>Имя:</b> " . htmlspecialchars($orderData['name']) . "\n";
     $message .= "📧 <b>Email:</b> " . htmlspecialchars($orderData['email']) . "\n";
-    $message .= "📱 <b>Телефон:</b> " . htmlspecialchars($orderData['phone']) . "\n\n";
-    $message .= "🔧 <b>Услуга:</b> " . htmlspecialchars($orderData['service']) . "\n\n";
+    $message .= "📱 <b>Телефон:</b> " . htmlspecialchars($orderData['phone']) . "\n";
+    
+    if (!empty($orderData['telegram'])) {
+        $message .= "💬 <b>Telegram:</b> @" . htmlspecialchars($orderData['telegram']) . "\n";
+    }
+    
+    $message .= "\n🔧 <b>Услуга:</b> " . htmlspecialchars($orderData['service']) . "\n\n";
     $message .= "📝 <b>Описание:</b>\n" . htmlspecialchars($orderData['description']) . "\n\n";
     
     if (!empty($uploadedFiles)) {

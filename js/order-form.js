@@ -88,14 +88,15 @@ class OrderFormHandler {
         const errors = {};
         const data = new FormData(this.form);
         
-        // Name validation
-        const name = data.get('name')?.trim();
+        // Name/FIO validation (support both field names)
+        const name = data.get('name')?.trim() || data.get('fio')?.trim();
+        const fieldName = data.get('name') ? 'name' : 'fio';
         if (!name) {
-            errors.name = 'Имя обязательно для заполнения';
+            errors[fieldName] = 'Имя обязательно для заполнения';
         } else if (name.length < 2) {
-            errors.name = 'Имя должно содержать минимум 2 символа';
+            errors[fieldName] = 'Имя должно содержать минимум 2 символа';
         } else if (name.length > 100) {
-            errors.name = 'Имя не должно превышать 100 символов';
+            errors[fieldName] = 'Имя не должно превышать 100 символов';
         }
         
         // Email validation
@@ -114,9 +115,24 @@ class OrderFormHandler {
             errors.phone = 'Телефон должен содержать минимум 10 символов';
         }
         
-        // Service validation
+        // Telegram validation (optional, but validate if present)
+        const telegram = data.get('telegram')?.trim();
+        if (telegram) {
+            // Remove @ if user added it
+            if (telegram.startsWith('@')) {
+                errors.telegram = 'Введите username без символа @';
+            } else if (telegram.length < 3) {
+                errors.telegram = 'Telegram username слишком короткий';
+            } else if (telegram.length > 32) {
+                errors.telegram = 'Telegram username слишком длинный';
+            } else if (!/^[a-zA-Z0-9_]+$/.test(telegram)) {
+                errors.telegram = 'Telegram username может содержать только буквы, цифры и _';
+            }
+        }
+        
+        // Service validation (optional for contact form)
         const service = data.get('service')?.trim();
-        if (!service) {
+        if (this.form.querySelector('[name="service"]') && !service) {
             errors.service = 'Выберите услугу';
         }
         
@@ -313,10 +329,15 @@ if (!document.getElementById('order-form-animations')) {
     document.head.appendChild(style);
 }
 
-// Auto-initialize for contact form
+// Auto-initialize for contact form and order form
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize contact form if exists
     if (document.getElementById('contactForm')) {
         new OrderFormHandler('contactForm');
+    }
+    
+    // Initialize order form if exists
+    if (document.getElementById('order-form')) {
+        new OrderFormHandler('order-form');
     }
 });
