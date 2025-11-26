@@ -70,6 +70,4 @@ $services = $CONTENT['services'];
 <script src="js/utils.js"></script>
 <script src="js/validators.js"></script>
 <script src="js/order-form.js"></script>
-<script src="js/calculator.js"></script>
-<script src="js/telegram.js"></script>
 <script src="js/main.js"></script>

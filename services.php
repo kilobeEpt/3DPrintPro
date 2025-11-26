@@ -123,9 +123,9 @@ $materials = $CONTENT['materials'];
                     <?php endif; ?>
 
                     <div class="service-actions">
-                        <a href="index.php#calculator" class="btn btn-primary">
-                            <i class="fas fa-calculator"></i>
-                            Рассчитать стоимость
+                        <a href="index.php#order-form-section" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Заказать услугу
                         </a>
                         <a href="<?= $site['telegram'] ?>" target="_blank" class="btn btn-outline">
                             <i class="fab fa-telegram"></i>
@@ -212,9 +212,9 @@ $materials = $CONTENT['materials'];
                 <h2>Готовы начать свой проект?</h2>
                 <p>Свяжитесь с нами для бесплатной консультации и расчета стоимости</p>
                 <div class="cta-buttons">
-                    <a href="index.php#calculator" class="btn btn-primary btn-lg">
-                        <i class="fas fa-calculator"></i>
-                        Рассчитать стоимость
+                    <a href="index.php#order-form-section" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane"></i>
+                        Заказать 3D печать
                     </a>
                     <a href="contact.php" class="btn btn-outline btn-lg">
                         <i class="fas fa-phone"></i>
