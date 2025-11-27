@@ -27,9 +27,9 @@
             <li><a href="services.php" class="nav-link <?= $active_page === 'services' ? 'active' : '' ?>" data-page="services">Услуги</a></li>
             <li><a href="index.php#order-form-section" class="nav-link">Заказать</a></li>
             <li><a href="portfolio.php" class="nav-link <?= $active_page === 'portfolio' ? 'active' : '' ?>" data-page="portfolio">Портфолио</a></li>
-            <li><a href="about.html" class="nav-link <?= $active_page === 'about' ? 'active' : '' ?>" data-page="about">О нас</a></li>
+            <li><a href="about.php" class="nav-link <?= $active_page === 'about' ? 'active' : '' ?>" data-page="about">О нас</a></li>
             <li><a href="contact.php" class="nav-link <?= $active_page === 'contact' ? 'active' : '' ?>" data-page="contact">Контакты</a></li>
-            <li><a href="blog.html" class="nav-link <?= $active_page === 'blog' ? 'active' : '' ?>" data-page="blog">Блог</a></li>
+            <li><a href="blog.php" class="nav-link <?= $active_page === 'blog' ? 'active' : '' ?>" data-page="blog">Блог</a></li>
         </ul>
         <div class="nav-actions">
             <button class="theme-toggle" id="themeToggle" title="Переключить тему">

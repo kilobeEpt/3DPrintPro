@@ -172,7 +172,7 @@ $meta = $CONTENT['meta'][$page_meta_key] ?? $CONTENT['meta']['home'];
       "@type": "ListItem",
       "position": 4,
       "name": "О компании",
-      "item": "<?= $site['url'] ?>/about.html"
+      "item": "<?= $site['url'] ?>/about.php"
     },
     {
       "@type": "ListItem",
