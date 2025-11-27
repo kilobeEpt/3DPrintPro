@@ -61,10 +61,40 @@ $services = $CONTENT['services'];
     </div>
 </div>
 
-<div class="modal" id="portfolioModal">
-    <div class="modal-content modal-large">
-        <button class="modal-close" onclick="closeModal('portfolioModal')">&times;</button>
-        <div id="portfolioModalContent"></div>
+<div class="modal portfolio-modal" id="portfolioModal" role="dialog" aria-modal="true" aria-labelledby="portfolioModalTitle">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content portfolio-modal-content">
+        <button class="modal-close portfolio-modal-close" aria-label="Закрыть модальное окно">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+        
+        <div class="portfolio-modal-body">
+            <div class="portfolio-modal-image-wrapper">
+                <img src="" alt="" id="portfolioModalImage" class="portfolio-modal-image">
+                <button class="portfolio-nav-btn portfolio-nav-prev" aria-label="Предыдущий проект">
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <button class="portfolio-nav-btn portfolio-nav-next" aria-label="Следующий проект">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </button>
+            </div>
+            
+            <div class="portfolio-modal-info">
+                <div class="portfolio-modal-counter" id="portfolioModalCounter">1 / 6</div>
+                <h2 id="portfolioModalTitle" class="portfolio-modal-title">Заголовок проекта</h2>
+                <div class="portfolio-modal-meta">
+                    <span class="portfolio-modal-tech">
+                        <i class="fas fa-cog" aria-hidden="true"></i>
+                        <span id="portfolioModalTech">Технология</span>
+                    </span>
+                    <span class="portfolio-modal-time">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                        <span id="portfolioModalTime">Время выполнения</span>
+                    </span>
+                </div>
+                <p id="portfolioModalDescription" class="portfolio-modal-description">Описание проекта</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -73,3 +103,4 @@ $services = $CONTENT['services'];
 <script src="js/validators.js"></script>
 <script src="js/order-form.js"></script>
 <script src="js/main.js"></script>
+<script src="js/portfolio-gallery.js"></script>

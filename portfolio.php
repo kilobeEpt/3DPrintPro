@@ -36,33 +36,45 @@ $categories = array_unique(array_map(fn($item) => $item['category'], $portfolio)
     <!-- Portfolio Section -->
     <section class="portfolio-full">
         <div class="container">
-            <div class="portfolio-filters">
-                <button class="filter-btn active" data-filter="all">Все работы</button>
+            <div class="portfolio-filters" role="group" aria-label="Фильтр портфолио">
+                <button class="filter-btn active" data-filter="all" aria-pressed="true">Все работы</button>
                 <?php foreach ($categories as $category): ?>
-                <button class="filter-btn" data-filter="<?= strtolower($category) ?>"><?= htmlspecialchars($category) ?></button>
+                <button class="filter-btn" data-filter="<?= strtolower($category) ?>" aria-pressed="false"><?= htmlspecialchars($category) ?></button>
                 <?php endforeach; ?>
             </div>
 
             <div class="portfolio-grid" id="portfolioGrid">
-                <?php foreach ($portfolio as $item): ?>
-                <div class="portfolio-item" data-category="<?= strtolower($item['category']) ?>">
-                    <img src="<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="portfolio-image" loading="lazy">
-                    <span class="portfolio-category"><?= htmlspecialchars($item['category']) ?></span>
+                <?php foreach ($portfolio as $index => $item): ?>
+                <article class="portfolio-card" 
+                         data-category="<?= strtolower($item['category']) ?>" 
+                         data-index="<?= $index ?>"
+                         data-title="<?= htmlspecialchars($item['title']) ?>"
+                         data-description="<?= htmlspecialchars($item['description']) ?>"
+                         data-technology="<?= htmlspecialchars($item['technology']) ?>"
+                         data-completion="<?= htmlspecialchars($item['completion_time']) ?>"
+                         data-image="<?= htmlspecialchars($item['image']) ?>">
+                    <div class="portfolio-image-container">
+                        <img src="<?= htmlspecialchars($item['image']) ?>" 
+                             alt="<?= htmlspecialchars($item['title']) ?>" 
+                             class="portfolio-image" 
+                             loading="lazy">
+                    </div>
+                    <span class="portfolio-category-badge"><?= htmlspecialchars($item['category']) ?></span>
                     <div class="portfolio-overlay">
-                        <h3><?= htmlspecialchars($item['title']) ?></h3>
-                        <p class="portfolio-tech">
-                            <i class="fas fa-cog"></i>
-                            <?= htmlspecialchars($item['technology']) ?>
-                        </p>
-                        <p class="portfolio-desc"><?= htmlspecialchars($item['description']) ?></p>
-                        <div class="portfolio-meta">
-                            <span>
-                                <i class="fas fa-clock"></i>
-                                <?= htmlspecialchars($item['completion_time']) ?>
-                            </span>
+                        <div class="portfolio-overlay-content">
+                            <h3 class="portfolio-title"><?= htmlspecialchars($item['title']) ?></h3>
+                            <p class="portfolio-tech">
+                                <i class="fas fa-cog" aria-hidden="true"></i>
+                                <?= htmlspecialchars($item['technology']) ?>
+                            </p>
+                            <p class="portfolio-desc"><?= htmlspecialchars($item['description']) ?></p>
+                            <button class="portfolio-view-btn" aria-label="Смотреть проект: <?= htmlspecialchars($item['title']) ?>">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                                Смотреть
+                            </button>
                         </div>
                     </div>
-                </div>
+                </article>
                 <?php endforeach; ?>
             </div>
         </div>

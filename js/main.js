@@ -231,31 +231,11 @@ class StaticApp {
     }
 
     initPortfolioFilters() {
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const portfolioItems = document.querySelectorAll('.portfolio-item');
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const filter = btn.getAttribute('data-filter');
-
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                portfolioItems.forEach(item => {
-                    const category = item.getAttribute('data-category');
-                    if (filter === 'all' || category === filter) {
-                        item.style.display = 'block';
-                        setTimeout(() => item.classList.add('visible'), 10);
-                    } else {
-                        item.classList.remove('visible');
-                        setTimeout(() => item.style.display = 'none', 300);
-                    }
-                });
-            });
-        });
-
+        // Portfolio filtering now handled by portfolio-gallery.js
+        // This method kept for backward compatibility
+        const portfolioItems = document.querySelectorAll('.portfolio-item, .portfolio-card');
         portfolioItems.forEach(item => {
-            item.classList.add('visible');
+            item.classList.add('visible', 'portfolio-card--visible');
         });
     }
 
