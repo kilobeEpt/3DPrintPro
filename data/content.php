@@ -9,6 +9,7 @@ return [
         'phone' => '+7 (999) 123-45-67',
         'email' => 'info@3dprint-omsk.ru',
         'telegram' => 'https://t.me/PrintPro_Omsk',
+        'whatsapp' => 'https://wa.me/79991234567',
         'address' => 'ул. Ленина, д. 15',
         'city' => 'Омск',
         'region' => 'Омская область',
@@ -23,7 +24,35 @@ return [
             'weekend' => 'Сб-Вс: выходные'
         ],
         'year_founded' => 2011,
-        'experience_years' => 12
+        'experience_years' => 12,
+        'social_links' => [
+            [
+                'name' => 'VKontakte',
+                'url' => 'https://vk.com/3dprintpro_omsk',
+                'icon' => 'fab fa-vk',
+                'color' => '#0077FF'
+            ],
+            [
+                'name' => 'Instagram',
+                'url' => 'https://instagram.com/3dprintpro_omsk',
+                'icon' => 'fab fa-instagram',
+                'color' => '#E4405F'
+            ],
+            [
+                'name' => 'YouTube',
+                'url' => 'https://youtube.com/@3dprintpro_omsk',
+                'icon' => 'fab fa-youtube',
+                'color' => '#FF0000'
+            ],
+            [
+                'name' => 'Telegram',
+                'url' => 'https://t.me/PrintPro_Omsk',
+                'icon' => 'fab fa-telegram',
+                'color' => '#0088CC'
+            ]
+        ],
+        'map_provider' => 'yandex',
+        'map_url' => 'https://yandex.ru/map-widget/v1/?ll=73.324200%2C54.988500&z=16&pt=73.324200,54.988500,pm2rdm'
     ],
 
     'services' => [
