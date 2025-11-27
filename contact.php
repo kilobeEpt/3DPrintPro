@@ -90,7 +90,7 @@ $faq = $CONTENT['faq'];
                             <strong><?= $site['working_hours']['weekend'] ?></strong>
                         </div>
                     </div>
-                    <p style="margin-top: 15px; color: var(--text-secondary);">
+                    <p class="helper-text">
                         <i class="fas fa-info-circle"></i>
                         Принимаем заказы через сайт и Telegram круглосуточно
                     </p>
@@ -107,7 +107,7 @@ $faq = $CONTENT['faq'];
                 <div class="map-placeholder">
                     <i class="fas fa-map-marked-alt"></i>
                     <p>Карта</p>
-                    <p style="font-size: 14px; color: var(--text-secondary);">
+                    <p class="coord-text">
                         Координаты: <?= $site['geo']['latitude'] ?>, <?= $site['geo']['longitude'] ?>
                     </p>
                 </div>

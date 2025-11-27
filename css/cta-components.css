@@ -24,6 +24,7 @@
     white-space: nowrap;
     text-decoration: none;
     box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+    position: relative;
 }
 
 .btn-cta-primary:hover:not(:disabled) {
@@ -33,6 +34,16 @@
 
 .btn-cta-primary:active {
     transform: translateY(0);
+}
+
+.btn-cta-primary:focus {
+    outline: none;
+    box-shadow: 0 4px 15px rgba(99,102,241,0.3), var(--focus-ring);
+}
+
+.btn-cta-primary:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: var(--focus-ring-offset);
 }
 
 .btn-cta-primary:disabled {
@@ -72,6 +83,7 @@ body[data-theme="dark"] .btn-cta-primary:hover:not(:disabled) {
     text-align: center;
     white-space: nowrap;
     text-decoration: none;
+    position: relative;
 }
 
 .btn-cta-secondary:hover:not(:disabled) {
@@ -82,6 +94,16 @@ body[data-theme="dark"] .btn-cta-primary:hover:not(:disabled) {
 
 .btn-cta-secondary:active {
     transform: translateY(0);
+}
+
+.btn-cta-secondary:focus {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+.btn-cta-secondary:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: var(--focus-ring-offset);
 }
 
 .btn-cta-secondary:disabled {
@@ -178,4 +200,30 @@ body[data-theme="dark"] .btn-outline {
 body[data-theme="dark"] .btn-outline:hover:not(:disabled) {
     background: var(--primary-light);
     color: var(--bg);
+}
+
+/* ========================================
+   MOBILE BREAKPOINTS - CTA SIZING
+   ======================================== */
+
+/* Mobile (768px and below) - enforce 44px minimum touch targets */
+@media (max-width: 768px) {
+    .btn-cta-primary,
+    .btn-cta-secondary,
+    .btn {
+        min-height: 44px;
+        padding: 12px 24px;
+    }
+    
+    .btn-cta-primary.btn-lg,
+    .btn-cta-secondary.btn-lg {
+        min-height: 48px;
+        padding: 16px 32px;
+    }
+    
+    .btn-cta-primary.btn-sm,
+    .btn-cta-secondary.btn-sm {
+        min-height: 44px;
+        padding: 12px 20px;
+    }
 }

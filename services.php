@@ -157,14 +157,14 @@ $materials = $CONTENT['materials'];
                     <h4>Преимущества:</h4>
                     <ul>
                         <?php foreach ($tech['pros'] as $pro): ?>
-                        <li><i class="fas fa-plus-circle" style="color: var(--success);"></i> <?= htmlspecialchars($pro) ?></li>
+                        <li><i class="fas fa-plus-circle icon-success"></i> <?= htmlspecialchars($pro) ?></li>
                         <?php endforeach; ?>
                     </ul>
                     
                     <h4>Недостатки:</h4>
                     <ul>
                         <?php foreach ($tech['cons'] as $con): ?>
-                        <li><i class="fas fa-minus-circle" style="color: var(--danger);"></i> <?= htmlspecialchars($con) ?></li>
+                        <li><i class="fas fa-minus-circle icon-danger"></i> <?= htmlspecialchars($con) ?></li>
                         <?php endforeach; ?>
                     </ul>
                     
