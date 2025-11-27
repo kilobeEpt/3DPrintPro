@@ -147,10 +147,12 @@ $site = $CONTENT['site'];
                 <p style="color: var(--text-secondary);">
                     Подписывайтесь на Telegram, чтобы не пропустить запуск блога
                 </p>
-                <a href="<?= $site['telegram'] ?>" target="_blank" class="btn btn-primary" style="margin-top: 20px; text-decoration: none;">
-                    <i class="fab fa-telegram"></i>
-                    Подписаться на Telegram
-                </a>
+                <div class="btn-cta-wrapper">
+                    <a href="<?= $site['telegram'] ?>" target="_blank" class="btn-cta-primary">
+                        <i class="fab fa-telegram"></i>
+                        Подписаться на Telegram
+                    </a>
+                </div>
             </div>
         </div>
     </section>
@@ -175,12 +177,12 @@ $site = $CONTENT['site'];
             <div class="content-wrapper" style="text-align: center;">
                 <h2>Есть вопрос о 3D печати?</h2>
                 <p>Напишите нам — ответим в блоге или лично в Telegram</p>
-                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
-                    <a href="contact.php" class="btn btn-primary">
+                <div class="cta-buttons">
+                    <a href="contact.php" class="btn-cta-primary">
                         <i class="fas fa-envelope"></i>
                         Задать вопрос
                     </a>
-                    <a href="<?= $site['telegram'] ?>" target="_blank" class="btn btn-outline">
+                    <a href="<?= $site['telegram'] ?>" target="_blank" class="btn-cta-secondary">
                         <i class="fab fa-telegram"></i>
                         Написать в Telegram
                     </a>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTA Component Test - 3D Print Pro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cta-components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            padding: 40px;
+            background: var(--bg);
+            color: var(--text);
+        }
+        .test-section {
+            margin-bottom: 60px;
+            padding: 30px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg-secondary);
+        }
+        .test-section h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        .test-row {
+            margin-bottom: 30px;
+        }
+        .test-row h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+        .checklist {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: var(--radius);
+        }
+        .checklist li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checklist li::before {
+            content: "☐";
+            font-size: 20px;
+            color: var(--primary);
+        }
+        #themeToggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <button id="themeToggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i> Toggle Theme
+    </button>
+
+    <h1 style="margin-bottom: 40px;">CTA Component Test Suite</h1>
+
+    <!-- Test 1: CTA Primary Buttons -->
+    <div class="test-section">
+        <h2>1. CTA Primary Buttons (.btn-cta-primary)</h2>
+        
+        <div class="test-row">
+            <h3>Default Size (48px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn-cta-primary">
+                    <i class="fas fa-cube"></i>
+                    Заказать 3D печать
+                </a>
+                <a href="#" class="btn-cta-primary">
+                    <i class="fas fa-envelope"></i>
+                    Связаться
+                </a>
+                <button class="btn-cta-primary" disabled>
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Отправка...
+                </button>
+            </div>
+        </div>
+
+        <div class="test-row">
+            <h3>Large Size (56px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn-cta-primary btn-lg">
+                    <i class="fas fa-cube"></i>
+                    Заказать 3D печать
+                </a>
+                <a href="#" class="btn-cta-primary btn-lg">
+                    <i class="fas fa-paper-plane"></i>
+                    Отправить заявку
+                </a>
+            </div>
+        </div>
+
+        <div class="test-row">
+            <h3>Small Size (44px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn-cta-primary btn-sm">
+                    <i class="fas fa-info"></i>
+                    Узнать больше
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test 2: CTA Secondary Buttons -->
+    <div class="test-section">
+        <h2>2. CTA Secondary Buttons (.btn-cta-secondary)</h2>
+        
+        <div class="test-row">
+            <h3>Default Size (48px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn-cta-secondary">
+                    <i class="fas fa-phone"></i>
+                    Связаться с нами
+                </a>
+                <a href="#" class="btn-cta-secondary">
+                    <i class="fab fa-telegram"></i>
+                    Написать в Telegram
+                </a>
+                <button class="btn-cta-secondary" disabled>
+                    Недоступно
+                </button>
+            </div>
+        </div>
+
+        <div class="test-row">
+            <h3>Large Size (56px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn-cta-secondary btn-lg">
+                    <i class="fas fa-phone"></i>
+                    Связаться с нами
+                </a>
+            </div>
+        </div>
+
+        <div class="test-row">
+            <h3>Small Size (44px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn-cta-secondary btn-sm">
+                    <i class="fab fa-telegram"></i>
+                    Telegram
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test 3: CTA Button Wrapper -->
+    <div class="test-section">
+        <h2>3. CTA Button Wrappers (.cta-buttons, .btn-cta-wrapper)</h2>
+        
+        <div class="test-row">
+            <h3>Using .cta-buttons</h3>
+            <div class="cta-buttons">
+                <a href="#" class="btn-cta-primary">
+                    <i class="fas fa-cube"></i>
+                    Заказать 3D печать
+                </a>
+                <a href="#" class="btn-cta-secondary">
+                    <i class="fas fa-phone"></i>
+                    Связаться
+                </a>
+                <a href="#" class="btn-cta-secondary">
+                    <i class="fab fa-telegram"></i>
+                    Telegram
+                </a>
+            </div>
+        </div>
+
+        <div class="test-row">
+            <h3>Using .btn-cta-wrapper</h3>
+            <div class="btn-cta-wrapper">
+                <a href="#" class="btn-cta-primary btn-lg">
+                    <i class="fas fa-cube"></i>
+                    Заказать 3D печать
+                </a>
+                <a href="#" class="btn-cta-secondary btn-lg">
+                    <i class="fas fa-envelope"></i>
+                    Написать нам
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test 4: Existing Button Classes -->
+    <div class="test-section">
+        <h2>4. Existing Button Classes (Backward Compatibility)</h2>
+        
+        <div class="test-row">
+            <h3>.btn .btn-primary (44px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-arrow-right"></i>
+                    Заказать 3D печать
+                </a>
+            </div>
+        </div>
+
+        <div class="test-row">
+            <h3>.btn .btn-outline (44px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn btn-outline">
+                    <i class="fas fa-info"></i>
+                    Наши работы
+                </a>
+            </div>
+        </div>
+
+        <div class="test-row">
+            <h3>.btn .btn-primary .btn-lg (56px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn btn-primary btn-lg">
+                    <i class="fas fa-paper-plane"></i>
+                    Заказать 3D печать
+                </a>
+            </div>
+        </div>
+
+        <div class="test-row">
+            <h3>.btn .btn-outline .btn-sm (40px min-height)</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="#" class="btn btn-outline btn-sm">
+                    <i class="fab fa-telegram"></i>
+                    Telegram
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test 5: Icon Consistency -->
+    <div class="test-section">
+        <h2>5. Icon Consistency & Spacing</h2>
+        
+        <div class="test-row">
+            <h3>Various Font Awesome Icons</h3>
+            <div class="cta-buttons">
+                <a href="#" class="btn-cta-primary">
+                    <i class="fas fa-cube"></i>
+                    Cube Icon
+                </a>
+                <a href="#" class="btn-cta-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Plane Icon
+                </a>
+                <a href="#" class="btn-cta-primary">
+                    <i class="fas fa-envelope"></i>
+                    Envelope Icon
+                </a>
+                <a href="#" class="btn-cta-secondary">
+                    <i class="fab fa-telegram"></i>
+                    Telegram Icon
+                </a>
+                <a href="#" class="btn-cta-secondary">
+                    <i class="fas fa-phone"></i>
+                    Phone Icon
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="test-section">
+        <h2>Visual Test Checklist</h2>
+        <div class="checklist">
+            <ol style="list-style: none; padding: 0;">
+                <li>All buttons have minimum 44px touch target height (48px for CTA)</li>
+                <li>Icon spacing is consistent (10px gap)</li>
+                <li>Icons are same size as text (1em)</li>
+                <li>Primary CTAs have gradient background and shadow</li>
+                <li>Secondary CTAs have outline/border style</li>
+                <li>Hover states work correctly (translateY, box-shadow)</li>
+                <li>Disabled state shows reduced opacity (0.6)</li>
+                <li>Dark theme provides good contrast (test with toggle)</li>
+                <li>All buttons have proper border-radius</li>
+                <li>Text is never truncated or wrapped</li>
+                <li>Buttons wrap properly on mobile (flex-wrap)</li>
+                <li>Size modifiers (.btn-lg, .btn-sm) work correctly</li>
+                <li>No text-decoration underlines on links</li>
+                <li>Font weight is 600 (semi-bold)</li>
+                <li>Transition animations are smooth (0.3s)</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
+            
+            const icon = document.querySelector('#themeToggle i');
+            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Measure button heights on load
+        window.addEventListener('load', function() {
+            console.log('=== CTA Component Height Measurements ===');
+            
+            const measurements = [
+                { selector: '.btn-cta-primary:not(.btn-lg):not(.btn-sm)', expected: 48 },
+                { selector: '.btn-cta-primary.btn-lg', expected: 56 },
+                { selector: '.btn-cta-primary.btn-sm', expected: 44 },
+                { selector: '.btn-cta-secondary:not(.btn-lg):not(.btn-sm)', expected: 48 },
+                { selector: '.btn:not(.btn-lg):not(.btn-sm):not(.btn-cta-primary):not(.btn-cta-secondary)', expected: 44 },
+                { selector: '.btn.btn-lg', expected: 56 },
+                { selector: '.btn.btn-sm', expected: 40 }
+            ];
+
+            measurements.forEach(({ selector, expected }) => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    const height = element.offsetHeight;
+                    const status = height >= expected ? '✓' : '✗';
+                    console.log(`${status} ${selector}: ${height}px (expected: ${expected}px+)`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
