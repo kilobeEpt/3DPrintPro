@@ -141,6 +141,15 @@
     .footer-content {
         grid-template-columns: repeat(2, 1fr);
     }
+    
+    /* Utility class adjustments for tablet */
+    .layout-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--space-20);
+    }
+    
+    .gap-32 { gap: var(--space-24); }
+    .gap-40 { gap: var(--space-32); }
 }
 
 /* ========================================
@@ -337,6 +346,20 @@
     
     .navbar {
         padding: 16px 20px;
+    }
+    
+    /* Utility class adjustments for mobile */
+    .layout-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-16);
+    }
+    
+    .gap-24 { gap: var(--space-16); }
+    .gap-32 { gap: var(--space-20); }
+    .gap-40 { gap: var(--space-24); }
+    
+    .card-surface {
+        padding: var(--card-padding-sm);
     }
     
     /* Hero Section */
