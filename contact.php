@@ -123,83 +123,16 @@ $faq = $CONTENT['faq'];
         </div>
     </section>
 
-    <!-- Contact Form Section -->
-    <section class="contact-form-section">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Напишите нам</span>
-                <h2 class="section-title">Отправьте сообщение</h2>
-                <p class="section-description">
-                    Заполните форму, и мы свяжемся с вами в течение 15 минут
-                </p>
-            </div>
-            <div class="contact-form-wrapper">
-                <form class="contact-form" id="contactForm" onsubmit="handleFormSubmit(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="contactName">
-                                <i class="fas fa-user"></i>
-                                Ваше имя*
-                            </label>
-                            <input type="text" id="contactName" name="name" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="contactPhone">
-                                <i class="fas fa-phone"></i>
-                                Телефон*
-                            </label>
-                            <input type="tel" id="contactPhone" name="phone" class="form-control" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="contactEmail">
-                            <i class="fas fa-envelope"></i>
-                            Email
-                        </label>
-                        <input type="email" id="contactEmail" name="email" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="contactSubject">
-                            <i class="fas fa-tag"></i>
-                            Тема обращения
-                        </label>
-                        <select id="contactSubject" name="subject" class="form-control">
-                            <option value="order">Заказ 3D печати</option>
-                            <option value="modeling">3D моделирование</option>
-                            <option value="consultation">Консультация</option>
-                            <option value="partnership">Сотрудничество</option>
-                            <option value="other">Другое</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="contactMessage">
-                            <i class="fas fa-comment"></i>
-                            Сообщение*
-                        </label>
-                        <textarea id="contactMessage" name="message" class="form-control" rows="5" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="privacy" required>
-                            <span>Согласен на обработку персональных данных</span>
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">
-                        <i class="fas fa-paper-plane"></i>
-                        Отправить сообщение
-                    </button>
-                    <a href="<?= $site['telegram'] ?>" target="_blank" class="btn btn-outline btn-block" style="margin-top: 15px; text-decoration: none;">
-                        <i class="fab fa-telegram"></i>
-                        Написать в Telegram
-                    </a>
-                </form>
-            </div>
-        </div>
-    </section>
+    <?php
+    // Contact Form Section - using reusable order form include with custom parameters
+    $form_heading = 'Отправьте сообщение';
+    $form_description = 'Заполните форму, и мы свяжемся с вами в течение 15 минут';
+    $form_label = 'Напишите нам';
+    $section_id = 'contact-form-section';
+    $form_id = 'contactForm';
+    $preselect_service = 'Консультация';
+    include __DIR__ . '/includes/order-form.php';
+    ?>
 
     <!-- FAQ Section -->
     <section class="faq" id="faq">

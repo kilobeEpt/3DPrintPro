@@ -302,12 +302,9 @@ class StaticApp {
     }
 
     initForms() {
-        const contactForm = document.getElementById('contactForm');
+        // Note: contactForm and order-form are handled by order-form.js
+        // We only handle subscribeForm here
         const subscribeForm = document.getElementById('subscribeForm');
-
-        if (contactForm) {
-            contactForm.addEventListener('submit', (e) => this.handleFormSubmit(e));
-        }
 
         if (subscribeForm) {
             subscribeForm.addEventListener('submit', (e) => this.handleSubscribeSubmit(e));
