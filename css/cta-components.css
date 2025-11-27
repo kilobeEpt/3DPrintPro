@@ -1,0 +1,181 @@
+/* ========================================
+   CTA COMPONENT UTILITY CLASSES
+   Design tokens for consistent CTA buttons
+   44px+ touch targets, accessible contrast
+   ======================================== */
+
+/* CTA Primary Button */
+.btn-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 32px;
+    min-height: 48px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    white-space: nowrap;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+}
+
+.btn-cta-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+}
+
+.btn-cta-primary:active {
+    transform: translateY(0);
+}
+
+.btn-cta-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-cta-primary i {
+    font-size: 1em;
+    line-height: 1;
+}
+
+body[data-theme="dark"] .btn-cta-primary {
+    box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+}
+
+body[data-theme="dark"] .btn-cta-primary:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(99,102,241,0.5);
+}
+
+/* CTA Secondary Button (Ghost/Outline) */
+.btn-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 32px;
+    min-height: 48px;
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.btn-cta-secondary:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-cta-secondary:active {
+    transform: translateY(0);
+}
+
+.btn-cta-secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-cta-secondary i {
+    font-size: 1em;
+    line-height: 1;
+}
+
+body[data-theme="dark"] .btn-cta-secondary {
+    border-color: var(--primary-light);
+    color: var(--primary-light);
+}
+
+body[data-theme="dark"] .btn-cta-secondary:hover:not(:disabled) {
+    background: var(--primary-light);
+    color: var(--bg);
+}
+
+/* CTA Size Modifiers */
+.btn-cta-primary.btn-lg,
+.btn-cta-secondary.btn-lg {
+    padding: 20px 44px;
+    min-height: 56px;
+    font-size: 18px;
+    gap: 12px;
+}
+
+.btn-cta-primary.btn-sm,
+.btn-cta-secondary.btn-sm {
+    padding: 12px 24px;
+    min-height: 44px;
+    font-size: 14px;
+    gap: 8px;
+}
+
+/* CTA Button Wrapper */
+.cta-buttons,
+.btn-cta-wrapper,
+.service-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.cta-buttons a,
+.btn-cta-wrapper a,
+.service-actions a {
+    text-decoration: none;
+}
+
+/* Ensure existing .btn classes have proper touch targets */
+.btn {
+    min-height: 44px;
+    text-decoration: none;
+}
+
+.btn i {
+    font-size: 1em;
+    line-height: 1;
+}
+
+.btn-lg {
+    padding: 18px 40px;
+    min-height: 56px;
+    font-size: 18px;
+    gap: 12px;
+}
+
+.btn-sm {
+    min-height: 40px;
+    gap: 8px;
+}
+
+/* Dark theme enhancements for existing buttons */
+body[data-theme="dark"] .btn-primary {
+    box-shadow: 0 4px 15px rgba(99,102,241,0.4);
+}
+
+body[data-theme="dark"] .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(99,102,241,0.5);
+}
+
+body[data-theme="dark"] .btn-outline {
+    border-color: var(--primary-light);
+    color: var(--primary-light);
+}
+
+body[data-theme="dark"] .btn-outline:hover:not(:disabled) {
+    background: var(--primary-light);
+    color: var(--bg);
+}

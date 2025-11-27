@@ -221,16 +221,16 @@ $site = $CONTENT['site'];
             <div class="content-wrapper" style="text-align: center;">
                 <h2>Готовы убедиться в нашем качестве?</h2>
                 <p>Закажите пробную печать со скидкой 15% для новых клиентов</p>
-                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
-                    <a href="index.php#order-form-section" class="btn btn-primary">
+                <div class="cta-buttons">
+                    <a href="index.php#order-form-section" class="btn-cta-primary">
                         <i class="fas fa-cube"></i>
                         Заказать 3D печать
                     </a>
-                    <a href="contact.php" class="btn btn-outline">
+                    <a href="contact.php" class="btn-cta-secondary">
                         <i class="fas fa-phone"></i>
                         Связаться с нами
                     </a>
-                    <a href="<?= $site['telegram'] ?>" target="_blank" class="btn btn-outline">
+                    <a href="<?= $site['telegram'] ?>" target="_blank" class="btn-cta-secondary">
                         <i class="fab fa-telegram"></i>
                         Написать в Telegram
                     </a>
