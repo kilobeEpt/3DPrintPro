@@ -131,6 +131,7 @@ $faq = $CONTENT['faq'];
     $section_id = 'contact-form-section';
     $form_id = 'contactForm';
     $preselect_service = 'Консультация';
+    $cta_source = 'contact';
     include __DIR__ . '/includes/order-form.php';
     ?>
 

@@ -259,6 +259,7 @@ $stats = $CONTENT['stats'];
 
     <?php
     // Order Form Section - using reusable include
+    $cta_source = 'homepage';
     include __DIR__ . '/includes/order-form.php';
     ?>
 

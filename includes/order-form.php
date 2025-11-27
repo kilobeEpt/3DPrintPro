@@ -10,6 +10,7 @@
  * - $form_id: Form ID (default: "order-form")
  * - $preselect_service: Service to preselect (optional)
  * - $show_info: Show info message at bottom (default: true)
+ * - $cta_source: CTA source for analytics (default: "unknown") - e.g., "homepage", "contact"
  */
 
 // Set defaults
@@ -20,6 +21,11 @@ $section_id = $section_id ?? 'order-form-section';
 $form_id = $form_id ?? 'order-form';
 $preselect_service = $preselect_service ?? '';
 $show_info = $show_info ?? true;
+$cta_source = $cta_source ?? 'unknown';
+
+// Load helper text from content
+$CONTENT = $CONTENT ?? require __DIR__ . '/../data/content.php';
+$helpers = $CONTENT['form_helpers'] ?? [];
 ?>
 
 <section id="<?= htmlspecialchars($section_id) ?>" class="order-form-container">
@@ -32,7 +38,13 @@ $show_info = $show_info ?? true;
             </p>
         </div>
         <div class="order-form-wrapper">
+            <!-- Aria-live region for announcements -->
+            <div id="<?= htmlspecialchars($form_id) ?>-announcements" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+            
             <form id="<?= htmlspecialchars($form_id) ?>" method="POST" action="/order-submit.php" enctype="multipart/form-data">
+                <!-- Hidden field for analytics/CTA source tracking -->
+                <input type="hidden" name="cta_source" value="<?= htmlspecialchars($cta_source) ?>">
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="<?= htmlspecialchars($form_id) ?>Fio">
@@ -56,14 +68,22 @@ $show_info = $show_info ?? true;
                             <i class="fas fa-phone"></i>
                             Телефон*
                         </label>
-                        <input type="tel" id="<?= htmlspecialchars($form_id) ?>Phone" name="phone" class="form-control" placeholder="+7 (___) ___-__-__" required>
+                        <input type="tel" id="<?= htmlspecialchars($form_id) ?>Phone" name="phone" class="form-control" placeholder="+7 (___) ___-__-__" required aria-describedby="<?= htmlspecialchars($form_id) ?>PhoneHelp">
+                        <small id="<?= htmlspecialchars($form_id) ?>PhoneHelp" class="form-helper">
+                            <i class="fas fa-info-circle"></i>
+                            <?= htmlspecialchars($helpers['phone'] ?? 'Укажите номер телефона в любом формате') ?>
+                        </small>
                     </div>
                     <div class="form-group">
                         <label for="<?= htmlspecialchars($form_id) ?>Telegram">
                             <i class="fab fa-telegram"></i>
                             Telegram username*
                         </label>
-                        <input type="text" id="<?= htmlspecialchars($form_id) ?>Telegram" name="telegram" class="form-control" placeholder="username (без @)" required>
+                        <input type="text" id="<?= htmlspecialchars($form_id) ?>Telegram" name="telegram" class="form-control" placeholder="username (без @)" required aria-describedby="<?= htmlspecialchars($form_id) ?>TelegramHelp">
+                        <small id="<?= htmlspecialchars($form_id) ?>TelegramHelp" class="form-helper form-helper-info">
+                            <i class="fas fa-info-circle"></i>
+                            <?= htmlspecialchars($helpers['telegram'] ?? 'Введите username без символа @') ?>
+                        </small>
                     </div>
                 </div>
 
@@ -88,7 +108,11 @@ $show_info = $show_info ?? true;
                         <i class="fas fa-comment-alt"></i>
                         Описание проекта*
                     </label>
-                    <textarea id="<?= htmlspecialchars($form_id) ?>Description" name="description" class="form-control" rows="5" placeholder="Опишите ваш проект подробно (минимум 10 символов)" required></textarea>
+                    <textarea id="<?= htmlspecialchars($form_id) ?>Description" name="description" class="form-control" rows="5" placeholder="Опишите ваш проект подробно (минимум 10 символов)" required aria-describedby="<?= htmlspecialchars($form_id) ?>DescriptionHelp"></textarea>
+                    <small id="<?= htmlspecialchars($form_id) ?>DescriptionHelp" class="form-helper">
+                        <i class="fas fa-lightbulb"></i>
+                        <?= htmlspecialchars($helpers['description'] ?? 'Подробно опишите ваш проект: размеры, материал, количество, сроки') ?>
+                    </small>
                 </div>
 
                 <div class="form-group">
@@ -96,8 +120,11 @@ $show_info = $show_info ?? true;
                         <i class="fas fa-paperclip"></i>
                         Загрузить файл (опционально)
                     </label>
-                    <input type="file" id="<?= htmlspecialchars($form_id) ?>Files" name="files" class="form-control" accept=".stl,.obj,.gcode,.step,.stp,.3mf,.amf,.ply">
-                    <small class="form-text">Допустимые форматы: STL, OBJ, GCODE, STEP, 3MF, AMF, PLY (макс. 50 МБ)</small>
+                    <input type="file" id="<?= htmlspecialchars($form_id) ?>Files" name="files" class="form-control" accept=".stl,.obj,.gcode,.step,.stp,.3mf,.amf,.ply" aria-describedby="<?= htmlspecialchars($form_id) ?>FilesHelp">
+                    <small id="<?= htmlspecialchars($form_id) ?>FilesHelp" class="form-helper">
+                        <i class="fas fa-file-upload"></i>
+                        <?= htmlspecialchars($helpers['files'] ?? 'Допустимые форматы: STL, OBJ, GCODE, STEP, 3MF, AMF, PLY (макс. 50 МБ)') ?>
+                    </small>
                 </div>
 
                 <div class="form-group">

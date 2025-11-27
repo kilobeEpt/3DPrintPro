@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Form UX Polish Test - 3D Print Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+        }
+        
+        .test-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .test-checklist {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .test-section {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section h2 {
+            color: var(--primary);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .test-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: var(--bg);
+            border-left: 4px solid var(--border);
+            border-radius: 6px;
+        }
+        
+        .test-item.pass {
+            border-left-color: #28a745;
+        }
+        
+        .test-item.fail {
+            border-left-color: #dc3545;
+        }
+        
+        .test-item label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        
+        .test-item input[type="checkbox"] {
+            margin-top: 4px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .test-item code {
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .theme-toggle-test {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        #testThemeToggle {
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-toggle-test">
+        <button id="testThemeToggle">
+            <i class="fas fa-moon"></i>
+            Toggle Theme
+        </button>
+    </div>
+
+    <div class="test-header">
+        <h1>🎨 Order Form UX Polish Test</h1>
+        <p>Comprehensive testing checklist for order form improvements</p>
+    </div>
+
+    <div class="test-checklist">
+        <!-- Section 1: CSS Classes for Messages -->
+        <div class="test-section">
+            <h2>
+                <i class="fas fa-palette"></i>
+                1. CSS Classes for Success/Error Messages
+            </h2>
+            <p><strong>Goal:</strong> Messages should use <code>.form-message-success</code> and <code>.form-message-error</code> CSS classes instead of inline styles.</p>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Success message uses <code>.form-message-success</code> class with proper theme colors (green in light, translucent in dark)</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Error message uses <code>.form-message-error</code> class with proper theme colors (red in light, translucent in dark)</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Messages automatically adapt when switching between light/dark themes</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Messages have consistent spacing and border styles (left border accent)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 2: Helper Text -->
+        <div class="test-section">
+            <h2>
+                <i class="fas fa-question-circle"></i>
+                2. Helper Text Blocks
+            </h2>
+            <p><strong>Goal:</strong> Key inputs (phone, telegram, files, description) should have helpful guidance text.</p>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Phone field has helper text: "Укажите номер телефона в любом формате..."</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Telegram field has helper text: "Введите ваш Telegram username без символа @..."</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Files field has helper text: "Поддерживаемые форматы: STL, OBJ..."</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Description field has helper text about what to include</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Helper text loaded from <code>data/content.php</code> form_helpers array</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 3: Accessibility -->
+        <div class="test-section">
+            <h2>
+                <i class="fas fa-universal-access"></i>
+                3. Accessibility Features
+            </h2>
+            <p><strong>Goal:</strong> Form should be fully accessible with ARIA attributes and proper touch targets.</p>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Form has <code>aria-live</code> region for screen reader announcements</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Validation errors are announced via aria-live (check browser inspector)</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Success message is announced via aria-live region</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Error fields have <code>aria-invalid="true"</code> attribute</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Submit button has <code>aria-busy</code> attribute during submission</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Helper text linked via <code>aria-describedby</code></span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>All inputs have minimum 44px touch targets on mobile</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Submit button has minimum 48px height</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 4: CTA Source Tracking -->
+        <div class="test-section">
+            <h2>
+                <i class="fas fa-chart-line"></i>
+                4. CTA Source Tracking
+            </h2>
+            <p><strong>Goal:</strong> Hidden field captures where the form was submitted from for analytics.</p>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Form has hidden field: <code>&lt;input type="hidden" name="cta_source"&gt;</code></span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Homepage form sets <code>cta_source="homepage"</code></span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Contact page form sets <code>cta_source="contact"</code></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 5: Responsive Behavior -->
+        <div class="test-section">
+            <h2>
+                <i class="fas fa-mobile-alt"></i>
+                5. Responsive Tablet/Mobile Tweaks
+            </h2>
+            <p><strong>Goal:</strong> Form should look balanced on tablets with proper stacking order.</p>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Desktop (>1024px): Two-column layout for form fields</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Tablet (768px-1024px): Submit button and info box properly stacked</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Mobile (<768px): Single-column layout, all fields full-width</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Touch targets meet 44px minimum on all screen sizes</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 6: Theme Support -->
+        <div class="test-section">
+            <h2>
+                <i class="fas fa-adjust"></i>
+                6. Light/Dark Theme Support
+            </h2>
+            <p><strong>Goal:</strong> All form elements should work correctly in both themes.</p>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Success messages visible in both light and dark themes</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Error messages visible in both light and dark themes</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Helper text readable in both themes</span>
+                </label>
+            </div>
+            
+            <div class="test-item">
+                <label>
+                    <input type="checkbox">
+                    <span>Form controls properly styled in dark theme</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Show actual form for testing -->
+    <div style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+        <h2 style="text-align: center; color: var(--primary);">Test Form Below</h2>
+        <p style="text-align: center; color: var(--text-secondary);">Submit the form to test all features</p>
+    </div>
+
+    <script>
+        // Theme toggle for testing
+        const themeToggle = document.getElementById('testThemeToggle');
+        const body = document.body;
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
+            
+            const icon = themeToggle.querySelector('i');
+            if (newTheme === 'dark') {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+        });
+        
+        // Check/uncheck test items
+        document.querySelectorAll('.test-item input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const item = e.target.closest('.test-item');
+                if (e.target.checked) {
+                    item.classList.add('pass');
+                    item.classList.remove('fail');
+                } else {
+                    item.classList.remove('pass');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
