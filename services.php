@@ -33,106 +33,81 @@ $materials = $CONTENT['materials'];
     </section>
 
     <!-- Services Section -->
-    <section class="services-full">
+    <section class="services-section">
         <div class="container">
+            <div class="section-header">
+                <span class="section-label">Услуги</span>
+                <h2 class="section-title">Наши услуги 3D печати</h2>
+                <p class="section-description">
+                    Полный спектр услуг от печати до постобработки
+                </p>
+            </div>
             <div class="services-grid">
                 <?php foreach ($services as $service): ?>
-                <div class="service-card-full" id="<?= $service['id'] ?>">
-                    <div class="service-header">
-                        <div class="service-icon-large">
-                            <i class="fas <?= $service['icon'] ?>"></i>
-                        </div>
-                        <div>
-                            <h2><?= htmlspecialchars($service['name']) ?></h2>
-                            <p class="service-price-tag"><?= htmlspecialchars($service['price']) ?></p>
-                        </div>
+                <article class="service-card" id="<?= $service['id'] ?>" data-icon="<?= $service['icon'] ?>">
+                    <?php if (isset($service['featured']) && $service['featured']): ?>
+                    <span class="featured-badge">Популярно</span>
+                    <?php endif; ?>
+                    
+                    <div class="service-icon">
+                        <i class="fas <?= $service['icon'] ?>" aria-hidden="true"></i>
+                        <span class="sr-only"><?= htmlspecialchars($service['name']) ?></span>
                     </div>
+                    
+                    <h3><?= htmlspecialchars($service['name']) ?></h3>
+                    
+                    <?php if (!empty($service['price'])): ?>
+                    <div class="service-price"><?= htmlspecialchars($service['price']) ?></div>
+                    <?php endif; ?>
+                    
                     <p class="service-description"><?= htmlspecialchars($service['description']) ?></p>
                     
-                    <h3>Преимущества:</h3>
-                    <ul class="service-features-list">
-                        <?php foreach ($service['features'] as $feature): ?>
+                    <?php if (!empty($service['features'])): ?>
+                    <ul class="service-features">
+                        <?php 
+                        // Show first 4 features for compact layout
+                        $featuresSlice = array_slice($service['features'], 0, 4);
+                        foreach ($featuresSlice as $feature): 
+                        ?>
                         <li>
-                            <i class="fas fa-check-circle"></i>
-                            <?= htmlspecialchars($feature) ?>
-                        </li>
-                        <?php endforeach; ?>
-                    </ul>
-
-                    <?php if (isset($service['materials'])): ?>
-                    <h3>Материалы:</h3>
-                    <div class="service-tags">
-                        <?php foreach ($service['materials'] as $material): ?>
-                        <span class="tag"><?= htmlspecialchars($material) ?></span>
-                        <?php endforeach; ?>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (isset($service['software'])): ?>
-                    <h3>ПО для моделирования:</h3>
-                    <div class="service-tags">
-                        <?php foreach ($service['software'] as $soft): ?>
-                        <span class="tag"><?= htmlspecialchars($soft) ?></span>
-                        <?php endforeach; ?>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (isset($service['formats'])): ?>
-                    <h3>Поддерживаемые форматы:</h3>
-                    <div class="service-tags">
-                        <?php foreach ($service['formats'] as $format): ?>
-                        <span class="tag"><?= htmlspecialchars($format) ?></span>
-                        <?php endforeach; ?>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (isset($service['techniques'])): ?>
-                    <h3>Методы обработки:</h3>
-                    <ul class="service-features-list">
-                        <?php foreach ($service['techniques'] as $technique): ?>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <?= htmlspecialchars($technique) ?>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span><?= htmlspecialchars($feature) ?></span>
                         </li>
                         <?php endforeach; ?>
                     </ul>
                     <?php endif; ?>
-
-                    <?php if (isset($service['options'])): ?>
-                    <h3>Доступные варианты:</h3>
-                    <ul class="service-features-list">
-                        <?php foreach ($service['options'] as $option): ?>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <?= htmlspecialchars($option) ?>
-                        </li>
+                    
+                    <?php if (!empty($service['materials']) || !empty($service['software']) || !empty($service['formats'])): ?>
+                    <div class="service-tags">
+                        <?php 
+                        // Combine and show first 5 tags
+                        $tags = array_merge(
+                            $service['materials'] ?? [],
+                            $service['software'] ?? [],
+                            $service['formats'] ?? []
+                        );
+                        $tagsSlice = array_slice($tags, 0, 5);
+                        foreach ($tagsSlice as $tag): 
+                        ?>
+                        <span class="tag"><?= htmlspecialchars($tag) ?></span>
                         <?php endforeach; ?>
-                    </ul>
-                    <?php endif; ?>
-
-                    <?php if (isset($service['max_size']) || isset($service['layer_height'])): ?>
-                    <h3>Технические характеристики:</h3>
-                    <ul class="service-specs">
-                        <?php if (isset($service['max_size'])): ?>
-                        <li><strong>Макс. размер:</strong> <?= htmlspecialchars($service['max_size']) ?></li>
+                        <?php if (count($tags) > 5): ?>
+                        <span class="tag tag-more">+<?= count($tags) - 5 ?></span>
                         <?php endif; ?>
-                        <?php if (isset($service['layer_height'])): ?>
-                        <li><strong>Высота слоя:</strong> <?= htmlspecialchars($service['layer_height']) ?></li>
-                        <?php endif; ?>
-                    </ul>
+                    </div>
                     <?php endif; ?>
-
-                    <div class="service-actions">
+                    
+                    <div class="service-cta-block">
                         <a href="index.php#order-form-section" class="btn-cta-primary">
                             <i class="fas fa-cube"></i>
                             Заказать 3D печать
                         </a>
-                        <a href="<?= $site['telegram'] ?>" target="_blank" class="btn-cta-secondary">
+                        <a href="<?= $site['telegram'] ?>" target="_blank" rel="noopener" class="btn-cta-secondary">
                             <i class="fab fa-telegram"></i>
                             Написать в Telegram
                         </a>
                     </div>
-                </div>
+                </article>
                 <?php endforeach; ?>
             </div>
         </div>
