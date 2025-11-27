@@ -28,12 +28,12 @@ $services = $CONTENT['services'];
             <div class="footer-col">
                 <h4>Компания</h4>
                 <ul>
-                    <li><a href="about.html">О нас</a></li>
+                    <li><a href="about.php">О нас</a></li>
                     <li><a href="portfolio.php">Портфолио</a></li>
-                    <li><a href="why-us.html">Почему мы</a></li>
-                    <li><a href="districts.html">Районы доставки</a></li>
+                    <li><a href="why-us.php">Почему мы</a></li>
+                    <li><a href="districts.php">Районы доставки</a></li>
                     <li><a href="contact.php">Контакты</a></li>
-                    <li><a href="blog.html">Блог</a></li>
+                    <li><a href="blog.php">Блог</a></li>
                 </ul>
             </div>
             <div class="footer-col">
