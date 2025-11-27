@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Form Verification Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .test-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .test-item .icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        .test-item .label {
+            flex: 1;
+            color: #333;
+        }
+        .test-item .status {
+            font-weight: bold;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+        .status.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .summary h2 {
+            margin-bottom: 10px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Order Form Verification Test</h1>
+        <p class="subtitle">Automated tests to verify no duplicate order forms exist</p>
+
+        <div class="test-section">
+            <h2>📋 Test Checklist</h2>
+            <div id="test-results"></div>
+        </div>
+
+        <div class="summary" id="summary">
+            <h2>⏳ Running Tests...</h2>
+            <p>Please wait while verification is performed</p>
+        </div>
+
+        <button onclick="runTests()">🔄 Re-run Tests</button>
+
+        <div class="test-section">
+            <h2>📝 Test Details</h2>
+            <div class="details" id="details"></div>
+        </div>
+    </div>
+
+    <script>
+        function createTestItem(label, status, icon = '✓') {
+            return `
+                <div class="test-item">
+                    <span class="icon">${icon}</span>
+                    <span class="label">${label}</span>
+                    <span class="status ${status}">${status.toUpperCase()}</span>
+                </div>
+            `;
+        }
+
+        function logDetail(message) {
+            const details = document.getElementById('details');
+            details.innerHTML += message + '\n';
+        }
+
+        async function runTests() {
+            const results = document.getElementById('test-results');
+            const summary = document.getElementById('summary');
+            const details = document.getElementById('details');
+            
+            results.innerHTML = '';
+            details.innerHTML = '<strong>Test Execution Log:</strong>\n\n';
+            summary.innerHTML = '<h2>⏳ Running Tests...</h2><p>Please wait</p>';
+
+            let passCount = 0;
+            let failCount = 0;
+            let totalTests = 0;
+
+            // Test 1: Check for single order-form-section
+            totalTests++;
+            logDetail('[TEST 1] Checking for single order-form-section...');
+            try {
+                const response = await fetch('/index.php');
+                const html = await response.text();
+                const matches = (html.match(/id="order-form-section"/g) || []).length;
+                logDetail(`  Found ${matches} instance(s) of id="order-form-section"`);
+                
+                if (matches === 1) {
+                    results.innerHTML += createTestItem('Single order-form-section exists', 'pass', '✅');
+                    passCount++;
+                    logDetail('  ✅ PASS\n');
+                } else {
+                    results.innerHTML += createTestItem(`Found ${matches} order-form-section elements (expected 1)`, 'fail', '❌');
+                    failCount++;
+                    logDetail('  ❌ FAIL\n');
+                }
+            } catch (error) {
+                results.innerHTML += createTestItem('Error checking order-form-section', 'fail', '❌');
+                failCount++;
+                logDetail(`  ❌ ERROR: ${error.message}\n`);
+            }
+
+            // Test 2: Check for single order-form
+            totalTests++;
+            logDetail('[TEST 2] Checking for single order-form...');
+            try {
+                const response = await fetch('/index.php');
+                const html = await response.text();
+                const matches = (html.match(/id="order-form"/g) || []).length;
+                logDetail(`  Found ${matches} instance(s) of id="order-form"`);
+                
+                if (matches === 1) {
+                    results.innerHTML += createTestItem('Single order-form exists', 'pass', '✅');
+                    passCount++;
+                    logDetail('  ✅ PASS\n');
+                } else {
+                    results.innerHTML += createTestItem(`Found ${matches} order-form elements (expected 1)`, 'fail', '❌');
+                    failCount++;
+                    logDetail('  ❌ FAIL\n');
+                }
+            } catch (error) {
+                results.innerHTML += createTestItem('Error checking order-form', 'fail', '❌');
+                failCount++;
+                logDetail(`  ❌ ERROR: ${error.message}\n`);
+            }
+
+            // Test 3: Check for all 7 required fields
+            totalTests++;
+            logDetail('[TEST 3] Checking for all 7 required fields...');
+            try {
+                const response = await fetch('/index.php');
+                const html = await response.text();
+                const requiredFields = ['fio', 'email', 'phone', 'telegram', 'service', 'description', 'files'];
+                let foundFields = 0;
+                const missingFields = [];
+                
+                for (const field of requiredFields) {
+                    const pattern = new RegExp(`name="${field}"`, 'g');
+                    if (pattern.test(html)) {
+                        foundFields++;
+                        logDetail(`  ✓ Field "${field}" found`);
+                    } else {
+                        missingFields.push(field);
+                        logDetail(`  ✗ Field "${field}" NOT found`);
+                    }
+                }
+                
+                if (foundFields === 7) {
+                    results.innerHTML += createTestItem('All 7 required fields present', 'pass', '✅');
+                    passCount++;
+                    logDetail('  ✅ PASS\n');
+                } else {
+                    results.innerHTML += createTestItem(`Only ${foundFields}/7 fields found. Missing: ${missingFields.join(', ')}`, 'fail', '❌');
+                    failCount++;
+                    logDetail('  ❌ FAIL\n');
+                }
+            } catch (error) {
+                results.innerHTML += createTestItem('Error checking fields', 'fail', '❌');
+                failCount++;
+                logDetail(`  ❌ ERROR: ${error.message}\n`);
+            }
+
+            // Test 4: Check form action points to order-submit.php
+            totalTests++;
+            logDetail('[TEST 4] Checking form action...');
+            try {
+                const response = await fetch('/index.php');
+                const html = await response.text();
+                const hasCorrectAction = /action="\/order-submit\.php"/.test(html);
+                logDetail(`  Form action points to /order-submit.php: ${hasCorrectAction}`);
+                
+                if (hasCorrectAction) {
+                    results.innerHTML += createTestItem('Form action points to /order-submit.php', 'pass', '✅');
+                    passCount++;
+                    logDetail('  ✅ PASS\n');
+                } else {
+                    results.innerHTML += createTestItem('Form action does not point to /order-submit.php', 'fail', '❌');
+                    failCount++;
+                    logDetail('  ❌ FAIL\n');
+                }
+            } catch (error) {
+                results.innerHTML += createTestItem('Error checking form action', 'fail', '❌');
+                failCount++;
+                logDetail(`  ❌ ERROR: ${error.message}\n`);
+            }
+
+            // Test 5: Check order-submit.php exists
+            totalTests++;
+            logDetail('[TEST 5] Checking if order-submit.php exists...');
+            try {
+                const response = await fetch('/order-submit.php', { method: 'GET' });
+                logDetail(`  Response status: ${response.status}`);
+                
+                if (response.status !== 404) {
+                    results.innerHTML += createTestItem('order-submit.php endpoint exists', 'pass', '✅');
+                    passCount++;
+                    logDetail('  ✅ PASS\n');
+                } else {
+                    results.innerHTML += createTestItem('order-submit.php not found', 'fail', '❌');
+                    failCount++;
+                    logDetail('  ❌ FAIL\n');
+                }
+            } catch (error) {
+                results.innerHTML += createTestItem('Error checking order-submit.php', 'fail', '❌');
+                failCount++;
+                logDetail(`  ❌ ERROR: ${error.message}\n`);
+            }
+
+            // Test 6: Check order-form.js is loaded
+            totalTests++;
+            logDetail('[TEST 6] Checking if OrderFormHandler is available...');
+            try {
+                if (typeof OrderFormHandler === 'function') {
+                    results.innerHTML += createTestItem('OrderFormHandler JavaScript class available', 'pass', '✅');
+                    passCount++;
+                    logDetail('  ✅ PASS\n');
+                } else {
+                    results.innerHTML += createTestItem('OrderFormHandler not available', 'fail', '❌');
+                    failCount++;
+                    logDetail('  ❌ FAIL\n');
+                }
+            } catch (error) {
+                results.innerHTML += createTestItem('Error checking OrderFormHandler', 'fail', '❌');
+                failCount++;
+                logDetail(`  ❌ ERROR: ${error.message}\n`);
+            }
+
+            // Update summary
+            const percentage = Math.round((passCount / totalTests) * 100);
+            if (failCount === 0) {
+                summary.innerHTML = `
+                    <h2>✅ All Tests Passed!</h2>
+                    <p>${passCount}/${totalTests} tests passed (${percentage}%)</p>
+                    <p>No duplicate order forms found. System is working correctly.</p>
+                `;
+            } else {
+                summary.innerHTML = `
+                    <h2>⚠️ Some Tests Failed</h2>
+                    <p>${passCount}/${totalTests} tests passed (${percentage}%)</p>
+                    <p>${failCount} test(s) failed. Please review details below.</p>
+                `;
+            }
+
+            logDetail(`\n=== FINAL SUMMARY ===`);
+            logDetail(`Total Tests: ${totalTests}`);
+            logDetail(`Passed: ${passCount}`);
+            logDetail(`Failed: ${failCount}`);
+            logDetail(`Success Rate: ${percentage}%`);
+        }
+
+        // Run tests on page load
+        window.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>
