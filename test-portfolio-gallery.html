@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Gallery Test - 3D Print Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        /* Test page styles */
+        body {
+            padding: 20px;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .test-header {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .test-header h1 {
+            margin: 0 0 15px 0;
+            color: var(--primary);
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .test-btn {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .test-btn:hover {
+            background: var(--primary-light);
+        }
+
+        .checklist {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 30px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .checklist h2 {
+            margin: 0 0 20px 0;
+            color: var(--text);
+        }
+
+        .checklist-item {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body data-page="test">
+    <div class="container">
+        <div class="test-header">
+            <h1>🎨 Portfolio Gallery Test Page</h1>
+            <p>Complete implementation test for filterable portfolio gallery with modal slider</p>
+            <div class="test-controls">
+                <button class="test-btn" id="toggleTheme">Toggle Dark Mode</button>
+                <button class="test-btn" id="testModal">Open Modal Directly</button>
+                <button class="test-btn" id="testKeyboard">Test Keyboard Nav</button>
+            </div>
+        </div>
+
+        <!-- Portfolio Section -->
+        <section class="portfolio-full">
+            <div class="container">
+                <h2 style="text-align: center; margin-bottom: 30px;">Portfolio Gallery</h2>
+                
+                <div class="portfolio-filters" role="group" aria-label="Фильтр портфолио">
+                    <button class="filter-btn active" data-filter="all" aria-pressed="true">Все работы</button>
+                    <button class="filter-btn" data-filter="промышленность" aria-pressed="false">Промышленность</button>
+                    <button class="filter-btn" data-filter="ювелирные изделия" aria-pressed="false">Ювелирные изделия</button>
+                    <button class="filter-btn" data-filter="электроника" aria-pressed="false">Электроника</button>
+                    <button class="filter-btn" data-filter="архитектура" aria-pressed="false">Архитектура</button>
+                    <button class="filter-btn" data-filter="медицина" aria-pressed="false">Медицина</button>
+                    <button class="filter-btn" data-filter="хобби и игры" aria-pressed="false">Хобби и игры</button>
+                </div>
+
+                <div class="portfolio-grid" id="portfolioGrid">
+                    <!-- Portfolio Card 1 -->
+                    <article class="portfolio-card" 
+                             data-category="промышленность" 
+                             data-index="0"
+                             data-title="Функциональный прототип механизма"
+                             data-description="Рабочий прототип механизма с подвижными частями для тестирования конструкции."
+                             data-technology="FDM (PETG)"
+                             data-completion="3 дня"
+                             data-image="https://via.placeholder.com/600x400/4F46E5/FFFFFF?text=Prototype+Mechanism">
+                        <div class="portfolio-image-container">
+                            <img src="https://via.placeholder.com/600x400/4F46E5/FFFFFF?text=Prototype+Mechanism" 
+                                 alt="Функциональный прототип механизма" 
+                                 class="portfolio-image" 
+                                 loading="lazy">
+                        </div>
+                        <span class="portfolio-category-badge">Промышленность</span>
+                        <div class="portfolio-overlay">
+                            <div class="portfolio-overlay-content">
+                                <h3 class="portfolio-title">Функциональный прототип механизма</h3>
+                                <p class="portfolio-tech">
+                                    <i class="fas fa-cog" aria-hidden="true"></i>
+                                    FDM (PETG)
+                                </p>
+                                <p class="portfolio-desc">Рабочий прототип механизма с подвижными частями для тестирования конструкции.</p>
+                                <button class="portfolio-view-btn" aria-label="Смотреть проект: Функциональный прототип механизма">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                    Смотреть
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Portfolio Card 2 -->
+                    <article class="portfolio-card" 
+                             data-category="ювелирные изделия" 
+                             data-index="1"
+                             data-title="Ювелирная восковка для литья"
+                             data-description="Высокодетализированная модель кольца для последующего литья в металл."
+                             data-technology="SLA (Castable Resin)"
+                             data-completion="1 день"
+                             data-image="https://via.placeholder.com/600x400/10B981/FFFFFF?text=Jewelry+Wax">
+                        <div class="portfolio-image-container">
+                            <img src="https://via.placeholder.com/600x400/10B981/FFFFFF?text=Jewelry+Wax" 
+                                 alt="Ювелирная восковка для литья" 
+                                 class="portfolio-image" 
+                                 loading="lazy">
+                        </div>
+                        <span class="portfolio-category-badge">Ювелирные изделия</span>
+                        <div class="portfolio-overlay">
+                            <div class="portfolio-overlay-content">
+                                <h3 class="portfolio-title">Ювелирная восковка для литья</h3>
+                                <p class="portfolio-tech">
+                                    <i class="fas fa-cog" aria-hidden="true"></i>
+                                    SLA (Castable Resin)
+                                </p>
+                                <p class="portfolio-desc">Высокодетализированная модель кольца для последующего литья в металл.</p>
+                                <button class="portfolio-view-btn" aria-label="Смотреть проект: Ювелирная восковка для литья">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                    Смотреть
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Portfolio Card 3 -->
+                    <article class="portfolio-card" 
+                             data-category="электроника" 
+                             data-index="2"
+                             data-title="Корпус для электроники"
+                             data-description="Прочный корпус для устройства с точными посадочными местами под компоненты."
+                             data-technology="FDM (ABS)"
+                             data-completion="2 дня"
+                             data-image="https://via.placeholder.com/600x400/F59E0B/FFFFFF?text=Electronics+Case">
+                        <div class="portfolio-image-container">
+                            <img src="https://via.placeholder.com/600x400/F59E0B/FFFFFF?text=Electronics+Case" 
+                                 alt="Корпус для электроники" 
+                                 class="portfolio-image" 
+                                 loading="lazy">
+                        </div>
+                        <span class="portfolio-category-badge">Электроника</span>
+                        <div class="portfolio-overlay">
+                            <div class="portfolio-overlay-content">
+                                <h3 class="portfolio-title">Корпус для электроники</h3>
+                                <p class="portfolio-tech">
+                                    <i class="fas fa-cog" aria-hidden="true"></i>
+                                    FDM (ABS)
+                                </p>
+                                <p class="portfolio-desc">Прочный корпус для устройства с точными посадочными местами под компоненты.</p>
+                                <button class="portfolio-view-btn" aria-label="Смотреть проект: Корпус для электроники">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                    Смотреть
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Portfolio Card 4 -->
+                    <article class="portfolio-card" 
+                             data-category="архитектура" 
+                             data-index="3"
+                             data-title="Архитектурный макет здания"
+                             data-description="Детальный макет многоэтажного здания с ландшафтом."
+                             data-technology="SLA (Standard Resin)"
+                             data-completion="5 дней"
+                             data-image="https://via.placeholder.com/600x400/3B82F6/FFFFFF?text=Architecture+Model">
+                        <div class="portfolio-image-container">
+                            <img src="https://via.placeholder.com/600x400/3B82F6/FFFFFF?text=Architecture+Model" 
+                                 alt="Архитектурный макет здания" 
+                                 class="portfolio-image" 
+                                 loading="lazy">
+                        </div>
+                        <span class="portfolio-category-badge">Архитектура</span>
+                        <div class="portfolio-overlay">
+                            <div class="portfolio-overlay-content">
+                                <h3 class="portfolio-title">Архитектурный макет здания</h3>
+                                <p class="portfolio-tech">
+                                    <i class="fas fa-cog" aria-hidden="true"></i>
+                                    SLA (Standard Resin)
+                                </p>
+                                <p class="portfolio-desc">Детальный макет многоэтажного здания с ландшафтом.</p>
+                                <button class="portfolio-view-btn" aria-label="Смотреть проект: Архитектурный макет здания">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                    Смотреть
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Portfolio Card 5 -->
+                    <article class="portfolio-card" 
+                             data-category="медицина" 
+                             data-index="4"
+                             data-title="Анатомическая модель"
+                             data-description="Точная анатомическая модель для медицинского обучения."
+                             data-technology="SLA (Dental Resin)"
+                             data-completion="2 дня"
+                             data-image="https://via.placeholder.com/600x400/EF4444/FFFFFF?text=Medical+Model">
+                        <div class="portfolio-image-container">
+                            <img src="https://via.placeholder.com/600x400/EF4444/FFFFFF?text=Medical+Model" 
+                                 alt="Анатомическая модель" 
+                                 class="portfolio-image" 
+                                 loading="lazy">
+                        </div>
+                        <span class="portfolio-category-badge">Медицина</span>
+                        <div class="portfolio-overlay">
+                            <div class="portfolio-overlay-content">
+                                <h3 class="portfolio-title">Анатомическая модель</h3>
+                                <p class="portfolio-tech">
+                                    <i class="fas fa-cog" aria-hidden="true"></i>
+                                    SLA (Dental Resin)
+                                </p>
+                                <p class="portfolio-desc">Точная анатомическая модель для медицинского обучения.</p>
+                                <button class="portfolio-view-btn" aria-label="Смотреть проект: Анатомическая модель">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                    Смотреть
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Portfolio Card 6 -->
+                    <article class="portfolio-card" 
+                             data-category="хобби и игры" 
+                             data-index="5"
+                             data-title="Фигурка персонажа"
+                             data-description="Детализированная фигурка с профессиональной покраской."
+                             data-technology="SLA + покраска"
+                             data-completion="4 дня"
+                             data-image="https://via.placeholder.com/600x400/8B5CF6/FFFFFF?text=Character+Figurine">
+                        <div class="portfolio-image-container">
+                            <img src="https://via.placeholder.com/600x400/8B5CF6/FFFFFF?text=Character+Figurine" 
+                                 alt="Фигурка персонажа" 
+                                 class="portfolio-image" 
+                                 loading="lazy">
+                        </div>
+                        <span class="portfolio-category-badge">Хобби и игры</span>
+                        <div class="portfolio-overlay">
+                            <div class="portfolio-overlay-content">
+                                <h3 class="portfolio-title">Фигурка персонажа</h3>
+                                <p class="portfolio-tech">
+                                    <i class="fas fa-cog" aria-hidden="true"></i>
+                                    SLA + покраска
+                                </p>
+                                <p class="portfolio-desc">Детализированная фигурка с профессиональной покраской.</p>
+                                <button class="portfolio-view-btn" aria-label="Смотреть проект: Фигурка персонажа">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                    Смотреть
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Test Checklist -->
+        <div class="checklist">
+            <h2>✅ Test Checklist</h2>
+            <div class="checklist-item">
+                <input type="checkbox" id="check1">
+                <label for="check1"><strong>Grid Layout:</strong> Three columns on desktop (≥1200px)</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check2">
+                <label for="check2"><strong>Grid Layout:</strong> Two columns on tablet (768-1024px)</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check3">
+                <label for="check3"><strong>Grid Layout:</strong> One column on mobile (<768px)</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check4">
+                <label for="check4"><strong>Image Aspect Ratio:</strong> All images maintain 4:3 ratio</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check5">
+                <label for="check5"><strong>Hover Effect:</strong> Overlay reveals on desktop hover</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check6">
+                <label for="check6"><strong>Overlay Content:</strong> Title, tech, description, CTA button visible</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check7">
+                <label for="check7"><strong>Filter Buttons:</strong> Active state shows aria-pressed="true"</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check8">
+                <label for="check8"><strong>Filtering:</strong> Cards animate smoothly when filtering</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check9">
+                <label for="check9"><strong>Modal Open:</strong> Clicking card opens full-screen modal</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check10">
+                <label for="check10"><strong>Modal Content:</strong> Image, title, description, metadata populate</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check11">
+                <label for="check11"><strong>Modal Counter:</strong> Shows "1 / 6" format correctly</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check12">
+                <label for="check12"><strong>Navigation:</strong> Prev/Next buttons work (wrap around)</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check13">
+                <label for="check13"><strong>Keyboard:</strong> Escape key closes modal</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check14">
+                <label for="check14"><strong>Keyboard:</strong> Left/Right arrows navigate between items</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check15">
+                <label for="check15"><strong>Keyboard:</strong> Tab key cycles through focusable elements (focus trap)</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check16">
+                <label for="check16"><strong>Touch:</strong> Swipe gestures work on mobile (test in DevTools)</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check17">
+                <label for="check17"><strong>Backdrop Click:</strong> Clicking outside modal closes it</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check18">
+                <label for="check18"><strong>Body Scroll:</strong> Background doesn't scroll when modal open</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check19">
+                <label for="check19"><strong>Dark Theme:</strong> Modal colors work in dark mode</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check20">
+                <label for="check20"><strong>Console:</strong> No JavaScript errors in browser console</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check21">
+                <label for="check21"><strong>Focus States:</strong> All interactive elements show focus indicators</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check22">
+                <label for="check22"><strong>Accessibility:</strong> Screen reader announces modal correctly</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check23">
+                <label for="check23"><strong>Mobile:</strong> Touch targets meet 44px minimum on mobile</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check24">
+                <label for="check24"><strong>Performance:</strong> Animations are smooth (no jank)</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check25">
+                <label for="check25"><strong>Browser Support:</strong> Works in Chrome, Firefox, Safari</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal portfolio-modal" id="portfolioModal" role="dialog" aria-modal="true" aria-labelledby="portfolioModalTitle">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content portfolio-modal-content">
+            <button class="modal-close portfolio-modal-close" aria-label="Закрыть модальное окно">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            
+            <div class="portfolio-modal-body">
+                <div class="portfolio-modal-image-wrapper">
+                    <img src="" alt="" id="portfolioModalImage" class="portfolio-modal-image">
+                    <button class="portfolio-nav-btn portfolio-nav-prev" aria-label="Предыдущий проект">
+                        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+                    <button class="portfolio-nav-btn portfolio-nav-next" aria-label="Следующий проект">
+                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+                
+                <div class="portfolio-modal-info">
+                    <div class="portfolio-modal-counter" id="portfolioModalCounter">1 / 6</div>
+                    <h2 id="portfolioModalTitle" class="portfolio-modal-title">Заголовок проекта</h2>
+                    <div class="portfolio-modal-meta">
+                        <span class="portfolio-modal-tech">
+                            <i class="fas fa-cog" aria-hidden="true"></i>
+                            <span id="portfolioModalTech">Технология</span>
+                        </span>
+                        <span class="portfolio-modal-time">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                            <span id="portfolioModalTime">Время выполнения</span>
+                        </span>
+                    </div>
+                    <p id="portfolioModalDescription" class="portfolio-modal-description">Описание проекта</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/portfolio-gallery.js"></script>
+    <script>
+        // Test controls
+        document.getElementById('toggleTheme').addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            document.body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        document.getElementById('testModal').addEventListener('click', () => {
+            const gallery = new PortfolioGallery();
+            gallery.modal = document.getElementById('portfolioModal');
+            gallery.portfolioCards = document.querySelectorAll('.portfolio-card');
+            gallery.openModal(0);
+        });
+
+        document.getElementById('testKeyboard').addEventListener('click', () => {
+            alert('Modal open: Press ESC to close, ← → arrows to navigate, TAB to cycle focus');
+        });
+    </script>
+</body>
+</html>
