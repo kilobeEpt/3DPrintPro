@@ -10,6 +10,7 @@ class OrderFormHandler {
         this.form = document.getElementById(formId);
         this.submitButton = null;
         this.originalButtonText = '';
+        this.ariaLiveRegion = null;
         
         if (this.form) {
             this.init();
@@ -23,6 +24,9 @@ class OrderFormHandler {
         if (this.submitButton) {
             this.originalButtonText = this.submitButton.innerHTML;
         }
+        
+        // Get aria-live region for announcements
+        this.ariaLiveRegion = document.getElementById(this.form.id + '-announcements');
         
         // Add honeypot field (hidden)
         this.addHoneypotField();
@@ -155,18 +159,21 @@ class OrderFormHandler {
     }
     
     displayErrors(errors) {
+        const errorCount = Object.keys(errors).length;
+        
         for (const [field, message] of Object.entries(errors)) {
             const input = this.form.querySelector(`[name="${field}"]`);
             
             if (input) {
                 // Add error class to input
                 input.classList.add('error');
+                input.setAttribute('aria-invalid', 'true');
                 
                 // Create error message element
                 const errorElement = document.createElement('div');
                 errorElement.className = 'error-message';
                 errorElement.textContent = message;
-                errorElement.style.cssText = 'color: #e74c3c; font-size: 12px; margin-top: 5px;';
+                errorElement.setAttribute('role', 'alert');
                 
                 // Insert after input or its parent
                 const parent = input.closest('.form-group') || input.parentElement;
@@ -174,14 +181,18 @@ class OrderFormHandler {
             }
         }
         
+        // Announce to screen readers
+        this.announce(`Найдено ошибок: ${errorCount}. Пожалуйста, исправьте ошибки в форме.`);
+        
         // Show notification
         this.showNotification('Пожалуйста, исправьте ошибки в форме', 'error');
     }
     
     clearErrors() {
-        // Remove error classes
+        // Remove error classes and aria-invalid
         this.form.querySelectorAll('.error').forEach(el => {
             el.classList.remove('error');
+            el.removeAttribute('aria-invalid');
         });
         
         // Remove error messages
@@ -200,30 +211,31 @@ class OrderFormHandler {
         // Scroll to top
         this.form.scrollIntoView({ behavior: 'smooth', block: 'start' });
         
-        // Show detailed success message
-        const successHtml = `
-            <div style="padding: 20px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #155724; margin: 0 0 10px 0;">
+        // Show detailed success message with CSS classes
+        const successDiv = document.createElement('div');
+        successDiv.className = 'form-message form-message-success';
+        successDiv.setAttribute('role', 'alert');
+        successDiv.innerHTML = `
+            <div>
+                <h3>
                     <i class="fas fa-check-circle"></i>
                     Спасибо! Заявка отправлена
                 </h3>
-                <p style="color: #155724; margin: 0;">
+                <p>
                     Мы получили вашу заявку и свяжемся с вами в ближайшее время.
                 </p>
             </div>
         `;
         
         // Insert success message before form
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = successHtml;
-        this.form.parentElement.insertBefore(tempDiv.firstElementChild, this.form);
+        this.form.parentElement.insertBefore(successDiv, this.form);
+        
+        // Announce to screen readers
+        this.announce('Заявка успешно отправлена. Мы свяжемся с вами в ближайшее время.');
         
         // Remove success message after 10 seconds
         setTimeout(() => {
-            const successMessage = this.form.parentElement.querySelector('[style*="background: #d4edda"]');
-            if (successMessage) {
-                successMessage.remove();
-            }
+            successDiv.remove();
         }, 10000);
     }
     
@@ -245,9 +257,23 @@ class OrderFormHandler {
         if (loading) {
             this.submitButton.disabled = true;
             this.submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+            this.submitButton.setAttribute('aria-busy', 'true');
         } else {
             this.submitButton.disabled = false;
             this.submitButton.innerHTML = this.originalButtonText;
+            this.submitButton.setAttribute('aria-busy', 'false');
+        }
+    }
+    
+    announce(message) {
+        // Announce message to screen readers via aria-live region
+        if (this.ariaLiveRegion) {
+            this.ariaLiveRegion.textContent = message;
+            
+            // Clear after 5 seconds to allow re-announcement if needed
+            setTimeout(() => {
+                this.ariaLiveRegion.textContent = '';
+            }, 5000);
         }
     }
     
