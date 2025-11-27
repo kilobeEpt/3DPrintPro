@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services Grid Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cta-components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            padding: 40px 0;
+            background: var(--bg);
+            color: var(--text);
+        }
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg);
+            border: 2px solid var(--border);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+        }
+        .test-controls button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .viewport-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 16px;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="test-controls">
+        <button onclick="toggleTheme()">Toggle Theme</button>
+        <button onclick="setWidth(1440)">Desktop (1440px)</button>
+        <button onclick="setWidth(1024)">Tablet Large (1024px)</button>
+        <button onclick="setWidth(768)">Tablet (768px)</button>
+        <button onclick="setWidth(414)">Mobile (414px)</button>
+        <button onclick="setWidth('100%')">Full Width</button>
+    </div>
+    
+    <div class="viewport-indicator">
+        <span id="viewport-size">Viewport: <span id="current-width"></span></span>
+    </div>
+
+    <section class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Услуги</span>
+                <h2 class="section-title">Наши услуги 3D печати</h2>
+                <p class="section-description">
+                    Полный спектр услуг от печати до постобработки
+                </p>
+            </div>
+            <div class="services-grid">
+                <!-- FDM Printing -->
+                <article class="service-card" data-icon="fa-print">
+                    <span class="featured-badge">Популярно</span>
+                    
+                    <div class="service-icon">
+                        <i class="fas fa-print" aria-hidden="true"></i>
+                        <span class="sr-only">FDM 3D печать</span>
+                    </div>
+                    
+                    <h3>FDM 3D печать</h3>
+                    
+                    <div class="service-price">от 150 ₽/час</div>
+                    
+                    <p class="service-description">Печать методом послойного наплавления пластика. Идеально для прототипов и функциональных деталей.</p>
+                    
+                    <ul class="service-features">
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Широкий выбор материалов (PLA, ABS, PETG, TPU)</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Размеры печати до 300×300×400 мм</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Быстрое изготовление от 1 часа</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Оптимальное соотношение цена/качество</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="service-tags">
+                        <span class="tag">PLA</span>
+                        <span class="tag">ABS</span>
+                        <span class="tag">PETG</span>
+                        <span class="tag">TPU</span>
+                        <span class="tag">Nylon</span>
+                    </div>
+                    
+                    <div class="service-cta-block">
+                        <a href="#order" class="btn-cta-primary">
+                            <i class="fas fa-cube"></i>
+                            Заказать 3D печать
+                        </a>
+                        <a href="#telegram" class="btn-cta-secondary">
+                            <i class="fab fa-telegram"></i>
+                            Написать в Telegram
+                        </a>
+                    </div>
+                </article>
+
+                <!-- SLA Printing -->
+                <article class="service-card" data-icon="fa-gem">
+                    <span class="featured-badge">Популярно</span>
+                    
+                    <div class="service-icon">
+                        <i class="fas fa-gem" aria-hidden="true"></i>
+                        <span class="sr-only">SLA 3D печать</span>
+                    </div>
+                    
+                    <h3>SLA 3D печать</h3>
+                    
+                    <div class="service-price">от 300 ₽/час</div>
+                    
+                    <p class="service-description">Фотополимерная печать с высокой детализацией. Идеально для ювелирных изделий, стоматологии и мелких деталей.</p>
+                    
+                    <ul class="service-features">
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Высочайшая точность и детализация</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Гладкая поверхность без видимых слоев</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Прозрачные и цветные фотополимеры</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Специализированные смолы для разных задач</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="service-tags">
+                        <span class="tag">Standard Resin</span>
+                        <span class="tag">Tough Resin</span>
+                        <span class="tag">Flexible Resin</span>
+                        <span class="tag">Castable Resin</span>
+                        <span class="tag">Dental Resin</span>
+                    </div>
+                    
+                    <div class="service-cta-block">
+                        <a href="#order" class="btn-cta-primary">
+                            <i class="fas fa-cube"></i>
+                            Заказать 3D печать
+                        </a>
+                        <a href="#telegram" class="btn-cta-secondary">
+                            <i class="fab fa-telegram"></i>
+                            Написать в Telegram
+                        </a>
+                    </div>
+                </article>
+
+                <!-- 3D Modeling -->
+                <article class="service-card" data-icon="fa-cube">
+                    <span class="featured-badge">Популярно</span>
+                    
+                    <div class="service-icon">
+                        <i class="fas fa-cube" aria-hidden="true"></i>
+                        <span class="sr-only">3D моделирование</span>
+                    </div>
+                    
+                    <h3>3D моделирование</h3>
+                    
+                    <div class="service-price">от 500 ₽/час</div>
+                    
+                    <p class="service-description">Создание 3D моделей по вашим эскизам, чертежам, фотографиям или идеям.</p>
+                    
+                    <ul class="service-features">
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Моделирование по чертежам и эскизам</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Реверс-инжиниринг готовых изделий</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Оптимизация моделей для печати</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Техническая документация</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="service-tags">
+                        <span class="tag">Fusion 360</span>
+                        <span class="tag">SolidWorks</span>
+                        <span class="tag">Blender</span>
+                        <span class="tag">ZBrush</span>
+                        <span class="tag">STL</span>
+                        <span class="tag tag-more">+4</span>
+                    </div>
+                    
+                    <div class="service-cta-block">
+                        <a href="#order" class="btn-cta-primary">
+                            <i class="fas fa-cube"></i>
+                            Заказать 3D печать
+                        </a>
+                        <a href="#telegram" class="btn-cta-secondary">
+                            <i class="fab fa-telegram"></i>
+                            Написать в Telegram
+                        </a>
+                    </div>
+                </article>
+
+                <!-- SLS Printing (no featured badge) -->
+                <article class="service-card" data-icon="fa-atom">
+                    <div class="service-icon">
+                        <i class="fas fa-atom" aria-hidden="true"></i>
+                        <span class="sr-only">SLS 3D печать</span>
+                    </div>
+                    
+                    <h3>SLS 3D печать</h3>
+                    
+                    <div class="service-price">от 500 ₽/час</div>
+                    
+                    <p class="service-description">Лазерное спекание порошкового нейлона. Прочные, термостойкие детали без поддержек.</p>
+                    
+                    <ul class="service-features">
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Высокая прочность и термостойкость</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Не требует поддержек при печати</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Сложная геометрия без ограничений</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Производственное качество деталей</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="service-tags">
+                        <span class="tag">PA12 (Nylon)</span>
+                        <span class="tag">PA11</span>
+                        <span class="tag">PA12-GF</span>
+                    </div>
+                    
+                    <div class="service-cta-block">
+                        <a href="#order" class="btn-cta-primary">
+                            <i class="fas fa-cube"></i>
+                            Заказать 3D печать
+                        </a>
+                        <a href="#telegram" class="btn-cta-secondary">
+                            <i class="fab fa-telegram"></i>
+                            Написать в Telegram
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Post-processing (no featured badge) -->
+                <article class="service-card" data-icon="fa-magic">
+                    <div class="service-icon">
+                        <i class="fas fa-magic" aria-hidden="true"></i>
+                        <span class="sr-only">Постобработка</span>
+                    </div>
+                    
+                    <h3>Постобработка</h3>
+                    
+                    <div class="service-price">от 200 ₽/час</div>
+                    
+                    <p class="service-description">Финишная обработка 3D печатных изделий: шлифовка, покраска, химическая обработка, сборка.</p>
+                    
+                    <ul class="service-features">
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Шлифовка и полировка поверхностей</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Покраска акриловыми и эмалевыми красками</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Химическая обработка (ацетоном, дихлорметаном)</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Склейка и сборка сложных конструкций</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="service-tags">
+                        <span class="tag">Механическая обработка</span>
+                        <span class="tag">Химическая полировка</span>
+                        <span class="tag">Покраска</span>
+                    </div>
+                    
+                    <div class="service-cta-block">
+                        <a href="#order" class="btn-cta-primary">
+                            <i class="fas fa-cube"></i>
+                            Заказать 3D печать
+                        </a>
+                        <a href="#telegram" class="btn-cta-secondary">
+                            <i class="fab fa-telegram"></i>
+                            Написать в Telegram
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Color Printing (no featured badge) -->
+                <article class="service-card" data-icon="fa-palette">
+                    <div class="service-icon">
+                        <i class="fas fa-palette" aria-hidden="true"></i>
+                        <span class="sr-only">Цветная 3D печать</span>
+                    </div>
+                    
+                    <h3>Цветная 3D печать</h3>
+                    
+                    <div class="service-price">от 200 ₽/час</div>
+                    
+                    <p class="service-description">Печать многоцветных изделий или покраска готовых моделей в любой цвет.</p>
+                    
+                    <ul class="service-features">
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Широкая палитра цветов</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Многоцветная печать на одном принтере</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Профессиональная покраска моделей</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span>Нанесение надписей и логотипов</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="service-tags">
+                        <span class="tag">Разноцветный пластик</span>
+                        <span class="tag">Покраска акрилом</span>
+                        <span class="tag">Аэрография</span>
+                    </div>
+                    
+                    <div class="service-cta-block">
+                        <a href="#order" class="btn-cta-primary">
+                            <i class="fas fa-cube"></i>
+                            Заказать 3D печать
+                        </a>
+                        <a href="#telegram" class="btn-cta-secondary">
+                            <i class="fab fa-telegram"></i>
+                            Написать в Telegram
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
+        }
+
+        function setWidth(width) {
+            const container = document.querySelector('.container');
+            if (width === '100%') {
+                container.style.maxWidth = 'none';
+                container.style.width = '100%';
+            } else {
+                container.style.maxWidth = width + 'px';
+                container.style.width = '100%';
+            }
+            updateViewportIndicator();
+        }
+
+        function updateViewportIndicator() {
+            const width = window.innerWidth;
+            document.getElementById('current-width').textContent = width + 'px';
+        }
+
+        window.addEventListener('resize', updateViewportIndicator);
+        updateViewportIndicator();
+    </script>
+</body>
+</html>
