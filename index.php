@@ -257,104 +257,10 @@ $stats = $CONTENT['stats'];
         </div>
     </section>
 
-    <!-- Order Form Section -->
-    <section id="order-form-section" class="order-form-container">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Заказать</span>
-                <h2 class="section-title">Заказать 3D печать</h2>
-                <p class="section-description">
-                    Заполните форму, и мы свяжемся с вами в ближайшее время
-                </p>
-            </div>
-            <div class="order-form-wrapper">
-                <form id="order-form" method="POST" action="/order-submit.php" enctype="multipart/form-data">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="orderFio">
-                                <i class="fas fa-user"></i>
-                                ФИО*
-                            </label>
-                            <input type="text" id="orderFio" name="fio" class="form-control" placeholder="Ваше полное имя" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="orderEmail">
-                                <i class="fas fa-envelope"></i>
-                                Email*
-                            </label>
-                            <input type="email" id="orderEmail" name="email" class="form-control" placeholder="your@email.com" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="orderPhone">
-                                <i class="fas fa-phone"></i>
-                                Телефон*
-                            </label>
-                            <input type="tel" id="orderPhone" name="phone" class="form-control" placeholder="+7 (___) ___-__-__" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="orderTelegram">
-                                <i class="fab fa-telegram"></i>
-                                Telegram username*
-                            </label>
-                            <input type="text" id="orderTelegram" name="telegram" class="form-control" placeholder="username (без @)" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="orderService">
-                            <i class="fas fa-cogs"></i>
-                            Услуга*
-                        </label>
-                        <select id="orderService" name="service" class="form-control" required>
-                            <option value="">Выберите услугу</option>
-                            <option value="FDM печать">FDM печать</option>
-                            <option value="SLA печать">SLA печать</option>
-                            <option value="SLS печать">SLS печать</option>
-                            <option value="Цветная печать">Цветная печать</option>
-                            <option value="Постобработка">Постобработка</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="orderDescription">
-                            <i class="fas fa-comment-alt"></i>
-                            Описание проекта*
-                        </label>
-                        <textarea id="orderDescription" name="description" class="form-control" rows="5" placeholder="Опишите ваш проект подробно (минимум 10 символов)" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="orderFiles">
-                            <i class="fas fa-paperclip"></i>
-                            Загрузить файл (опционально)
-                        </label>
-                        <input type="file" id="orderFiles" name="files" class="form-control" accept=".stl,.obj,.gcode,.step,.stp,.3mf,.amf,.ply">
-                        <small class="form-text">Допустимые форматы: STL, OBJ, GCODE, STEP, 3MF, AMF, PLY (макс. 50 МБ)</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="privacy" required>
-                            <span>Согласен на обработку персональных данных</span>
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-block btn-submit">
-                        <i class="fas fa-paper-plane"></i>
-                        Отправить заказ
-                    </button>
-
-                    <div class="order-form-info">
-                        <i class="fas fa-info-circle"></i>
-                        <p>Мы свяжемся с вами в течение 15 минут для уточнения деталей заказа</p>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
+    <?php
+    // Order Form Section - using reusable include
+    include __DIR__ . '/includes/order-form.php';
+    ?>
 
     <?php include __DIR__ . '/includes/footer.php'; ?>
 </body>
