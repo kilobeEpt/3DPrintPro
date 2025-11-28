@@ -12,10 +12,10 @@ $services = $CONTENT['services'];
                     <span><?= $site['name'] ?></span>
                 </div>
                 <p>Профессиональная 3D печать в <?= $site['city'] ?> с <?= $site['year_founded'] ?> года</p>
-                <div style="margin-top: 15px;">
-                    <a href="<?= $site['telegram'] ?>" target="_blank" class="btn btn-outline btn-sm">
+                <div class="btn-cta-wrapper">
+                    <a href="<?= $site['telegram'] ?>" target="_blank" rel="noopener" class="btn-cta-secondary btn-sm">
                         <i class="fab fa-telegram"></i>
-                        Наш Telegram
+                        <span>Наш Telegram</span>
                     </a>
                 </div>
             </div>

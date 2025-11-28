@@ -40,11 +40,12 @@ $stats = $CONTENT['stats'];
                     FDM, SLA, SLS технологии. Печать от 1 часа. 15+ материалов. <?= $stats['years'] ?> лет опыта.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#order-form-section" class="btn btn-primary">
+                    <a href="#order-form-section" class="btn-cta-primary btn-lg">
+                        <i class="fas fa-cube"></i>
                         <span>Заказать 3D печать</span>
-                        <i class="fas fa-arrow-right"></i>
                     </a>
-                    <a href="portfolio.php" class="btn btn-outline">
+                    <a href="portfolio.php" class="btn-cta-secondary btn-lg">
+                        <i class="fas fa-images"></i>
                         <span>Наши работы</span>
                     </a>
                 </div>
@@ -121,7 +122,7 @@ $stats = $CONTENT['stats'];
                 }
                 foreach ($displayServices as $service):
                 ?>
-                <a href="index.php#order-form-section" class="service-card <?= $service['featured'] ? 'featured' : '' ?>" style="text-decoration: none; color: inherit; display: block;">
+                <a href="index.php#order-form-section" class="service-card <?= $service['featured'] ? 'featured' : '' ?>">
                     <?php if ($service['featured']): ?>
                     <div class="featured-badge">Популярное</div>
                     <?php endif; ?>
@@ -138,10 +139,10 @@ $stats = $CONTENT['stats'];
                 </a>
                 <?php endforeach; ?>
             </div>
-            <div style="text-align: center; margin-top: 30px;">
-                <a href="services.php" class="btn btn-outline">
+            <div class="cta-buttons">
+                <a href="services.php" class="btn-cta-secondary">
+                    <i class="fas fa-th-large"></i>
                     <span>Все услуги</span>
-                    <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -171,10 +172,10 @@ $stats = $CONTENT['stats'];
                 <?php endforeach; ?>
             </div>
             
-            <div style="text-align: center; margin-top: 30px;">
-                <a href="portfolio.php" class="btn btn-outline">
+            <div class="cta-buttons">
+                <a href="portfolio.php" class="btn-cta-secondary">
+                    <i class="fas fa-images"></i>
                     <span>Смотреть все работы</span>
-                    <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>
