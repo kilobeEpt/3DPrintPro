@@ -51,14 +51,22 @@ $helpers = $CONTENT['form_helpers'] ?? [];
                             <i class="fas fa-user"></i>
                             ФИО*
                         </label>
-                        <input type="text" id="<?= htmlspecialchars($form_id) ?>Fio" name="fio" class="form-control" placeholder="Ваше полное имя" required>
+                        <input type="text" id="<?= htmlspecialchars($form_id) ?>Fio" name="fio" class="form-control" placeholder="Ваше полное имя" required aria-describedby="<?= htmlspecialchars($form_id) ?>FioHelp">
+                        <small id="<?= htmlspecialchars($form_id) ?>FioHelp" class="form-helper">
+                            <i class="fas fa-info-circle"></i>
+                            <?= htmlspecialchars($helpers['fio'] ?? 'Укажите ваше имя и фамилию') ?>
+                        </small>
                     </div>
                     <div class="form-group">
                         <label for="<?= htmlspecialchars($form_id) ?>Email">
                             <i class="fas fa-envelope"></i>
                             Email*
                         </label>
-                        <input type="email" id="<?= htmlspecialchars($form_id) ?>Email" name="email" class="form-control" placeholder="your@email.com" required>
+                        <input type="email" id="<?= htmlspecialchars($form_id) ?>Email" name="email" class="form-control" placeholder="your@email.com" required aria-describedby="<?= htmlspecialchars($form_id) ?>EmailHelp">
+                        <small id="<?= htmlspecialchars($form_id) ?>EmailHelp" class="form-helper">
+                            <i class="fas fa-info-circle"></i>
+                            <?= htmlspecialchars($helpers['email'] ?? 'Введите действующий адрес электронной почты') ?>
+                        </small>
                     </div>
                 </div>
 
