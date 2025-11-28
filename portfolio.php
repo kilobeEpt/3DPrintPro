@@ -37,9 +37,9 @@ $categories = array_unique(array_map(fn($item) => $item['category'], $portfolio)
     <section class="portfolio-full">
         <div class="container">
             <div class="portfolio-filters" role="group" aria-label="Фильтр портфолио">
-                <button class="filter-btn active" data-filter="all" aria-pressed="true">Все работы</button>
+                <button type="button" class="filter-btn active" data-filter="all" aria-pressed="true">Все работы</button>
                 <?php foreach ($categories as $category): ?>
-                <button class="filter-btn" data-filter="<?= strtolower($category) ?>" aria-pressed="false"><?= htmlspecialchars($category) ?></button>
+                <button type="button" class="filter-btn" data-filter="<?= strtolower($category) ?>" aria-pressed="false"><?= htmlspecialchars($category) ?></button>
                 <?php endforeach; ?>
             </div>
 
