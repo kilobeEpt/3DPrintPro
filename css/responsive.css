@@ -158,6 +158,20 @@
     
     .gap-32 { gap: var(--space-24); }
     .gap-40 { gap: var(--space-32); }
+    
+    /* Contact layout - stack columns on tablet */
+    .contact-layout {
+        grid-template-columns: 1fr;
+        gap: var(--space-40);
+    }
+    
+    .contact-panel {
+        position: static;
+    }
+    
+    .map-embed {
+        height: 400px;
+    }
 }
 
 /* ========================================
@@ -368,6 +382,50 @@
     
     .card-surface {
         padding: var(--card-padding-sm);
+    }
+    
+    /* Contact page mobile optimizations */
+    .contact-main-section {
+        padding: var(--space-40) 0;
+    }
+    
+    .contact-layout {
+        gap: var(--space-32);
+    }
+    
+    .contact-panel {
+        padding: var(--card-padding-md);
+        gap: var(--space-24);
+    }
+    
+    .contact-actions-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-action-btn {
+        justify-content: flex-start;
+        padding-left: var(--space-20);
+    }
+    
+    .map-embed {
+        height: 300px;
+        min-height: 250px;
+    }
+    
+    .map-directions {
+        padding: var(--card-padding-md);
+    }
+    
+    .contact-info-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    /* Ensure touch targets */
+    .btn-cta-primary,
+    .btn-cta-secondary {
+        min-height: 44px;
     }
     
     /* Hero Section */
