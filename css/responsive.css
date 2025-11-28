@@ -178,6 +178,16 @@
     .map-embed {
         height: 400px;
     }
+    
+    /* Order form adjustments for tablet */
+    .order-form-wrapper {
+        padding: var(--space-32);
+    }
+    
+    #order-form .form-row,
+    #contactForm .form-row {
+        gap: var(--space-16);
+    }
 }
 
 /* ========================================
@@ -436,6 +446,23 @@
         font-size: 18px;
     }
     
+    /* Order form mobile optimizations */
+    .order-form-wrapper {
+        padding: var(--card-padding-md);
+    }
+    
+    #order-form .form-control,
+    #contactForm .form-control {
+        min-height: 44px;
+        padding: var(--space-12);
+    }
+    
+    #order-form .btn-submit,
+    #contactForm .btn-submit {
+        min-height: 44px;
+        padding: var(--space-12) var(--space-16);
+    }
+    
     /* Ensure touch targets */
     .btn-cta-primary,
     .btn-cta-secondary {
@@ -572,8 +599,21 @@
         grid-template-columns: 1fr;
     }
     
-    .form-row {
+    /* Order form stacking on small mobile */
+    .form-row,
+    #order-form .form-row,
+    #contactForm .form-row {
         grid-template-columns: 1fr;
+        gap: var(--space-16);
+    }
+    
+    .order-form-wrapper {
+        padding: var(--card-padding-sm);
+    }
+    
+    #order-form .form-group,
+    #contactForm .form-group {
+        margin-bottom: var(--space-16);
     }
     
     .hero-buttons {

@@ -3143,29 +3143,29 @@ body[data-theme="dark"] .about-badge {
     max-width: 800px;
     margin: 0 auto;
     background: var(--bg-secondary);
-    padding: 40px;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
+    padding: var(--space-40);
+    border-radius: var(--card-radius-lg);
+    box-shadow: var(--card-shadow);
 }
 
 #order-form .form-row,
 #contactForm .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: var(--space-20);
 }
 
 #order-form .form-group,
 #contactForm .form-group {
-    margin-bottom: 20px;
+    margin-bottom: var(--space-20);
 }
 
 #order-form .form-group label,
 #contactForm .form-group label {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
     font-weight: 500;
     color: var(--text);
 }
@@ -3179,9 +3179,10 @@ body[data-theme="dark"] .about-badge {
 #order-form .form-control,
 #contactForm .form-control {
     width: 100%;
-    padding: 14px;
+    padding: var(--space-12) var(--space-16);
+    min-height: 48px;
     border: 2px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--card-radius-sm);
     background: var(--bg);
     color: var(--text);
     font-size: 15px;
@@ -3213,20 +3214,20 @@ body[data-theme="dark"] .about-badge {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%236366f1' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 40px;
+    background-position: right var(--space-16) center;
+    padding-right: var(--space-40);
 }
 
 #order-form input[type="file"].form-control,
 #contactForm input[type="file"].form-control {
-    padding: 10px;
+    padding: var(--space-12);
     cursor: pointer;
 }
 
 #order-form .form-text,
 #contactForm .form-text {
     display: block;
-    margin-top: 6px;
+    margin-top: var(--space-8);
     font-size: 13px;
     color: var(--text-secondary);
 }
@@ -3235,7 +3236,7 @@ body[data-theme="dark"] .about-badge {
 #contactForm .checkbox-label {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: var(--space-12);
     cursor: pointer;
     user-select: none;
 }
@@ -3260,10 +3261,10 @@ body[data-theme="dark"] .about-badge {
 #contactForm .btn-submit {
     width: 100%;
     min-height: 48px;
-    padding: 16px;
+    padding: var(--space-16);
     font-size: 16px;
     font-weight: 600;
-    margin-top: 10px;
+    margin-top: var(--space-12);
     position: relative;
     overflow: hidden;
 }
@@ -3289,11 +3290,11 @@ body[data-theme="dark"] .about-badge {
 .order-form-info {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
+    gap: var(--space-12);
+    padding: var(--space-16);
     background: var(--bg-tertiary);
-    border-radius: var(--radius);
-    margin-top: 20px;
+    border-radius: var(--card-radius-sm);
+    margin-top: var(--space-20);
     border-left: 4px solid var(--info);
 }
 
@@ -3311,21 +3312,21 @@ body[data-theme="dark"] .about-badge {
 
 /* Form message blocks (success/error) */
 .form-message {
-    padding: 20px;
-    border-radius: var(--radius);
-    margin: 20px 0;
+    padding: var(--space-20);
+    border-radius: var(--card-radius-sm);
+    margin: var(--space-20) 0;
     animation: fadeInDown 0.4s ease;
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: var(--space-12);
 }
 
 .form-message h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 var(--space-12) 0;
     font-size: 1.1rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-8);
 }
 
 .form-message p {
@@ -3402,14 +3403,14 @@ body[data-theme="dark"] .form-message-error h3 {
 /* Helper text blocks */
 .form-helper {
     display: block;
-    margin-top: 6px;
+    margin-top: var(--space-8);
     font-size: 13px;
     color: var(--text-secondary);
     line-height: 1.5;
 }
 
 .form-helper i {
-    margin-right: 4px;
+    margin-right: var(--space-4);
     opacity: 0.7;
 }
 
