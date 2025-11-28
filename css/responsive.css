@@ -148,7 +148,8 @@
     }
     
     .portfolio-grid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-24);
     }
     
     .footer-content {
@@ -309,8 +310,12 @@
     }
     
     .portfolio-grid {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 24px;
+        grid-template-columns: 1fr;
+        gap: var(--space-20);
+    }
+    
+    .portfolio-card:hover {
+        transform: none !important;
     }
     
     .about-content {
@@ -604,6 +609,53 @@
     .filter-btn {
         padding: 8px 16px;
         font-size: 14px;
+        min-height: 44px;
+    }
+    
+    /* Portfolio Modal Mobile */
+    .portfolio-modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .portfolio-modal-body {
+        flex-direction: column;
+    }
+    
+    .portfolio-modal-image-wrapper {
+        flex: none;
+        height: 50vh;
+        min-height: 300px;
+    }
+    
+    .portfolio-modal-info {
+        flex: none;
+        padding: var(--space-24);
+        max-height: 45vh;
+    }
+    
+    .portfolio-modal-title {
+        font-size: 22px;
+    }
+    
+    .portfolio-modal-close {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+    
+    .portfolio-nav-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+    }
+    
+    .portfolio-nav-prev {
+        left: var(--space-8);
+    }
+    
+    .portfolio-nav-next {
+        right: var(--space-8);
     }
 }
 

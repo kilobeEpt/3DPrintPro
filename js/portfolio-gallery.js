@@ -21,6 +21,11 @@ class PortfolioGallery {
             return; // Not on portfolio page
         }
 
+        // Set initial visible state for all cards
+        this.portfolioCards.forEach(card => {
+            card.classList.add('portfolio-card--visible');
+        });
+
         this.initFilters();
         this.initCardClicks();
         this.initModalControls();

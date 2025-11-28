@@ -231,12 +231,14 @@ class StaticApp {
     }
 
     initPortfolioFilters() {
-        // Portfolio filtering now handled by portfolio-gallery.js
-        // This method kept for backward compatibility
-        const portfolioItems = document.querySelectorAll('.portfolio-item, .portfolio-card');
-        portfolioItems.forEach(item => {
-            item.classList.add('visible', 'portfolio-card--visible');
-        });
+        // Portfolio filtering on portfolio.php is now handled by portfolio-gallery.js
+        // This method only handles homepage portfolio items if present
+        const portfolioItems = document.querySelectorAll('.portfolio-item');
+        if (portfolioItems.length > 0) {
+            portfolioItems.forEach(item => {
+                item.classList.add('visible');
+            });
+        }
     }
 
     initTestimonials() {
