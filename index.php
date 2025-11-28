@@ -127,13 +127,14 @@ $stats = $CONTENT['stats'];
                     <div class="featured-badge">Популярное</div>
                     <?php endif; ?>
                     <div class="service-icon">
-                        <i class="fas <?= $service['icon'] ?>"></i>
+                        <i class="fas <?= $service['icon'] ?>" aria-hidden="true"></i>
+                        <span class="sr-only"><?= htmlspecialchars($service['name']) ?></span>
                     </div>
                     <h3><?= htmlspecialchars($service['name']) ?></h3>
                     <p><?= htmlspecialchars($service['description']) ?></p>
                     <ul class="service-features">
                         <?php foreach ($service['features'] as $feature): ?>
-                        <li><i class="fas fa-check"></i> <?= htmlspecialchars($feature) ?></li>
+                        <li><i class="fas fa-check-circle icon-success" aria-hidden="true"></i> <?= htmlspecialchars($feature) ?></li>
                         <?php endforeach; ?>
                     </ul>
                 </a>
