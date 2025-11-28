@@ -28,6 +28,43 @@
     --section-padding: 100px;
     --card-padding: 30px;
     
+    /* 8px Spacing Scale - Design Token System v1.0 */
+    --space-4: 4px;
+    --space-8: 8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-20: 20px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --space-40: 40px;
+    --space-48: 48px;
+    --space-56: 56px;
+    --space-64: 64px;
+    --space-72: 72px;
+    --space-80: 80px;
+    --space-88: 88px;
+    --space-96: 96px;
+    
+    /* Card & Surface Tokens */
+    --card-bg: #ffffff;
+    --card-surface: #f9fafb;
+    --card-border: #e5e7eb;
+    --card-shadow: 0 4px 6px rgba(0,0,0,0.07);
+    
+    /* Card Padding Scale */
+    --card-padding-sm: 16px;
+    --card-padding-md: 24px;
+    --card-padding-lg: 32px;
+    
+    /* Card Radius Scale */
+    --card-radius-sm: 8px;
+    --card-radius-md: 12px;
+    --card-radius-lg: 16px;
+    
+    /* Focus Rings (WCAG Compliant) */
+    --focus-ring: 0 0 0 3px rgba(99, 102, 241, 0.3);
+    --focus-ring-offset: 2px;
+    
     /* Transitions */
     --transition: all 0.3s ease;
     --transition-fast: all 0.15s ease;
@@ -65,6 +102,12 @@ body[data-theme="dark"] {
     --text-secondary: #cbd5e1;
     --text-light: #94a3b8;
     --border: #334155;
+    
+    /* Card & Surface Tokens (Dark Theme) */
+    --card-bg: #1e293b;
+    --card-surface: #334155;
+    --card-border: #475569;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 /* Reset */
@@ -1706,6 +1749,133 @@ body[data-theme="dark"] .about-badge {
 .hidden {
     display: none !important;
 }
+
+/* Typography Utilities */
+.text-muted {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.text-light {
+    color: var(--text-light);
+}
+
+.text-small {
+    font-size: 14px;
+}
+
+.text-large {
+    font-size: 18px;
+}
+
+.helper-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+.coord-text {
+    font-size: 14px;
+    color: var(--text-light);
+    font-family: 'Courier New', monospace;
+}
+
+/* Screen Reader Only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Layout Utilities */
+.layout-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-32);
+}
+
+/* Gap Utilities (8px spacing scale) */
+.gap-8 {
+    gap: var(--space-8);
+}
+
+.gap-16 {
+    gap: var(--space-16);
+}
+
+.gap-24 {
+    gap: var(--space-24);
+}
+
+.gap-32 {
+    gap: var(--space-32);
+}
+
+.gap-40 {
+    gap: var(--space-40);
+}
+
+/* Section Spacing */
+.section-spacing {
+    padding: var(--space-64) 0;
+}
+
+.section-spacing-sm {
+    padding: var(--space-40) 0;
+}
+
+.section-spacing-lg {
+    padding: var(--space-96) 0;
+}
+
+/* Card Utilities */
+.card-surface {
+    background: var(--card-surface);
+    border-radius: var(--card-radius-md);
+    padding: var(--card-padding-md);
+}
+
+.card-hover {
+    transition: var(--transition);
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.card-shadow {
+    box-shadow: var(--card-shadow);
+}
+
+.card-shadow-md {
+    box-shadow: var(--shadow-md);
+}
+
+/* Icon Utilities */
+.icon-success {
+    color: var(--success);
+}
+
+.icon-danger {
+    color: var(--danger);
+}
+
+.icon-info {
+    color: var(--info);
+}
+
+.icon-warning {
+    color: var(--warning);
+}
+
 
 .visible {
     display: block !important;
