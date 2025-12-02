@@ -23,7 +23,7 @@ $services = $CONTENT['services'];
                 <h4>Услуги</h4>
                 <ul id="footerServices">
                     <?php foreach (array_slice($services, 0, 4) as $service): ?>
-                    <li><a href="services.php#<?= $service['id'] ?>"><?= htmlspecialchars($service['name']) ?></a></li>
+                    <li><a href="services.php#<?= $service['slug'] ?>"><?= htmlspecialchars($service['name']) ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
