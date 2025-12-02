@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page Hero - 3D Print Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .test-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+        }
+        
+        .test-controls button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px 15px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .test-controls button:hover {
+            background: var(--primary-dark);
+        }
+        
+        .test-checklist {
+            background: var(--bg-secondary);
+            padding: 40px 20px;
+            margin-top: 20px;
+        }
+        
+        .test-checklist h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .checklist {
+            max-width: 800px;
+            margin: 0 auto;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: var(--card-bg);
+            border-radius: 6px;
+            border-left: 4px solid var(--border);
+        }
+        
+        .checklist li:before {
+            content: '☐ ';
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .example-section {
+            padding: 40px 20px;
+            margin: 20px 0;
+        }
+        
+        .example-section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Test Controls -->
+    <div class="test-controls">
+        <h4 style="margin-top: 0;">Theme Toggle</h4>
+        <button onclick="toggleTheme()">Switch Theme</button>
+        <button onclick="testFocus()">Test Focus States</button>
+    </div>
+
+    <!-- Example 1: Services Page Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <div class="breadcrumbs">
+                <a href="index.php">Главная</a>
+                <span>/</span>
+                <span>Услуги</span>
+            </div>
+            <h1>Услуги 3D печати в Омске</h1>
+            <p>Полный спектр услуг 3D печати: FDM, SLA, SLS технологии, 3D моделирование и постобработка</p>
+        </div>
+    </section>
+
+    <div class="example-section">
+        <h2>Example 1: Services Page Hero</h2>
+        <p style="text-align: center; color: var(--text-secondary);">
+            This example shows the page hero from services.php
+        </p>
+    </div>
+
+    <!-- Example 2: Portfolio Page Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <div class="breadcrumbs">
+                <a href="index.php">Главная</a>
+                <span>/</span>
+                <span>Портфолио</span>
+            </div>
+            <h1>Портфолио работ по 3D печати</h1>
+            <p>Примеры наших проектов в различных отраслях. Более 500 выполненных заказов</p>
+        </div>
+    </section>
+
+    <div class="example-section">
+        <h2>Example 2: Portfolio Page Hero</h2>
+        <p style="text-align: center; color: var(--text-secondary);">
+            This example shows the page hero from portfolio.php
+        </p>
+    </div>
+
+    <!-- Example 3: Contact Page Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <div class="breadcrumbs">
+                <a href="index.php">Главная</a>
+                <span>/</span>
+                <span>Контакты</span>
+            </div>
+            <h1>Контакты 3D Print Pro в Омске</h1>
+            <p>Свяжитесь с нами удобным способом — звоните, пишите или приезжайте к нам в офис</p>
+        </div>
+    </section>
+
+    <div class="example-section">
+        <h2>Example 3: Contact Page Hero</h2>
+        <p style="text-align: center; color: var(--text-secondary);">
+            This example shows the page hero from contact.php
+        </p>
+    </div>
+
+    <!-- Test Checklist -->
+    <section class="test-checklist">
+        <div class="container">
+            <h2>QA Testing Checklist</h2>
+            <ul class="checklist">
+                <li><strong>Visual Design:</strong> No white background stands out, clean theme-aware colors</li>
+                <li><strong>Light Theme:</strong> Page hero uses var(--bg) background, subtle border at bottom</li>
+                <li><strong>Dark Theme:</strong> Page hero background matches dark theme, enhanced contrast</li>
+                <li><strong>Breadcrumbs:</strong> Proper spacing (--space-8 gap), no harsh background</li>
+                <li><strong>Breadcrumbs Links:</strong> Text-secondary color, hover shows primary, underline on hover</li>
+                <li><strong>Breadcrumbs Focus:</strong> Visible focus ring with outline and box-shadow</li>
+                <li><strong>Typography H1:</strong> Responsive clamp(1.5rem → 2rem), proper line-height 1.2</li>
+                <li><strong>Typography P:</strong> Responsive clamp(1rem → 1.125rem), secondary color, line-height 1.6</li>
+                <li><strong>Spacing:</strong> Design tokens used (--space-64 vertical, --space-40 horizontal on desktop)</li>
+                <li><strong>Desktop (≥1024px):</strong> Padding --space-64 / --space-40, h1 2rem, p 1.125rem</li>
+                <li><strong>Tablet (768-1024px):</strong> Padding --space-48 / --space-32, reduced font sizes</li>
+                <li><strong>Mobile (≤768px):</strong> Padding --space-32 / --space-24, smaller fonts, reduced breadcrumb gap</li>
+                <li><strong>Breadcrumb Mobile:</strong> Font-size 0.8125rem, gap --space-4, margin-bottom --space-16</li>
+                <li><strong>Text Wrapping:</strong> Long breadcrumbs wrap properly without overflow</li>
+                <li><strong>Keyboard Navigation:</strong> Tab through breadcrumbs, focus states visible</li>
+                <li><strong>Theme Toggle:</strong> Seamless transition between light and dark themes</li>
+                <li><strong>Consistency:</strong> All three pages (services, portfolio, contact) look identical in structure</li>
+                <li><strong>No Gradient:</strong> No gradient background, simple clean design</li>
+                <li><strong>Border:</strong> 1px solid border at bottom using --card-border</li>
+                <li><strong>Dark Theme Border:</strong> Border uses rgba(255,255,255,0.1) for proper contrast</li>
+            </ul>
+        </div>
+    </section>
+
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            document.documentElement.setAttribute('data-theme', newTheme);
+            console.log('Theme switched to:', newTheme);
+        }
+
+        // Test focus states
+        function testFocus() {
+            const firstBreadcrumb = document.querySelector('.breadcrumbs a');
+            if (firstBreadcrumb) {
+                firstBreadcrumb.focus();
+                alert('Focus set on first breadcrumb link. Use Tab key to navigate through all breadcrumb links and observe focus rings.');
+            }
+        }
+
+        // Initialize with light theme
+        document.body.setAttribute('data-theme', 'light');
+        document.documentElement.setAttribute('data-theme', 'light');
+        
+        console.log('Page Hero Test Page Loaded');
+        console.log('Use the controls in the top-right to toggle theme and test focus states');
+    </script>
+</body>
+</html>
