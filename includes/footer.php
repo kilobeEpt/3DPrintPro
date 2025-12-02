@@ -70,7 +70,7 @@ $services = $CONTENT['services'];
         
         <div class="portfolio-modal-body">
             <div class="portfolio-modal-image-wrapper">
-                <img src="" alt="" id="portfolioModalImage" class="portfolio-modal-image">
+                <img src="" alt="" id="portfolioModalImage" class="portfolio-modal-image" decoding="async">
                 <button class="portfolio-nav-btn portfolio-nav-prev" aria-label="Предыдущий проект">
                     <i class="fas fa-chevron-left" aria-hidden="true"></i>
                 </button>

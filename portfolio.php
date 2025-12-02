@@ -55,9 +55,12 @@ $categories = array_unique(array_map(fn($item) => $item['category'], $portfolio)
                          data-image="<?= htmlspecialchars($item['image']) ?>">
                     <div class="portfolio-image-container">
                         <img src="<?= htmlspecialchars($item['image']) ?>" 
-                             alt="<?= htmlspecialchars($item['title']) ?>" 
+                             alt="<?= htmlspecialchars($item['title']) ?> - <?= htmlspecialchars($item['technology']) ?>" 
                              class="portfolio-image" 
-                             loading="lazy">
+                             loading="lazy"
+                             decoding="async"
+                             width="600"
+                             height="450">
                     </div>
                     <span class="portfolio-category-badge"><?= htmlspecialchars($item['category']) ?></span>
                     <div class="portfolio-overlay">

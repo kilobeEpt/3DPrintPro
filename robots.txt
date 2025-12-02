@@ -1,25 +1,31 @@
 User-agent: *
+Host: https://3dprint-omsk.ru
 Allow: /
 
-# Disallow admin panel
-Disallow: /admin.html
-Disallow: /admin
+# Disallow admin and API endpoints
+Disallow: /admin/
+Disallow: /admin.php
+Disallow: /api/
 
-# Allow all pages
+# Disallow storage and cache directories
+Disallow: /storage/
+Disallow: /vendor/
+
+# Allow public pages
 Allow: /index.php
-Allow: /index.html
 Allow: /services.php
 Allow: /portfolio.php
-Allow: /about.html
+Allow: /about.php
 Allow: /contact.php
-Allow: /blog.html
-Allow: /districts.html
-Allow: /why-us.html
+Allow: /blog.php
+Allow: /districts.php
+Allow: /why-us.php
 
-# Allow CSS and JS
+# Allow assets
 Allow: /css/
 Allow: /js/
+Allow: /images/
 Allow: /assets/
 
 # Sitemap
-Sitemap: https://3dprint-omsk.ru/sitemap.xml
+Sitemap: https://3dprint-omsk.ru/sitemap.php

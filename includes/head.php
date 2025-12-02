@@ -369,6 +369,12 @@ $is_last = ($index === $post_count - 1);
 <noscript><div><img src="https://mc.yandex.ru/watch/105404239" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
 
+<!-- Resource Hints for Performance -->
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://mc.yandex.ru" crossorigin>
+<link rel="dns-prefetch" href="https://mc.yandex.ru">
+
 <!-- Styles -->
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/cta-components.css">
