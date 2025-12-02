@@ -131,6 +131,8 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Compensate for fixed header */
+    padding-top: 70px;
 }
 
 img {
@@ -447,7 +449,7 @@ body[data-theme="dark"] .header {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    padding-top: 80px;
+    padding-top: 20px;
     position: relative;
     overflow: hidden;
 }

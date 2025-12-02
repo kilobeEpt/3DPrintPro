@@ -213,6 +213,11 @@
         --card-padding: 24px;
     }
     
+    /* Adjust body padding for smaller header on tablet */
+    body {
+        padding-top: 72px;
+    }
+    
     /* Hide top info strip on mobile */
     .top-info-strip {
         display: none !important;
@@ -399,6 +404,11 @@
         --card-padding: 20px;
     }
     
+    /* Adjust body padding for mobile header */
+    body {
+        padding-top: 60px;
+    }
+    
     .container {
         padding: 0 20px;
     }
@@ -504,7 +514,7 @@
     
     /* Hero Section */
     .hero {
-        padding-top: 100px;
+        padding-top: 20px;
         min-height: auto;
     }
     
