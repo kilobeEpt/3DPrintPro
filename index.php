@@ -37,7 +37,7 @@ $stats = $CONTENT['stats'];
                     <span class="title-line gradient-text" id="heroTitle">послойная 3D печать в <?= $site['city'] ?></span>
                 </h1>
                 <p class="hero-description" id="heroDescription">
-                    Полный спектр услуг 3D печати: FDM, SLA, SLS технологии + 3D моделирование и сканирование. <?= $stats['years'] ?> лет опыта.
+                    Полный спектр услуг 3D печати: FDM, SLA, SLS технологии в Омске. Послойная печать, 3D моделирование, 3D сканирование и постобработка 3D изделий. <?= $stats['years'] ?> лет опыта.
                 </p>
                 <div class="hero-buttons">
                     <a href="#order-form-section" class="btn-cta-primary btn-lg">

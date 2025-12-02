@@ -17,22 +17,17 @@ $site = $CONTENT['site'];
     <?php include __DIR__ . '/includes/header.php'; ?>
 
     <!-- Page Hero -->
-    <section class="page-hero text-center">
+    <section class="page-hero">
         <div class="container">
-            <h1>Блог о 3D печати</h1>
-            <p>Статьи, новости, обзоры и полезные советы от экспертов</p>
+            <div class="breadcrumbs">
+                <a href="index.php">Главная</a>
+                <span>/</span>
+                <span>Блог</span>
+            </div>
+            <h1>Блог о FDM, SLA, SLS печати в Омске — статьи и новости</h1>
+            <p>Послойная 3D печать, 3D моделирование, 3D сканирование: обзоры, советы и кейсы от экспертов</p>
         </div>
     </section>
-
-    <!-- Breadcrumbs -->
-    <nav class="breadcrumbs">
-        <div class="container">
-            <ul>
-                <li><a href="index.php">Главная</a></li>
-                <li>Блог</li>
-            </ul>
-        </div>
-    </nav>
 
     <!-- Blog Intro -->
     <section class="content-section">
@@ -40,8 +35,9 @@ $site = $CONTENT['site'];
             <div class="content-wrapper">
                 <h2>Добро пожаловать в наш блог</h2>
                 <p>
-                    Здесь мы делимся своим опытом, рассказываем о новых технологиях, публикуем кейсы 
-                    интересных проектов и даём практические советы по работе с 3D печатью.
+                    Здесь мы делимся опытом послойной 3D печати в Омске: рассказываем о FDM печати, SLA печати, SLS печати, 
+                    3D моделировании и 3D сканировании. Публикуем кейсы интересных проектов, обзоры материалов и даём 
+                    практические советы по работе с технологиями аддитивного производства.
                 </p>
                 <p>
                     Подписывайтесь на наш <a href="<?= $site['telegram'] ?>" target="_blank" style="color: var(--primary); font-weight: 600;">Telegram-канал</a>, 

@@ -17,22 +17,17 @@ $site = $CONTENT['site'];
     <?php include __DIR__ . '/includes/header.php'; ?>
 
     <!-- Page Hero -->
-    <section class="page-hero text-center">
+    <section class="page-hero">
         <div class="container">
-            <h1>Почему выбирают 3D Print Pro</h1>
-            <p>12 лет опыта, 1500+ успешных проектов, команда профессионалов</p>
+            <div class="breadcrumbs">
+                <a href="index.php">Главная</a>
+                <span>/</span>
+                <span>Почему мы</span>
+            </div>
+            <h1>Почему выбирают 3D Print Pro для FDM, SLA, SLS печати в Омске</h1>
+            <p>12 лет опыта послойной 3D печати, 3D моделирование, 3D сканирование, постобработка. 1500+ успешных проектов</p>
         </div>
     </section>
-
-    <!-- Breadcrumbs -->
-    <nav class="breadcrumbs">
-        <div class="container">
-            <ul>
-                <li><a href="index.php">Главная</a></li>
-                <li>Почему мы</li>
-            </ul>
-        </div>
-    </nav>
 
     <!-- Why Choose Us Section -->
     <section class="content-section">
