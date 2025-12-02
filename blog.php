@@ -58,7 +58,13 @@ $site = $CONTENT['site'];
             <div class="blog-grid">
                 <!-- Placeholder Article 1 -->
                 <a href="#" class="blog-card">
-                    <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&auto=format&fit=crop" alt="FDM vs SLA vs SLS" class="blog-image">
+                    <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=600&auto=format&fit=crop" 
+                         alt="Сравнение технологий FDM, SLA и SLS 3D печати" 
+                         class="blog-image" 
+                         loading="lazy" 
+                         decoding="async"
+                         width="600" 
+                         height="400">
                     <div class="blog-content">
                         <span class="blog-date">15 января 2025</span>
                         <h3>FDM vs SLA vs SLS: какую технологию выбрать?</h3>
@@ -71,7 +77,13 @@ $site = $CONTENT['site'];
 
                 <!-- Placeholder Article 2 -->
                 <a href="#" class="blog-card">
-                    <img src="https://images.unsplash.com/photo-1612837017391-4b6b7b0e3d0a?w=600&auto=format&fit=crop" alt="Выбор материала" class="blog-image">
+                    <img src="https://images.unsplash.com/photo-1612837017391-4b6b7b0e3d0a?w=600&auto=format&fit=crop" 
+                         alt="Руководство по выбору материалов для 3D печати - PLA, ABS, PETG, TPU" 
+                         class="blog-image" 
+                         loading="lazy" 
+                         decoding="async"
+                         width="600" 
+                         height="400">
                     <div class="blog-content">
                         <span class="blog-date">10 января 2025</span>
                         <h3>Как выбрать материал для 3D печати</h3>
@@ -84,7 +96,13 @@ $site = $CONTENT['site'];
 
                 <!-- Placeholder Article 3 -->
                 <a href="#" class="blog-card">
-                    <img src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600&auto=format&fit=crop" alt="Постобработка" class="blog-image">
+                    <img src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=600&auto=format&fit=crop" 
+                         alt="Методы постобработки 3D печатных деталей - шлифовка, покраска, химическая обработка" 
+                         class="blog-image" 
+                         loading="lazy" 
+                         decoding="async"
+                         width="600" 
+                         height="400">
                     <div class="blog-content">
                         <span class="blog-date">5 января 2025</span>
                         <h3>Постобработка 3D печатных деталей</h3>
@@ -97,7 +115,13 @@ $site = $CONTENT['site'];
 
                 <!-- Placeholder Article 4 -->
                 <a href="#" class="blog-card">
-                    <img src="https://images.unsplash.com/photo-1593376893114-1aed528d80cf?w=600&auto=format&fit=crop" alt="Прототипирование" class="blog-image">
+                    <img src="https://images.unsplash.com/photo-1593376893114-1aed528d80cf?w=600&auto=format&fit=crop" 
+                         alt="Быстрое прототипирование для стартапов с помощью 3D печати" 
+                         class="blog-image" 
+                         loading="lazy" 
+                         decoding="async"
+                         width="600" 
+                         height="400">
                     <div class="blog-content">
                         <span class="blog-date">28 декабря 2024</span>
                         <h3>Быстрое прототипирование для стартапов</h3>
@@ -110,7 +134,13 @@ $site = $CONTENT['site'];
 
                 <!-- Placeholder Article 5 -->
                 <a href="#" class="blog-card">
-                    <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop" alt="Архитектурные макеты" class="blog-image">
+                    <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop" 
+                         alt="3D печать архитектурных макетов и прототипов зданий" 
+                         class="blog-image" 
+                         loading="lazy" 
+                         decoding="async"
+                         width="600" 
+                         height="400">
                     <div class="blog-content">
                         <span class="blog-date">20 декабря 2024</span>
                         <h3>3D печать архитектурных макетов</h3>
@@ -123,7 +153,13 @@ $site = $CONTENT['site'];
 
                 <!-- Placeholder Article 6 -->
                 <a href="#" class="blog-card">
-                    <img src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=600&auto=format&fit=crop" alt="Медицинская 3D печать" class="blog-image">
+                    <img src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=600&auto=format&fit=crop" 
+                         alt="Медицинские модели из 3D печати для хирургического планирования" 
+                         class="blog-image" 
+                         loading="lazy" 
+                         decoding="async"
+                         width="600" 
+                         height="400">
                     <div class="blog-content">
                         <span class="blog-date">15 декабря 2024</span>
                         <h3>Медицинские модели: от МРТ до 3D печати</h3>

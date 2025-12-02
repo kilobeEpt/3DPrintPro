@@ -122,15 +122,15 @@ $stats = $CONTENT['stats'];
                 }
                 foreach ($displayServices as $service):
                 ?>
-                <a href="index.php#order-form-section" class="service-card <?= $service['featured'] ? 'featured' : '' ?>">
-                    <?php if ($service['featured']): ?>
-                    <div class="featured-badge">Популярное</div>
-                    <?php endif; ?>
-                    <div class="service-icon">
-                        <i class="fas <?= $service['icon'] ?>" aria-hidden="true"></i>
-                        <span class="sr-only"><?= htmlspecialchars($service['name']) ?></span>
-                    </div>
-                    <h3><?= htmlspecialchars($service['name']) ?></h3>
+                <a href="services.php#<?= $service['slug'] ?>" class="service-card <?= $service['featured'] ? 'featured' : '' ?>">
+                   <?php if ($service['featured']): ?>
+                   <div class="featured-badge">Популярное</div>
+                   <?php endif; ?>
+                   <div class="service-icon">
+                       <i class="fas <?= $service['icon'] ?>" aria-hidden="true"></i>
+                       <span class="sr-only"><?= htmlspecialchars($service['name']) ?></span>
+                   </div>
+                   <h3><?= htmlspecialchars($service['name']) ?></h3>
                     <p><?= htmlspecialchars($service['description']) ?></p>
                     <ul class="service-features">
                         <?php foreach ($service['features'] as $feature): ?>
