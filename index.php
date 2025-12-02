@@ -34,10 +34,10 @@ $stats = $CONTENT['stats'];
             <div class="hero-text">
                 <h1 class="hero-title">
                     <span class="title-line">Профессиональная</span>
-                    <span class="title-line gradient-text" id="heroTitle">3D печать в <?= $site['city'] ?></span>
+                    <span class="title-line gradient-text" id="heroTitle">послойная 3D печать в <?= $site['city'] ?></span>
                 </h1>
                 <p class="hero-description" id="heroDescription">
-                    FDM, SLA, SLS технологии. Печать от 1 часа. 15+ материалов. <?= $stats['years'] ?> лет опыта.
+                    Полный спектр услуг 3D печати: FDM, SLA, SLS технологии + 3D моделирование и сканирование. <?= $stats['years'] ?> лет опыта.
                 </p>
                 <div class="hero-buttons">
                     <a href="#order-form-section" class="btn-cta-primary btn-lg">
@@ -109,9 +109,9 @@ $stats = $CONTENT['stats'];
         <div class="container">
             <div class="section-header">
                 <span class="section-label">Наши услуги</span>
-                <h2 class="section-title">Услуги 3D печати в <?= $site['city'] ?></h2>
+                <h2 class="section-title">Полный спектр услуг послойной 3D печати</h2>
                 <p class="section-description">
-                    FDM, SLA, SLS технологии. От прототипов до функциональных изделий.
+                    FDM, SLA, SLS технологии + 3D моделирование, сканирование и постобработка
                 </p>
             </div>
             <div class="services-grid" id="servicesGrid">

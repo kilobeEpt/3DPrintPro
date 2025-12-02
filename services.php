@@ -8,8 +8,7 @@ $active_page = 'services';
 $CONTENT = require __DIR__ . '/data/content.php';
 $site = $CONTENT['site'];
 $services = $CONTENT['services'];
-$technologies = $CONTENT['technologies'];
-$materials = $CONTENT['materials'];
+$portfolio = $CONTENT['portfolio'];
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -27,24 +26,26 @@ $materials = $CONTENT['materials'];
                 <span>/</span>
                 <span>Услуги</span>
             </div>
-            <h1>Услуги 3D печати в <?= $site['city'] ?></h1>
-            <p>Полный спектр услуг 3D печати: FDM, SLA, SLS технологии, 3D моделирование и постобработка</p>
+            <h1>Полный спектр услуг послойной 3D печати в <?= $site['city'] ?></h1>
+            <p>FDM, SLA, SLS технологии, 3D моделирование, 3D сканирование и постобработка — всё для воплощения ваших идей</p>
         </div>
     </section>
 
-    <!-- Services Section -->
-    <section class="services-section">
+    <!-- Services Quick Overview Grid -->
+    <section class="services-overview">
         <div class="container">
             <div class="section-header">
-                <span class="section-label">Услуги</span>
+                <span class="section-label">Обзор услуг</span>
                 <h2 class="section-title">Наши услуги 3D печати</h2>
                 <p class="section-description">
-                    Полный спектр услуг от печати до постобработки
+                    Полный спектр услуг послойной 3D печати: FDM, SLA, SLS + сопутствующие сервисы
                 </p>
             </div>
             <div class="services-grid">
                 <?php foreach ($services as $service): ?>
-                <article class="service-card" id="<?= $service['id'] ?>" data-icon="<?= $service['icon'] ?>">
+                <a href="#<?= $service['slug'] ?>" class="service-card<?= isset($service['featured']) && $service['featured'] ? ' featured' : '' ?>" 
+                   data-service-type="<?= htmlspecialchars($service['id']) ?>" 
+                   data-price-range="<?= htmlspecialchars($service['price_range'] ?? $service['price']) ?>">
                     <?php if (isset($service['featured']) && $service['featured']): ?>
                     <span class="featured-badge">Популярно</span>
                     <?php endif; ?>
@@ -60,12 +61,11 @@ $materials = $CONTENT['materials'];
                     <div class="service-price"><?= htmlspecialchars($service['price']) ?></div>
                     <?php endif; ?>
                     
-                    <p class="service-description"><?= htmlspecialchars($service['description']) ?></p>
+                    <p class="service-description"><?= htmlspecialchars($service['short_description']) ?></p>
                     
                     <?php if (!empty($service['features'])): ?>
                     <ul class="service-features">
                         <?php 
-                        // Show first 4 features for compact layout
                         $featuresSlice = array_slice($service['features'], 0, 4);
                         foreach ($featuresSlice as $feature): 
                         ?>
@@ -76,111 +76,171 @@ $materials = $CONTENT['materials'];
                         <?php endforeach; ?>
                     </ul>
                     <?php endif; ?>
-                    
-                    <?php if (!empty($service['materials']) || !empty($service['software']) || !empty($service['formats'])): ?>
-                    <div class="service-tags">
+                </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Service Sections -->
+    <?php foreach ($services as $service): ?>
+    <section id="<?= $service['slug'] ?>" class="service-detail" data-service-id="<?= $service['id'] ?>">
+        <div class="container">
+            <div class="service-detail-header">
+                <div class="service-detail-icon">
+                    <i class="fas <?= $service['icon'] ?>" aria-hidden="true"></i>
+                </div>
+                <div class="service-detail-title">
+                    <h2><?= htmlspecialchars($service['name']) ?></h2>
+                    <p class="service-detail-price"><?= htmlspecialchars($service['price']) ?></p>
+                </div>
+            </div>
+
+            <div class="service-detail-content">
+                <!-- Description -->
+                <div class="service-detail-description">
+                    <h3>Описание технологии</h3>
+                    <p><?= nl2br(htmlspecialchars($service['description'])) ?></p>
+                </div>
+
+                <!-- Benefits -->
+                <?php if (!empty($service['benefits'])): ?>
+                <div class="service-detail-benefits">
+                    <h3>Преимущества</h3>
+                    <ul class="benefits-list">
+                        <?php foreach ($service['benefits'] as $benefit): ?>
+                        <li>
+                            <i class="fas fa-check-circle icon-success" aria-hidden="true"></i>
+                            <span><?= htmlspecialchars($benefit) ?></span>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+                <?php endif; ?>
+
+                <!-- Materials/Specs Table -->
+                <?php if (!empty($service['materials']) && is_array($service['materials']) && isset($service['materials'][0]['name'])): ?>
+                <div class="service-detail-materials">
+                    <h3>Материалы</h3>
+                    <div class="materials-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Материал</th>
+                                    <th>Свойства</th>
+                                    <th>Температура</th>
+                                    <th>Применение</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($service['materials'] as $material): ?>
+                                <tr>
+                                    <td><strong><?= htmlspecialchars($material['name']) ?></strong></td>
+                                    <td><?= htmlspecialchars($material['properties']) ?></td>
+                                    <td><?= htmlspecialchars($material['temp']) ?></td>
+                                    <td><?= htmlspecialchars($material['applications']) ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Technical Specs -->
+                <?php if (!empty($service['specs'])): ?>
+                <div class="service-detail-specs">
+                    <h3>Технические характеристики</h3>
+                    <div class="specs-grid">
+                        <?php foreach ($service['specs'] as $specName => $specValue): ?>
+                        <div class="spec-item">
+                            <span class="spec-label"><?= htmlspecialchars($specName) ?></span>
+                            <span class="spec-value"><?= htmlspecialchars($specValue) ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Turnaround Time -->
+                <?php if (!empty($service['turnaround'])): ?>
+                <div class="service-detail-turnaround">
+                    <h3>Сроки изготовления</h3>
+                    <p><?= nl2br(htmlspecialchars($service['turnaround'])) ?></p>
+                </div>
+                <?php endif; ?>
+
+                <!-- Pricing Notes -->
+                <?php if (!empty($service['pricing_notes'])): ?>
+                <div class="service-detail-pricing">
+                    <h3>Стоимость и формирование цены</h3>
+                    <p><?= nl2br(htmlspecialchars($service['pricing_notes'])) ?></p>
+                </div>
+                <?php endif; ?>
+
+                <!-- Sample Projects -->
+                <?php if (!empty($service['sample_projects'])): ?>
+                <div class="service-detail-examples">
+                    <h3>Примеры работ</h3>
+                    <div class="examples-grid">
                         <?php 
-                        // Combine and show first 5 tags
-                        $tags = array_merge(
-                            $service['materials'] ?? [],
-                            $service['software'] ?? [],
-                            $service['formats'] ?? []
-                        );
-                        $tagsSlice = array_slice($tags, 0, 5);
-                        foreach ($tagsSlice as $tag): 
+                        foreach ($service['sample_projects'] as $projectId):
+                            $project = array_values(array_filter($portfolio, fn($p) => $p['id'] === $projectId))[0] ?? null;
+                            if ($project):
                         ?>
-                        <span class="tag"><?= htmlspecialchars($tag) ?></span>
-                        <?php endforeach; ?>
-                        <?php if (count($tags) > 5): ?>
-                        <span class="tag tag-more">+<?= count($tags) - 5 ?></span>
-                        <?php endif; ?>
+                        <div class="example-card">
+                            <img src="<?= htmlspecialchars($project['image']) ?>" alt="<?= htmlspecialchars($project['title']) ?>" loading="lazy">
+                            <div class="example-info">
+                                <h4><?= htmlspecialchars($project['title']) ?></h4>
+                                <p class="example-tech"><?= htmlspecialchars($project['technology']) ?></p>
+                                <p class="example-category"><?= htmlspecialchars($project['category']) ?></p>
+                            </div>
+                        </div>
+                        <?php 
+                            endif;
+                        endforeach; 
+                        ?>
                     </div>
-                    <?php endif; ?>
-                    
-                    <div class="service-cta-block">
-                        <a href="index.php#order-form-section" class="btn-cta-primary">
-                            <i class="fas fa-cube"></i>
-                            Заказать 3D печать
-                        </a>
-                        <a href="<?= $site['telegram'] ?>" target="_blank" rel="noopener" class="btn-cta-secondary">
-                            <i class="fab fa-telegram"></i>
-                            Написать в Telegram
-                        </a>
-                    </div>
-                </article>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </section>
+                </div>
+                <?php endif; ?>
 
-    <!-- Technologies Comparison Section -->
-    <section class="technologies-comparison">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Сравнение</span>
-                <h2 class="section-title">Сравнение технологий 3D печати</h2>
-                <p class="section-description">
-                    Выберите оптимальную технологию для вашего проекта
-                </p>
-            </div>
-            <div class="comparison-grid">
-                <?php foreach ($technologies as $key => $tech): ?>
-                <div class="tech-card">
-                    <h3><?= htmlspecialchars($tech['name']) ?></h3>
-                    <p><?= htmlspecialchars($tech['description']) ?></p>
-                    
-                    <h4>Преимущества:</h4>
-                    <ul>
-                        <?php foreach ($tech['pros'] as $pro): ?>
-                        <li><i class="fas fa-plus-circle icon-success"></i> <?= htmlspecialchars($pro) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                    
-                    <h4>Недостатки:</h4>
-                    <ul>
-                        <?php foreach ($tech['cons'] as $con): ?>
-                        <li><i class="fas fa-minus-circle icon-danger"></i> <?= htmlspecialchars($con) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                    
-                    <h4>Применение:</h4>
-                    <div class="tech-applications">
-                        <?php foreach ($tech['applications'] as $app): ?>
-                        <span class="tag"><?= htmlspecialchars($app) ?></span>
+                <!-- Service-specific FAQ -->
+                <?php if (!empty($service['service_faq'])): ?>
+                <div class="service-detail-faq">
+                    <h3>Часто задаваемые вопросы</h3>
+                    <div class="faq-accordion">
+                        <?php foreach ($service['service_faq'] as $index => $faqItem): ?>
+                        <div class="faq-item">
+                            <button class="faq-question" aria-expanded="false">
+                                <span><?= htmlspecialchars($faqItem['q']) ?></span>
+                                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p><?= nl2br(htmlspecialchars($faqItem['a'])) ?></p>
+                            </div>
+                        </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </section>
+                <?php endif; ?>
 
-    <!-- Materials Section -->
-    <section class="materials-section">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-label">Материалы</span>
-                <h2 class="section-title">Материалы для 3D печати</h2>
-                <p class="section-description">
-                    Широкий выбор материалов для любых задач
-                </p>
-            </div>
-            <div class="materials-grid">
-                <?php foreach ($materials as $key => $material): ?>
-                <div class="material-card">
-                    <h3><?= htmlspecialchars($material['name']) ?></h3>
-                    <div class="material-info">
-                        <p><strong>Свойства:</strong> <?= htmlspecialchars($material['properties']) ?></p>
-                        <p><strong>Температура печати:</strong> <?= htmlspecialchars($material['temperature']) ?></p>
-                        <p><strong>Применение:</strong> <?= htmlspecialchars($material['applications']) ?></p>
-                    </div>
+                <!-- CTA Buttons -->
+                <div class="service-detail-cta">
+                    <a href="index.php#order-form-section" class="btn-cta-primary btn-lg">
+                        <i class="fas fa-cube"></i>
+                        Заказать <?= htmlspecialchars($service['name']) ?>
+                    </a>
+                    <a href="contact.php" class="btn-cta-secondary btn-lg">
+                        <i class="fas fa-comments"></i>
+                        Получить консультацию
+                    </a>
                 </div>
-                <?php endforeach; ?>
             </div>
         </div>
     </section>
+    <?php endforeach; ?>
 
-    <!-- CTA Section -->
+    <!-- Final CTA Section -->
     <section class="cta-section">
         <div class="container">
             <div class="cta-content">

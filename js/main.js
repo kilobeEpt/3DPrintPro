@@ -21,6 +21,7 @@ class StaticApp {
         this.initForms();
         this.initScrollAnimations();
         this.initSmoothScroll();
+        this.initServiceFAQ();
     }
 
     initPreloader() {
@@ -380,6 +381,37 @@ class StaticApp {
                 document.body.removeChild(notification);
             }, 300);
         }, 3000);
+    }
+
+    initServiceFAQ() {
+        // Initialize service detail FAQ accordions
+        const faqQuestions = document.querySelectorAll('.service-detail-faq .faq-question');
+        
+        faqQuestions.forEach(button => {
+            button.addEventListener('click', function() {
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                const answer = this.nextElementSibling;
+                
+                // Close all other FAQs in the same section
+                const parentSection = this.closest('.service-detail-faq');
+                parentSection.querySelectorAll('.faq-question').forEach(otherButton => {
+                    if (otherButton !== this) {
+                        otherButton.setAttribute('aria-expanded', 'false');
+                        const otherAnswer = otherButton.nextElementSibling;
+                        otherAnswer.classList.remove('active');
+                    }
+                });
+                
+                // Toggle current FAQ
+                if (isExpanded) {
+                    this.setAttribute('aria-expanded', 'false');
+                    answer.classList.remove('active');
+                } else {
+                    this.setAttribute('aria-expanded', 'true');
+                    answer.classList.add('active');
+                }
+            });
+        });
     }
 }
 
