@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Meta & Schema Refresh - Test Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        h1 {
+            color: #1a202c;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .subtitle {
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        .status {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 1.5rem;
+        }
+        .checklist {
+            list-style: none;
+        }
+        .checklist li {
+            padding: 12px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        .checklist li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #48bb78;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        .info-box strong {
+            color: #2c5282;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .card h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        .card p {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #48bb78;
+        }
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status">✅ COMPLETE v1.0</div>
+        <h1>SEO Meta & Schema Refresh</h1>
+        <p class="subtitle">Comprehensive structured data and meta tag implementation</p>
+
+        <div class="section">
+            <h2>📊 Implementation Summary</h2>
+            <div class="grid">
+                <div class="card">
+                    <div class="number">8</div>
+                    <h3>Pages Updated</h3>
+                    <p>Meta tags optimized for all pages</p>
+                </div>
+                <div class="card">
+                    <div class="number">7</div>
+                    <h3>JSON-LD Schemas</h3>
+                    <p>Organization, LocalBusiness, Website, Service, FAQ, Blog, Breadcrumbs</p>
+                </div>
+                <div class="card">
+                    <div class="number">3</div>
+                    <h3>Blog Posts</h3>
+                    <p>Structured data for schema generation</p>
+                </div>
+                <div class="card">
+                    <div class="number">155-160</div>
+                    <h3>Description Length</h3>
+                    <p>Optimized for search results</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>✅ Acceptance Criteria</h2>
+            <ul class="checklist">
+                <li>Updated meta titles and descriptions for all 8 pages</li>
+                <li>Descriptions within 155-160 character limit</li>
+                <li>Keyword arrays with required phrases ("3D печать Омск", "FDM печать")</li>
+                <li>Per-page og_image and twitter_image fields with fallbacks</li>
+                <li>Blog posts dataset with canonical titles, descriptions, dates, images, slugs</li>
+                <li>Service offerings dataset for schema generation</li>
+                <li>Root canonical URL handling (index.php → /)</li>
+                <li>Dynamic Open Graph tags (og:type, og:image, article:tag)</li>
+                <li>Dynamic Twitter Card tags</li>
+                <li>Organization JSON-LD with social links</li>
+                <li>LocalBusiness JSON-LD with opening hours and GMB/Yandex support</li>
+                <li>Website JSON-LD with SearchAction</li>
+                <li>Service catalog JSON-LD (6 services)</li>
+                <li>FAQPage JSON-LD from CONTENT['faq']</li>
+                <li>Blog with BlogPosting array (conditional)</li>
+                <li>OG default image created (1200×630 SVG)</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🔍 Testing Instructions</h2>
+            
+            <div class="info-box">
+                <strong>Step 1: Visual Inspection</strong><br>
+                View page source on any page and verify meta tags, Open Graph, and JSON-LD schemas are present.
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">Test Each Page:</h3>
+            <a href="index.php" class="btn" target="_blank">Home Page</a>
+            <a href="services.php" class="btn" target="_blank">Services</a>
+            <a href="portfolio.php" class="btn" target="_blank">Portfolio</a>
+            <a href="contact.php" class="btn" target="_blank">Contact</a>
+            <a href="about.php" class="btn" target="_blank">About</a>
+            <a href="blog.php" class="btn" target="_blank">Blog</a>
+            <a href="why-us.php" class="btn" target="_blank">Why Us</a>
+            <a href="districts.php" class="btn" target="_blank">Districts</a>
+
+            <div class="code-block">
+# View page source (Right-click → View Page Source)
+# Look for:
+- &lt;title&gt; tags
+- &lt;meta name="description"&gt;
+- &lt;meta property="og:*"&gt;
+- &lt;meta name="twitter:*"&gt;
+- &lt;script type="application/ld+json"&gt;
+            </div>
+
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">External Validation Tools:</h3>
+            <a href="https://search.google.com/test/rich-results" class="btn btn-secondary" target="_blank">Google Rich Results Test</a>
+            <a href="https://developers.facebook.com/tools/debug/" class="btn btn-secondary" target="_blank">Facebook Debugger</a>
+            <a href="https://cards-dev.twitter.com/validator" class="btn btn-secondary" target="_blank">Twitter Card Validator</a>
+            <a href="https://validator.schema.org/" class="btn btn-secondary" target="_blank">Schema.org Validator</a>
+        </div>
+
+        <div class="section">
+            <h2>📋 Manual Checklist</h2>
+            <ul class="checklist">
+                <li>Title length &lt; 60 characters on all pages</li>
+                <li>Description 155-160 characters on all pages</li>
+                <li>Keywords include "3D печать Омск" where relevant</li>
+                <li>Canonical URLs are clean (no double //)</li>
+                <li>OG image URL is valid and loads</li>
+                <li>Blog page shows article:tag meta tags</li>
+                <li>All JSON-LD schemas validate without errors</li>
+                <li>Social links appear in Organization/LocalBusiness sameAs</li>
+                <li>FAQ schema includes all 8 questions</li>
+                <li>Service catalog includes all 6 services</li>
+                <li>Blog posts show in BlogPosting array on blog page</li>
+                <li>Breadcrumbs schema includes 5 main pages</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📁 Files Modified</h2>
+            <div class="code-block">
+data/content.php
+├── Added blog_posts array (3 posts)
+├── Enhanced meta tags (8 pages)
+├── Added og_image/twitter_image fields
+└── Converted keywords to arrays
+
+includes/head.php
+├── Complete refactor (~382 lines)
+├── Dynamic OG/Twitter tags
+├── 7 JSON-LD schemas
+└── Conditional rendering (FAQ, Blog)
+
+images/og-default.svg
+└── NEW: Default OG image (1200×630)
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 SEO Benefits</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>🔍 Search Visibility</h3>
+                    <p>Rich snippets, FAQ answers, breadcrumbs, knowledge panel</p>
+                </div>
+                <div class="card">
+                    <h3>📱 Social Sharing</h3>
+                    <p>Better CTR with custom OG images, rich cards</p>
+                </div>
+                <div class="card">
+                    <h3>📍 Local SEO</h3>
+                    <p>LocalBusiness schema improves local rankings</p>
+                </div>
+                <div class="card">
+                    <h3>🏆 Technical SEO</h3>
+                    <p>Proper canonical URLs, structured data, mobile optimization</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box" style="margin-top: 40px;">
+            <strong>📚 Full Documentation:</strong> See <code>SEO_META_SCHEMA_REFRESH.md</code> for complete implementation details, troubleshooting, and future enhancements.
+        </div>
+    </div>
+</body>
+</html>
