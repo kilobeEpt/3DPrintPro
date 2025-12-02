@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Header Overlap Fix</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Inline FOUC prevention */
+        (function() {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        })();
+    </style>
+</head>
+<body data-page="test">
+    <!-- Header (same as header.php) -->
+    <header class="header" id="header">
+        <nav class="navbar">
+            <a href="index.php" class="logo" style="text-decoration: none; color: inherit;">
+                <i class="fas fa-cube"></i>
+                <span id="siteName">3D Print Pro</span>
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.php" class="nav-link active" data-page="home">Главная</a></li>
+                <li><a href="services.php" class="nav-link" data-page="services">Услуги</a></li>
+                <li><a href="index.php#order-form-section" class="nav-link">Заказать</a></li>
+                <li><a href="portfolio.php" class="nav-link" data-page="portfolio">Портфолио</a></li>
+                <li><a href="about.php" class="nav-link" data-page="about">О нас</a></li>
+                <li><a href="contact.php" class="nav-link" data-page="contact">Контакты</a></li>
+                <li><a href="blog.php" class="nav-link" data-page="blog">Блог</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="Переключить тему">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="hamburger" id="hamburger" aria-label="Меню">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Test Content - Page Hero -->
+    <section class="page-hero" style="background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(236,72,153,0.1));">
+        <div class="container">
+            <div class="breadcrumbs">
+                <a href="index.php">Главная</a>
+                <span>/</span>
+                <span>Test Page</span>
+            </div>
+            <h1>✅ Header Overlap Fix Test</h1>
+            <p>If you can see this entire hero section without it being covered by the header, the fix is working!</p>
+        </div>
+    </section>
+
+    <!-- Test Content Section -->
+    <section style="padding: 60px 0; background: var(--bg-secondary);">
+        <div class="container">
+            <h2 style="margin-bottom: 30px; color: var(--primary);">Visual Checklist</h2>
+            
+            <div style="display: grid; gap: 20px; max-width: 800px;">
+                <!-- Checklist items -->
+                <div style="display: flex; align-items: flex-start; gap: 15px; padding: 20px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;">
+                    <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; color: white; font-weight: bold; flex-shrink: 0;">1</div>
+                    <div>
+                        <strong style="display: block; margin-bottom: 8px; color: var(--text);">Page Hero Visible</strong>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">The breadcrumbs, heading "Header Overlap Fix Test", and description should be fully visible and NOT hidden under the header.</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 15px; padding: 20px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;">
+                    <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; color: white; font-weight: bold; flex-shrink: 0;">2</div>
+                    <div>
+                        <strong style="display: block; margin-bottom: 8px; color: var(--text);">Header Sticky/Fixed</strong>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">The header should stay at the top when you scroll down (position: fixed).</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 15px; padding: 20px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;">
+                    <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; color: white; font-weight: bold; flex-shrink: 0;">3</div>
+                    <div>
+                        <strong style="display: block; margin-bottom: 8px; color: var(--text);">No Weird Gaps</strong>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">There should be no excessive white space between header and content. The spacing should look natural (70px on desktop, 72px on tablet, 60px on mobile).</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 15px; padding: 20px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;">
+                    <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; color: white; font-weight: bold; flex-shrink: 0;">4</div>
+                    <div>
+                        <strong style="display: block; margin-bottom: 8px; color: var(--text);">Mobile Test</strong>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">Resize browser to mobile width (< 768px). Content should still be fully visible below header.</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 15px; padding: 20px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;">
+                    <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; color: white; font-weight: bold; flex-shrink: 0;">5</div>
+                    <div>
+                        <strong style="display: block; margin-bottom: 8px; color: var(--text);">Tablet Test</strong>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">Resize browser to tablet width (768px - 968px). Content should still be fully visible below header.</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 15px; padding: 20px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;">
+                    <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--success), #059669); border-radius: 50%; color: white; font-weight: bold; flex-shrink: 0;">✓</div>
+                    <div>
+                        <strong style="display: block; margin-bottom: 8px; color: var(--success);">Dark Theme Test</strong>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">Click the theme toggle button (moon/sun icon) in the header. The fix should work in both light and dark themes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 60px; padding: 40px; background: var(--card-bg); border: 2px solid var(--primary); border-radius: 16px;">
+                <h3 style="margin-bottom: 20px; color: var(--primary);">📋 Technical Details</h3>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border); color: var(--text-secondary);">
+                        <strong style="color: var(--text);">Header Position:</strong> fixed (z-index: 1020)
+                    </li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border); color: var(--text-secondary);">
+                        <strong style="color: var(--text);">Body Padding-Top (Desktop):</strong> 70px
+                    </li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border); color: var(--text-secondary);">
+                        <strong style="color: var(--text);">Body Padding-Top (Tablet ≤968px):</strong> 72px
+                    </li>
+                    <li style="padding: 12px 0; color: var(--text-secondary);">
+                        <strong style="color: var(--text);">Body Padding-Top (Mobile ≤768px):</strong> 60px
+                    </li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 40px; padding: 40px; background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(236,72,153,0.05)); border-radius: 16px; text-align: center;">
+                <h3 style="margin-bottom: 20px; color: var(--text);">✨ All Pages to Test</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
+                    <a href="index.php" style="padding: 12px 24px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.3s;">Главная</a>
+                    <a href="services.php" style="padding: 12px 24px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.3s;">Услуги</a>
+                    <a href="portfolio.php" style="padding: 12px 24px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.3s;">Портфолио</a>
+                    <a href="contact.php" style="padding: 12px 24px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.3s;">Контакты</a>
+                    <a href="about.php" style="padding: 12px 24px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.3s;">О нас</a>
+                    <a href="blog.php" style="padding: 12px 24px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.3s;">Блог</a>
+                    <a href="why-us.php" style="padding: 12px 24px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.3s;">Почему мы</a>
+                    <a href="districts.php" style="padding: 12px 24px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.3s;">Районы</a>
+                </div>
+            </div>
+
+            <!-- Scroll test content -->
+            <div style="margin-top: 100vh; padding: 60px 40px; background: var(--card-bg); border: 2px dashed var(--border); border-radius: 16px; text-align: center;">
+                <h3 style="color: var(--primary); margin-bottom: 16px;">🎯 Scroll Test Area</h3>
+                <p style="color: var(--text-secondary); margin: 0;">If you scrolled down here, check that the header stayed fixed at the top and didn't disappear.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const icon = themeToggle.querySelector('i');
+        
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+        }
+        
+        // Set initial icon
+        const currentTheme = document.body.getAttribute('data-theme') || 'light';
+        updateThemeIcon(currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        // Hamburger menu
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('navMenu');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+            document.body.classList.toggle('nav-open');
+        });
+    </script>
+</body>
+</html>
