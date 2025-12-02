@@ -52,87 +52,26 @@ $site = $CONTENT['site'];
         <div class="container">
             <div class="section-header">
                 <span class="section-label">Районы Омска</span>
-                <h2 class="section-title">Обслуживаемые округа</h2>
+                <h2 class="section-title">Обслуживаемые округа — услуги 3D печати</h2>
             </div>
 
-            <div class="district-card">
-                <h3><i class="fas fa-map-marker-alt"></i>Центральный округ</h3>
-                <p>
-                    Наша мастерская расположена в самом сердце Омска — на ул. Ленина, д. 15. Если вы живёте 
-                    или работаете в Центральном округе, можете забрать заказ самостоятельно или заказать 
-                    курьерскую доставку (30-60 минут).
+            <?php foreach ($site['service_areas'] as $area): ?>
+            <div class="district-card" itemscope itemtype="https://schema.org/ServiceArea">
+                <h3><i class="fas fa-map-marker-alt"></i><span itemprop="name"><?= $area['name'] ?></span></h3>
+                <p itemprop="description">
+                    <?= $area['description'] ?>
                 </p>
                 <ul>
+                    <?php if ($area['name'] === 'Центральный округ'): ?>
                     <li><i class="fas fa-check"></i> Самовывоз: бесплатно, в рабочее время</li>
-                    <li><i class="fas fa-check"></i> Курьер: от 150₽, доставка 30-60 минут</li>
-                    <li><i class="fas fa-check"></i> Ключевые районы: исторический центр, Любинский проспект, пл. Ленина</li>
+                    <?php endif; ?>
+                    <li><i class="fas fa-check"></i> Курьер: <?= $area['delivery_cost'] ?>, доставка <?= $area['delivery_time'] ?></li>
+                    <li><i class="fas fa-check"></i> Бесплатная доставка при заказе от <?= number_format($area['free_delivery_threshold'], 0, ',', ' ') ?>₽</li>
+                    <li><i class="fas fa-check"></i> Все технологии: FDM, SLA, SLS печать в Омске</li>
                 </ul>
+                <meta itemprop="deliveryLeadTime" content="<?= $area['delivery_time'] ?>">
             </div>
-
-            <div class="district-card">
-                <h3><i class="fas fa-map-marker-alt"></i>Советский округ</h3>
-                <p>
-                    Один из крупнейших округов Омска. Доставляем в любую точку района — от микрорайонов 
-                    на севере до южных кварталов. Среднее время доставки — 1-2 часа в зависимости от загруженности дорог.
-                </p>
-                <ul>
-                    <li><i class="fas fa-check"></i> Курьер: от 200₽, доставка 1-2 часа</li>
-                    <li><i class="fas fa-check"></i> Бесплатно при заказе от 3000₽</li>
-                    <li><i class="fas fa-check"></i> Популярные микрорайоны: Северный, Первомайский, Амурский</li>
-                </ul>
-            </div>
-
-            <div class="district-card">
-                <h3><i class="fas fa-map-marker-alt"></i>Кировский округ</h3>
-                <p>
-                    Доставка в Кировский округ осуществляется ежедневно. Охватываем как старые жилые массивы, 
-                    так и новые микрорайоны. Возможна доставка в выходные дни по предварительной договорённости.
-                </p>
-                <ul>
-                    <li><i class="fas fa-check"></i> Курьер: от 250₽, доставка 1.5-2 часа</li>
-                    <li><i class="fas fa-check"></i> Бесплатно при заказе от 3000₽</li>
-                    <li><i class="fas fa-check"></i> Районы: Нефтяники, микрорайоны Кировского АО</li>
-                </ul>
-            </div>
-
-            <div class="district-card">
-                <h3><i class="fas fa-map-marker-alt"></i>Ленинский округ</h3>
-                <p>
-                    Работаем с клиентами из Ленинского округа, включая отдалённые микрорайоны. Доставка 
-                    организуется курьером или можно забрать из нашей мастерской в центре (20-30 минут на авто).
-                </p>
-                <ul>
-                    <li><i class="fas fa-check"></i> Курьер: от 250₽, доставка 1.5-2.5 часа</li>
-                    <li><i class="fas fa-check"></i> Бесплатно при заказе от 3000₽</li>
-                    <li><i class="fas fa-check"></i> Районы: Левобережье, Старый Кировск, микрорайоны ЛАО</li>
-                </ul>
-            </div>
-
-            <div class="district-card">
-                <h3><i class="fas fa-map-marker-alt"></i>Октябрьский округ</h3>
-                <p>
-                    Обслуживаем промышленные предприятия и частных клиентов Октябрьского округа. Доставка 
-                    в рабочие дни, возможна срочная доставка в течение 2-3 часов при необходимости.
-                </p>
-                <ul>
-                    <li><i class="fas fa-check"></i> Курьер: от 250₽, доставка 2-3 часа</li>
-                    <li><i class="fas fa-check"></i> Бесплатно при заказе от 3000₽</li>
-                    <li><i class="fas fa-check"></i> Районы: промзоны, жилые микрорайоны ОАО</li>
-                </ul>
-            </div>
-
-            <div class="district-card">
-                <h3><i class="fas fa-map-marker-alt"></i>Омская область</h3>
-                <p>
-                    Для клиентов из пригородов и других населённых пунктов Омской области предлагаем доставку 
-                    Почтой России или транспортными компаниями (СДЭК, ПЭК, Деловые Линии). Упакуем изделие надёжно.
-                </p>
-                <ul>
-                    <li><i class="fas fa-check"></i> Почта России: 5-14 дней, стоимость зависит от веса</li>
-                    <li><i class="fas fa-check"></i> СДЭК/ПЭК: 2-5 дней, от 300₽</li>
-                    <li><i class="fas fa-check"></i> Города: Исилькуль, Калачинск, Тара, Называевск и др.</li>
-                </ul>
-            </div>
+            <?php endforeach; ?>
         </div>
     </section>
 
@@ -181,11 +120,75 @@ $site = $CONTENT['site'];
         </div>
     </section>
 
+    <!-- Delivery FAQ Section -->
+    <section class="faq" id="delivery-faq" style="background: var(--bg-secondary);">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">FAQ о доставке</span>
+                <h2 class="section-title">Вопросы о доставке 3D печати в Омске</h2>
+                <p class="section-description">
+                    Ответы на частые вопросы о сроках и стоимости доставки по Омску
+                </p>
+            </div>
+            <div class="faq-container">
+                <div class="faq-item active">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3>Какие сроки доставки 3D печати по районам Омска?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer" style="display: block;">
+                        <p>Сроки зависят от района: Центральный округ — 30-60 минут, Советский округ — 1-2 часа, Кировский округ — 1.5-2 часа, Ленинский округ — 1.5-2.5 часа, Октябрьский округ — 2-3 часа. Доставка осуществляется после готовности заказа. Вы получите SMS-уведомление, когда изделие будет готово к отправке.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3>Сколько стоит доставка 3D печати по Омску?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Стоимость курьерской доставки по Омску: Центральный округ — от 150₽, остальные округа — от 200-250₽. Бесплатная доставка при заказе от 3000₽ во все районы Омска. Самовывоз из нашей мастерской на ул. Ленина, 15 всегда бесплатный.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3>Доставляете ли вы в выходные дни?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Доставка в выходные дни возможна по предварительной договорённости. Свяжитесь с нами по телефону +7 (999) 123-45-67 или через Telegram @PrintPro_Omsk для согласования времени. Самовывоз в выходные дни не осуществляется (мастерская работает Пн-Пт).</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3>Как отправить 3D печать в другой город Омской области?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Для отправки в города Омской области (Исилькуль, Калачинск, Тара и др.) используем Почту России (5-14 дней, от 300₽) или транспортные компании СДЭК/ПЭК (2-5 дней, от 400₽). Изделия надёжно упаковываются в крафт-бокс с защитным материалом. Предоставляем трек-номер для отслеживания.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <h3>Какие технологии 3D печати доступны во всех районах Омска?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Все технологии послойной 3D печати доступны для клиентов из любых районов Омска: FDM печать термопластиками (PLA, ABS, PETG, TPU, Nylon), SLA фотополимерная печать для высокой детализации, SLS лазерное спекание нейлона. Также предлагаем 3D моделирование, 3D сканирование и постобработку изделий с доставкой курьером.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
-    <section class="content-section" style="background: var(--bg-secondary);">
+    <section class="content-section">
         <div class="container">
             <div class="content-wrapper" style="text-align: center;">
-                <h2>Закажите 3D печать с доставкой</h2>
+                <h2>Закажите 3D печать с доставкой в Омске</h2>
                 <p>Рассчитайте стоимость онлайн или свяжитесь с нами для консультации</p>
                 <div class="cta-buttons">
                     <a href="index.php#order-form-section" class="btn-cta-primary">
@@ -204,6 +207,104 @@ $site = $CONTENT['site'];
             </div>
         </div>
     </section>
+
+    <!-- Districts Page Specific JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Какие сроки доставки 3D печати по районам Омска?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Сроки зависят от района: Центральный округ — 30-60 минут, Советский округ — 1-2 часа, Кировский округ — 1.5-2 часа, Ленинский округ — 1.5-2.5 часа, Октябрьский округ — 2-3 часа. Доставка осуществляется после готовности заказа."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Сколько стоит доставка 3D печати по Омску?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Стоимость курьерской доставки по Омску: Центральный округ — от 150₽, остальные округа — от 200-250₽. Бесплатная доставка при заказе от 3000₽ во все районы Омска."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Доставляете ли вы в выходные дни?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Доставка в выходные дни возможна по предварительной договорённости. Свяжитесь с нами по телефону +7 (999) 123-45-67 или через Telegram."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Как отправить 3D печать в другой город Омской области?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Для отправки в города Омской области используем Почту России (5-14 дней, от 300₽) или транспортные компании СДЭК/ПЭК (2-5 дней, от 400₽)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Какие технологии 3D печати доступны во всех районах Омска?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Все технологии послойной 3D печати доступны для клиентов из любых районов Омска: FDM печать термопластиками, SLA фотополимерная печать, SLS лазерное спекание нейлона, 3D моделирование, 3D сканирование и постобработку изделий."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "serviceType": "3D печать с доставкой",
+      "name": "Доставка 3D печати по Омску",
+      "description": "Курьерская доставка услуг послойной 3D печати FDM, SLA, SLS по всем округам Омска: Центральный, Советский, Кировский, Ленинский, Октябрьский. Бесплатная доставка от 3000₽.",
+      "provider": {
+        "@id": "<?= $site['url'] ?>/#organization"
+      },
+      "areaServed": [
+        <?php foreach ($site['service_areas'] as $index => $area): ?>
+        {
+          "@type": "City",
+          "name": "<?= htmlspecialchars($area['name'], ENT_QUOTES) ?>, Омск"
+        }<?= $index < count($site['service_areas']) - 1 ? ',' : '' ?>
+        
+        <?php endforeach; ?>
+      ],
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "RUB",
+        "price": "150",
+        "priceSpecification": [
+          <?php foreach ($site['service_areas'] as $index => $area): ?>
+          {
+            "@type": "DeliveryChargeSpecification",
+            "appliesToDeliveryMethod": "http://purl.org/goodrelations/v1#DeliveryModeCourier",
+            "eligibleRegion": {
+              "@type": "City",
+              "name": "<?= htmlspecialchars($area['name'], ENT_QUOTES) ?>, Омск"
+            },
+            "price": "<?= preg_replace('/[^0-9]/', '', explode('-', $area['delivery_cost'])[0]) ?>",
+            "priceCurrency": "RUB",
+            "deliveryLeadTime": {
+              "@type": "QuantitativeValue",
+              "minValue": "<?= preg_replace('/[^0-9]/', '', explode('-', $area['delivery_time'])[0]) ?>",
+              "maxValue": "<?= preg_replace('/[^0-9]/', '', explode('-', $area['delivery_time'])[count(explode('-', $area['delivery_time'])) - 1]) ?>",
+              "unitCode": "MIN"
+            }
+          }<?= $index < count($site['service_areas']) - 1 ? ',' : '' ?>
+          
+          <?php endforeach; ?>
+        ]
+      }
+    }
+    </script>
 
     <?php include __DIR__ . '/includes/footer.php'; ?>
 </body>
